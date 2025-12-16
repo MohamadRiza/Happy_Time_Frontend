@@ -1,20 +1,19 @@
 // src/components/HeroSection.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const HeroSection = () => {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const videoRef = useRef(null);
-  
+
   const videoSources = [
     '/generated_video.mp4',
-    '/videos/video2.mp4',
-    '/videos/video3.mp4',
+    '/generated_video1.mp4',
+    '/generated_video2.mp4',
   ];
 
   const totalVideos = videoSources.length;
 
-  // Go to next video (auto or manual)
+  // Go to next video
   const nextVideo = () => {
     setCurrentVideoIndex((prev) => (prev + 1) % totalVideos);
   };
@@ -24,32 +23,30 @@ const HeroSection = () => {
     setCurrentVideoIndex((prev) => (prev - 1 + totalVideos) % totalVideos);
   };
 
-  // Auto-advance when current video ends
-  const handleVideoEnd = () => {
-    setTimeout(nextVideo, 1000); // Small delay for smooth transition
-  };
-
-  // Reset video play when index changes
+  // Auto-advance after video duration
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.load();
-      videoRef.current.play().catch(e => console.log("Autoplay prevented:", e));
-    }
+    const videoDuration = 10000; // approximate duration in ms if videos are similar length
+    const timer = setTimeout(nextVideo, videoDuration);
+    return () => clearTimeout(timer);
   }, [currentVideoIndex]);
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Video Background */}
-      <video
-        ref={videoRef}
-        src={videoSources[currentVideoIndex]}
-        onEnded={handleVideoEnd}
-        autoPlay
-        muted
-        playsInline
-        className="absolute top-0 left-0 w-full h-full object-cover"
-        preload="metadata"
-      />
+      {/* Video Backgrounds */}
+      {videoSources.map((src, index) => (
+        <video
+          key={index}
+          src={src}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            index === currentVideoIndex ? 'opacity-100 z-0' : 'opacity-0 z-[-1]'
+          }`}
+        />
+      ))}
 
       {/* Overlay for readability */}
       <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
@@ -58,14 +55,14 @@ const HeroSection = () => {
             Timeless Elegance
           </h1>
           <p className="text-lg md:text-xl text-white mb-8">
-            Discover the world’s most exquisite luxury timepieces at Happy Time, Sri Lanka’s trusted watch connoisseur since 2014.
+            Discover the world’s most exquisite luxury timepieces at Happy Time, Sri Lanka’s trusted watch connoisseur since 1996.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button className="bg-gold text-black font-semibold px-6 py-3 rounded-full hover:bg-gold/90 transition-all shadow-lg">
               Explore Collection
             </button>
             <button className="border-2 border-gold text-gold font-semibold px-6 py-3 rounded-full hover:bg-gold hover:text-black transition-all">
-              Book a Viewing
+              Contact Us
             </button>
           </div>
         </div>
