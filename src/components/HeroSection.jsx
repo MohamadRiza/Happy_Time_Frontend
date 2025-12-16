@@ -1,0 +1,107 @@
+// src/components/HeroSection.jsx
+import React, { useState, useEffect, useRef } from 'react';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+
+const HeroSection = () => {
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const videoRef = useRef(null);
+  
+  const videoSources = [
+    '/generated_video.mp4',
+    '/videos/video2.mp4',
+    '/videos/video3.mp4',
+  ];
+
+  const totalVideos = videoSources.length;
+
+  // Go to next video (auto or manual)
+  const nextVideo = () => {
+    setCurrentVideoIndex((prev) => (prev + 1) % totalVideos);
+  };
+
+  // Go to previous video
+  const prevVideo = () => {
+    setCurrentVideoIndex((prev) => (prev - 1 + totalVideos) % totalVideos);
+  };
+
+  // Auto-advance when current video ends
+  const handleVideoEnd = () => {
+    setTimeout(nextVideo, 1000); // Small delay for smooth transition
+  };
+
+  // Reset video play when index changes
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(e => console.log("Autoplay prevented:", e));
+    }
+  }, [currentVideoIndex]);
+
+  return (
+    <div className="relative w-full h-screen overflow-hidden">
+      {/* Video Background */}
+      <video
+        ref={videoRef}
+        src={videoSources[currentVideoIndex]}
+        onEnded={handleVideoEnd}
+        autoPlay
+        muted
+        playsInline
+        className="absolute top-0 left-0 w-full h-full object-cover"
+        preload="metadata"
+      />
+
+      {/* Overlay for readability */}
+      <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+        <div className="text-center px-4 max-w-3xl">
+          <h1 className="text-4xl md:text-6xl font-bold text-gold mb-4 tracking-wide">
+            Timeless Elegance
+          </h1>
+          <p className="text-lg md:text-xl text-white mb-8">
+            Discover the world’s most exquisite luxury timepieces at Happy Time, Sri Lanka’s trusted watch connoisseur since 2014.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button className="bg-gold text-black font-semibold px-6 py-3 rounded-full hover:bg-gold/90 transition-all shadow-lg">
+              Explore Collection
+            </button>
+            <button className="border-2 border-gold text-gold font-semibold px-6 py-3 rounded-full hover:bg-gold hover:text-black transition-all">
+              Book a Viewing
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Arrows */}
+      <button
+        onClick={prevVideo}
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white bg-black/30 hover:bg-black/50 p-3 rounded-full z-10 transition-all"
+        aria-label="Previous video"
+      >
+        <FaChevronLeft size={20} />
+      </button>
+      <button
+        onClick={nextVideo}
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white bg-black/30 hover:bg-black/50 p-3 rounded-full z-10 transition-all"
+        aria-label="Next video"
+      >
+        <FaChevronRight size={20} />
+      </button>
+
+      {/* Indicator Dots */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+        {videoSources.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentVideoIndex(index)}
+            className={`w-3 h-3 rounded-full transition-all ${
+              index === currentVideoIndex ? 'bg-gold' : 'bg-white/50'
+            }`}
+            aria-label={`Go to video ${index + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default HeroSection;
