@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-const menuItems = ["Home", "Shop", "About", "Careers", "Contact"];
+const menuItems = ["Home", "Shop", "About", "Careers", "Contact", "Login"];
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
