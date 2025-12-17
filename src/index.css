@@ -33,3 +33,22 @@
     background-position: 0% center;
   }
 }
+/* glowing effect for home */
+@keyframes goldGlow {
+  0% {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2),
+                0 0 40px rgba(212, 175, 55, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(212, 175, 55, 0.45),
+                0 0 70px rgba(212, 175, 55, 0.25);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2),
+                0 0 40px rgba(212, 175, 55, 0.15);
+  }
+}
+
+.gold-glow {
+  animation: goldGlow 4s ease-in-out infinite;
+}
