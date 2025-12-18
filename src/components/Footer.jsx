@@ -30,13 +30,13 @@ const Footer = () => {
             />
 
             <p className="text-sm leading-relaxed mb-5 max-w-xs">
-              Sri Lanka’s premier luxury watch destination since 2014.
+              Sri Lanka’s premier luxury watch destination since 1996.
             </p>
 
             <div className="space-y-2 text-xs text-gray-500">
               <div className="flex gap-2">
                 <span>📍</span>
-                <span>2nd Cross Street No 73, Pettah, Colombo, Sri Lanka</span>
+                <span>49A Keyzer Street, Pettah, Colombo, Sri Lanka</span>
               </div>
               <div>📞 +94 77 123 4567</div>
               <div>📞 +94 71 987 6543</div>
@@ -149,7 +149,7 @@ const Footer = () => {
           </p>
 
           <p className="mt-2 text-gray-500">
-            Trusted luxury watch retailer in Pettah, Colombo since 2014.
+            Trusted luxury watch retailer in Pettah, Colombo since 1996.
           </p>
 
           <div className="mt-3">
