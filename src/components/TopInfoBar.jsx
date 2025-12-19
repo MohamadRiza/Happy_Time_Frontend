@@ -7,7 +7,7 @@ const TopInfoBar = () => {
       
       {/* Moving Contact Info */}
       <div className="flex items-center gap-6 whitespace-nowrap animate-marquee">
-        <span>📍 2nd Cross Street No 123, Pettah, Colombo, Sri Lanka</span>
+        <span>📍 <a href="https://www.google.com/maps?q=Happy+Time+(Pvt)+Ltd,+Pettah,+Colombo">49A Keyzer Street, Pettah, Colombo, Sri Lanka</a></span>
         <span>📞 +94 77 123 4567</span>
         <span>📞 +94 71 234 5678</span>
         <span>✉️ info@happytime.lk</span>
@@ -18,7 +18,7 @@ const TopInfoBar = () => {
         
         {/* TikTok */}
         <a
-          href="https://tiktok.com/@happytime"
+          href="https://tiktok.com/@happytime_pvtltd"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:text-white transition duration-300"
@@ -31,7 +31,7 @@ const TopInfoBar = () => {
 
         {/* Facebook */}
         <a
-          href="https://facebook.com/happytime"
+          href="https://facebook.com/happytimegroup"
           className="hover:text-white transition duration-300"
           aria-label="Facebook"
         >
@@ -42,7 +42,7 @@ const TopInfoBar = () => {
 
         {/* Instagram */}
         <a
-          href="https://instagram.com/happytime"
+          href="https://instagram.com/happytime_pvt_ltd"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:text-white transition duration-300"

@@ -5,6 +5,7 @@ import TopInfoBar from './components/TopInfoBar';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Footer from './components/Footer';
+import AboutPage from './pages/AboutPage';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/about" element={<AboutPage />} />
           </Routes>
         </main>
         <Footer />

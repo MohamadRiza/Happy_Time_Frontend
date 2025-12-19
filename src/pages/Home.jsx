@@ -1,10 +1,10 @@
 // src/pages/Home.jsx
 import React from 'react';
-import HeroSection from '../components/HeroSection';
-import FeaturedWatches from '../components/FeaturedWatches';
-import AboutSection from '../components/AboutSection';
-import CategorySection from '../components/CategorySection';
-import TrustSection from '../components/TrustSection';
+import HeroSection from '../components/HomeSections/HeroSection';
+import FeaturedWatches from '../components/HomeSections/FeaturedWatches';
+import CategorySection from '../components/HomeSections/CategorySection';
+import TrustSection from '../components/HomeSections/TrustSection';
+import AboutSection from '../components/HomeSections/AboutSection';
 
 const Home = () => {
   return (
