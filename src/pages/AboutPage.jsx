@@ -1,6 +1,7 @@
 // src/pages/AboutPage.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import ScrollToTop from '../components/ScrollToTop';
 
 const branches = [
   {
@@ -62,7 +63,7 @@ const AboutPage = () => {
 
   return (
     <div className="bg-black text-white min-h-screen">
-
+<ScrollToTop />
       {/* HERO */}
       <div className="relative h-[70vh] md:h-[80vh]">
         <img

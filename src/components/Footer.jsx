@@ -9,6 +9,7 @@ const Footer = () => {
     { name: 'Careers', path: '/careers' },
     { name: 'Contact', path: '/contact' },
     { name: 'Privacy Policy', path: '/privacy' },
+    { name: 'ADMIN', path: '/admin/login' },
   ];
 
   const socialClass =

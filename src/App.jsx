@@ -7,6 +7,10 @@ import Home from './pages/Home';
 import Footer from './components/Footer';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
+import CareersPage from './pages/CareersPage';
+import AdminDashboard from './pages/AdminPages/AdminDashboard';
+import AdminLogin from './pages/AdminPages/AdminLogin';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -19,6 +23,11 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/careers" element={<CareersPage />} />
+
+            {/* ADMIN ROUTES */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           </Routes>
         </main>
         <Footer />
