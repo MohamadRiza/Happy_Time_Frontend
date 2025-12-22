@@ -11,6 +11,8 @@ import CareersPage from './pages/CareersPage';
 import AdminDashboard from './pages/AdminPages/AdminDashboard';
 import AdminLogin from './pages/AdminPages/AdminLogin';
 import ProtectedRoute from './components/ProtectedRoute';
+import VacancyManager from './pages/AdminPages/VacancyManager';
+import VacancyDetailPage from './pages/VacancyDetailPage';
 
 function App() {
   return (
@@ -24,10 +26,12 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/careers" element={<CareersPage />} />
+            <Route path="/careers/:id" element={<VacancyDetailPage />} />
 
             {/* ADMIN ROUTES */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="admin/vacancies" element={<ProtectedRoute><VacancyManager /></ProtectedRoute>} />
           </Routes>
         </main>
         <Footer />

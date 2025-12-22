@@ -1,5 +1,6 @@
 // src/pages/ContactPage.jsx
 import React, { useState } from 'react';
+import ScrollToTop from '../components/ScrollToTop';
 
 const branches = [
   {
@@ -74,7 +75,8 @@ const ContactPage = () => {
 
   return (
     <div className="bg-black text-white min-h-screen font-sans">
-
+        <ScrollToTop />
+        
       {/* HERO */}
       <div className="relative h-[70vh] md:h-[80vh]">
         <img
