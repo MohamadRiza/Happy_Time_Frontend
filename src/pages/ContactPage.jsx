@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import ScrollToTop from '../components/ScrollToTop';
 
+// ✅ All URLs and names cleaned - NO trailing spaces
 const branches = [
   {
     id: 1,
@@ -58,7 +59,11 @@ const ContactPage = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const selectedBranch = branches.find((b) => b.id === selectedBranchId) || branches[0];
+  // ✅ Guaranteed to always have a valid branch
+  const getSelectedBranch = () => {
+    return branches.find(b => b.id === selectedBranchId) || branches[0];
+  };
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const handleChange = (e) => {
@@ -70,15 +75,37 @@ const ContactPage = () => {
     e.preventDefault();
     setError('');
 
-    // Validate required fields using formData directly
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      setError('Please fill in all required fields.');
+    // ✅ Get branch FIRST
+    const selectedBranch = getSelectedBranch();
+    const branchName = selectedBranch.name.trim();
+
+    // ✅ Trim all values
+    const nameTrimmed = formData.name.trim();
+    const emailTrimmed = formData.email.trim();
+    const phoneTrimmed = formData.phone.trim();
+    const messageTrimmed = formData.message.trim();
+
+    // ✅ Validate every single field
+    if (!nameTrimmed) {
+      setError('Please enter your name.');
+      return;
+    }
+    if (!emailTrimmed) {
+      setError('Please enter your email.');
+      return;
+    }
+    if (!messageTrimmed) {
+      setError('Please enter your message.');
+      return;
+    }
+    if (!branchName) {
+      setError('Please select a branch.');
       return;
     }
 
-    // Email validation
+    // ✅ Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email.trim())) {
+    if (!emailRegex.test(emailTrimmed)) {
       setError('Please enter a valid email address.');
       return;
     }
@@ -92,11 +119,11 @@ const ContactPage = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          phone: formData.phone ? formData.phone.trim() : '',
-          message: formData.message.trim(),
-          branch: selectedBranch.name,
+          name: nameTrimmed,
+          email: emailTrimmed,
+          phone: phoneTrimmed,
+          message: messageTrimmed,
+          branch: branchName,
         }),
       });
 
@@ -107,18 +134,20 @@ const ContactPage = () => {
         setFormData({ name: '', email: '', phone: '', message: '' });
         setTimeout(() => setSubmitSuccess(false), 5000);
       } else {
-        const errorMsg = data.message || 'Failed to send your message. Please try again.';
+        // ✅ Show EXACT error from backend
+        const errorMsg = 
+          data.message || 
+          (Array.isArray(data.errors) ? data.errors.join(', ') : 'Failed to send your message.');
         setError(errorMsg);
       }
     } catch (err) {
       console.error('Submission error:', err);
-      setError('Network error. Please check your connection and try again.');
+      setError('Network error. Please check your internet connection.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Auto-hide success message
   useEffect(() => {
     let timer;
     if (submitSuccess) {
@@ -126,6 +155,8 @@ const ContactPage = () => {
     }
     return () => clearTimeout(timer);
   }, [submitSuccess]);
+
+  const selectedBranch = getSelectedBranch();
 
   return (
     <div className="bg-black text-white min-h-screen font-sans">
@@ -202,7 +233,6 @@ const ContactPage = () => {
                   placeholder="Full Name *"
                   value={formData.name}
                   onChange={handleChange}
-                  required
                   className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
                 />
                 <input
@@ -211,7 +241,6 @@ const ContactPage = () => {
                   placeholder="Email *"
                   value={formData.email}
                   onChange={handleChange}
-                  required
                   className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
                 />
                 <input
@@ -228,7 +257,6 @@ const ContactPage = () => {
                   placeholder="Your Message *"
                   value={formData.message}
                   onChange={handleChange}
-                  required
                   className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
                 ></textarea>
                 <button
