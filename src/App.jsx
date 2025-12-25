@@ -14,6 +14,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import VacancyManager from './pages/AdminPages/VacancyManager';
 import VacancyDetailPage from './pages/VacancyDetailPage';
 import MessagesManager from './pages/AdminPages/MessagesManager';
+import ProductManager from './pages/AdminPages/ProductManager';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
             <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="admin/vacancies" element={<ProtectedRoute><VacancyManager /></ProtectedRoute>} />
             <Route path="admin/messages" element={<ProtectedRoute><MessagesManager /></ProtectedRoute>} />
+            <Route path="admin/products" element={<ProtectedRoute><ProductManager /></ProtectedRoute>} />
           </Routes>
         </main>
         <Footer />
