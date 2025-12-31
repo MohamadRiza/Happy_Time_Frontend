@@ -15,6 +15,8 @@ import VacancyManager from './pages/AdminPages/VacancyManager';
 import VacancyDetailPage from './pages/VacancyDetailPage';
 import MessagesManager from './pages/AdminPages/MessagesManager';
 import ProductManager from './pages/AdminPages/ProductManager';
+import ShopPage from './pages/ShopPage';
+import ProductDetailPage from './pages/ProductDetailPage';
 
 function App() {
   return (
@@ -29,6 +31,9 @@ function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/careers" element={<CareersPage />} />
             <Route path="/careers/:id" element={<VacancyDetailPage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/shop/:id" element={<ProductDetailPage />} />
+
 
             {/* ADMIN ROUTES */}
             <Route path="/admin/login" element={<AdminLogin />} />

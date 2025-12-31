@@ -17,6 +17,7 @@ const ProductManager = () => {
     price: '',
     modelNumber: '',
     watchShape: 'Round',
+    gender: 'unisex',
     colors: '',
     customColors: '',
   });
@@ -34,6 +35,12 @@ const ProductManager = () => {
   
   const watchShapes = [
     'Round', 'Square', 'Rectangular', 'Oval', 'Tonneau', 'Other'
+  ];
+  
+  const genders = [
+    { value: 'men', label: 'Men' },
+    { value: 'women', label: 'Women' },
+    { value: 'unisex', label: 'Unisex' }
   ];
   
   const colorCombinations = [
@@ -164,6 +171,11 @@ const ProductManager = () => {
       setUploading(false);
       return;
     }
+    if (!formData.gender) {
+      setError('Gender is required');
+      setUploading(false);
+      return;
+    }
     if (!finalColors) {
       setError('Color combination is required');
       setUploading(false);
@@ -179,6 +191,7 @@ const ProductManager = () => {
     formDataToSend.append('title', formData.title.trim());
     formDataToSend.append('description', formData.description.trim());
     formDataToSend.append('brand', finalBrand);
+    formDataToSend.append('gender', formData.gender);
     if (formData.price) {
       formDataToSend.append('price', formData.price);
     }
@@ -229,6 +242,7 @@ const ProductManager = () => {
       price: '',
       modelNumber: '',
       watchShape: 'Round',
+      gender: 'unisex',
       colors: '',
       customColors: '',
     });
@@ -258,6 +272,7 @@ const ProductManager = () => {
       price: product.price?.toString() || '',
       modelNumber: product.modelNumber || '',
       watchShape: product.watchShape,
+      gender: product.gender || 'unisex',
       colors,
       customColors,
     });
@@ -287,14 +302,14 @@ const ProductManager = () => {
 
   return (
     <AdminLayout title="Product Management">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <h2 className="text-2xl font-bold text-white">Manage Products</h2>
         <button
           onClick={() => {
             resetForm();
             setShowForm(true);
           }}
-          className="bg-gold text-black px-4 py-2 rounded-lg font-medium hover:bg-gold/90 transition"
+          className="bg-gold text-black px-4 py-2 rounded-lg font-medium hover:bg-gold/90 transition whitespace-nowrap"
         >
           + Add New Product
         </button>
@@ -309,28 +324,29 @@ const ProductManager = () => {
           </h3>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-gray-400 mb-2">Title *</label>
+              <label className="block text-gray-400 mb-2 text-sm">Title *</label>
               <input
                 type="text"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
                 required
-                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
+                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
                 placeholder="Rolex Submariner"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div>
-                <label className="block text-gray-400 mb-2">Brand *</label>
+                <label className="block text-gray-400 mb-2 text-sm">Brand *</label>
                 <select
                   value={formData.brand}
                   onChange={handleBrandChange}
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
                 >
                   {brands.map(brand => (
-                    <option key={brand} value={brand}>{brand}</option>
+                    <option key={brand} value={brand} className="bg-gray-800 text-white">{brand}</option>
                   ))}
                 </select>
                 {formData.brand === 'Other' && (
@@ -339,36 +355,62 @@ const ProductManager = () => {
                     value={formData.customBrand}
                     onChange={(e) => setFormData({ ...formData, customBrand: e.target.value })}
                     placeholder="Enter custom brand"
-                    className="w-full mt-2 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
+                    className="w-full mt-2 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
                     required
                   />
                 )}
               </div>
 
               <div>
-                <label className="block text-gray-400 mb-2">Watch Shape *</label>
+                <label className="block text-gray-400 mb-2 text-sm">Watch Shape *</label>
                 <select
                   name="watchShape"
                   value={formData.watchShape}
                   onChange={handleChange}
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
                 >
                   {watchShapes.map(shape => (
-                    <option key={shape} value={shape}>{shape}</option>
+                    <option key={shape} value={shape} className="bg-gray-800 text-white">{shape}</option>
                   ))}
                 </select>
               </div>
             </div>
 
+            {/* Gender Selection */}
             <div className="mb-4">
-              <label className="block text-gray-400 mb-2">Color Combination *</label>
+              <label className="block text-gray-400 mb-2 text-sm">Gender *</label>
+              <div className="grid grid-cols-3 gap-3">
+                {genders.map(gender => (
+                  <label 
+                    key={gender.value} 
+                    className="flex items-center cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="gender"
+                      value={gender.value}
+                      checked={formData.gender === gender.value}
+                      onChange={handleChange}
+                      className="w-4 h-4 text-gold bg-gray-700 border-gray-600 focus:ring-gold focus:ring-offset-0 focus:ring-2"
+                      required
+                    />
+                    <span className="ml-2 text-white text-sm">{gender.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-400 mb-2 text-sm">Color Combination *</label>
               <select
                 value={formData.colors}
                 onChange={handleColorChange}
-                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
+                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
               >
                 {colorCombinations.map(combo => (
-                  <option key={combo} value={combo}>{combo}</option>
+                  <option key={combo} value={combo} className="bg-gray-800 text-white">{combo}</option>
                 ))}
               </select>
               {formData.colors === 'Other' && (
@@ -377,7 +419,7 @@ const ProductManager = () => {
                   value={formData.customColors}
                   onChange={(e) => setFormData({ ...formData, customColors: e.target.value })}
                   placeholder="e.g., Titanium - Ceramic"
-                  className="w-full mt-2 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
+                  className="w-full mt-2 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
                   required
                 />
               )}
@@ -385,14 +427,14 @@ const ProductManager = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div>
-                <label className="block text-gray-400 mb-2">Price (LKR)</label>
+                <label className="block text-gray-400 mb-2 text-sm">Price (LKR)</label>
                 <input
                   type="number"
                   name="price"
                   value={formData.price}
                   onChange={handleChange}
                   min="0"
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
                   placeholder="145000"
                 />
                 <p className="text-gray-500 text-xs mt-1">
@@ -400,33 +442,33 @@ const ProductManager = () => {
                 </p>
               </div>
               <div>
-                <label className="block text-gray-400 mb-2">Model Number</label>
+                <label className="block text-gray-400 mb-2 text-sm">Model Number</label>
                 <input
                   type="text"
                   name="modelNumber"
                   value={formData.modelNumber}
                   onChange={handleChange}
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
                   placeholder="126610LN"
                 />
               </div>
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-400 mb-2">Description *</label>
+              <label className="block text-gray-400 mb-2 text-sm">Description *</label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 required
                 rows="4"
-                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
+                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
                 placeholder="Describe the watch features, materials, and specifications..."
               />
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-400 mb-2">
+              <label className="block text-gray-400 mb-2 text-sm">
                 Product Images * (Max 3, max 20MB each)
               </label>
               <input
@@ -434,7 +476,7 @@ const ProductManager = () => {
                 accept="image/*"
                 multiple
                 onChange={handleImageChange}
-                className="w-full text-white"
+                className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-800 file:text-white hover:file:bg-gray-700"
               />
               {previewImages.length > 0 && (
                 <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -453,7 +495,7 @@ const ProductManager = () => {
                           setPreviewImages(newPreviews);
                           setImageFiles(newFiles);
                         }}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
                       >
                         ×
                       </button>
@@ -464,14 +506,14 @@ const ProductManager = () => {
             </div>
 
             <div className="mb-6">
-              <label className="block text-gray-400 mb-2">
+              <label className="block text-gray-400 mb-2 text-sm">
                 Product Video (Max 1 min, max 20MB)
               </label>
               <input
                 type="file"
                 accept="video/*"
                 onChange={handleVideoChange}
-                className="w-full text-white"
+                className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-800 file:text-white hover:file:bg-gray-700"
               />
               {previewVideo && (
                 <div className="mt-2">
@@ -486,7 +528,7 @@ const ProductManager = () => {
                       setVideoFile(null);
                       setPreviewVideo('');
                     }}
-                    className="mt-2 text-red-400 hover:text-red-300"
+                    className="mt-2 text-red-400 hover:text-red-300 text-sm"
                   >
                     Remove Video
                   </button>
@@ -494,18 +536,18 @@ const ProductManager = () => {
               )}
             </div>
 
-            <div className="flex justify-end space-x-3">
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
               <button
                 type="button"
                 onClick={resetForm}
-                className="px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-800"
+                className="px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-800 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={uploading}
-                className="px-4 py-2 bg-gold text-black rounded-lg font-medium hover:bg-gold/90 disabled:opacity-70"
+                className="px-4 py-2 bg-gold text-black rounded-lg font-medium hover:bg-gold/90 disabled:opacity-70 transition-colors whitespace-nowrap"
               >
                 {uploading ? 'Uploading...' : editingId ? 'Update Product' : 'Create Product'}
               </button>
@@ -517,14 +559,14 @@ const ProductManager = () => {
       {loading ? (
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
-          <p className="mt-2 text-gray-400">Loading products...</p>
+          <p className="mt-4 text-gray-400">Loading products...</p>
         </div>
       ) : products.length === 0 ? (
         <div className="text-center py-12 bg-gray-900/50 border border-gray-800 rounded-xl">
           <p className="text-gray-500">No products created yet.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => (
             <div
               key={product._id}
@@ -549,7 +591,7 @@ const ProductManager = () => {
               <div className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-lg font-bold text-white line-clamp-1">{product.title}</h3>
-                  <span className="bg-gold/10 text-gold text-xs px-2 py-1 rounded">
+                  <span className="bg-gold/10 text-gold text-xs px-2 py-1 rounded whitespace-nowrap">
                     {product.brand}
                   </span>
                 </div>
@@ -559,10 +601,18 @@ const ProductManager = () => {
                   <span className="bg-gray-800 text-gray-300 text-xs px-2 py-1 rounded">
                     {product.colors?.[0] || 'N/A'}
                   </span>
+                  <span className={`text-xs px-2 py-1 rounded ${
+                    product.gender === 'men' ? 'bg-blue-900/30 text-blue-300' :
+                    product.gender === 'women' ? 'bg-pink-900/30 text-pink-300' :
+                    'bg-purple-900/30 text-purple-300'
+                  }`}>
+                    {product.gender === 'men' ? 'Men' : 
+                     product.gender === 'women' ? 'Women' : 'Unisex'}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-white font-medium">
+                  <span className="text-white font-medium text-sm">
                     {product.price ? `LKR ${product.price.toLocaleString()}` : 'Contact for Price'}
                   </span>
                   <div className="flex space-x-2">

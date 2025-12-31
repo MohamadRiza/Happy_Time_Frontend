@@ -1,7 +1,7 @@
 // src/pages/VacancyManager.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getToken } from '../../utils/auth'; // Correct relative path
+import { getToken } from '../../utils/auth';
 import AdminLayout from '../../components/AdminLayout';
 
 const VacancyManager = () => {
@@ -153,8 +153,7 @@ const VacancyManager = () => {
       const data = await res.json();
       if (data.success) {
         fetchVacancies();
-        setShowForm(false);
-        setEditingId(null);
+        resetAndCloseForm();
       } else {
         setError(data.message || 'Operation failed');
       }
@@ -238,14 +237,14 @@ const VacancyManager = () => {
 
   return (
     <AdminLayout title="Manage Vacancies">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <h2 className="text-2xl font-bold text-white">Vacancy Management</h2>
         <button
           onClick={() => {
-            setEditingId(null);
+            resetAndCloseForm();
             setShowForm(true);
           }}
-          className="bg-gold text-black px-4 py-2 rounded-lg font-medium hover:bg-gold/90 transition"
+          className="bg-gold text-black px-4 py-2 rounded-lg font-medium hover:bg-gold/90 transition whitespace-nowrap"
         >
           + Add New Vacancy
         </button>
@@ -262,26 +261,27 @@ const VacancyManager = () => {
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div>
-                <label className="block text-gray-400 mb-2">Job Title *</label>
+                <label className="block text-gray-400 mb-2 text-sm">Job Title *</label>
                 <input
                   type="text"
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
                   required
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold placeholder-gray-500"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold placeholder-gray-500"
                 />
               </div>
               <div>
-                <label className="block text-gray-400 mb-2">Location *</label>
+                <label className="block text-gray-400 mb-2 text-sm">Location *</label>
                 <select
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+                  style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
                 >
                   {locations.map(loc => (
-                    <option key={loc.id} value={loc.id}>{loc.name}</option>
+                    <option key={loc.id} value={loc.id} className="bg-gray-800 text-white">{loc.name}</option>
                   ))}
                 </select>
               </div>
@@ -289,7 +289,7 @@ const VacancyManager = () => {
 
             {/* Salary Range */}
             <div className="mb-4">
-              <label className="block text-gray-400 mb-2">Salary Range *</label>
+              <label className="block text-gray-400 mb-2 text-sm">Salary Range *</label>
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1">
                   <div className="flex items-center">
@@ -297,10 +297,11 @@ const VacancyManager = () => {
                       name="salaryCurrency"
                       value={formData.salaryCurrency}
                       onChange={handleChange}
-                      className="w-20 bg-black/30 border border-gray-700 rounded-l-lg px-2 py-2 text-white focus:outline-none focus:border-gold"
+                      className="w-20 bg-black/30 border border-gray-700 rounded-l-lg px-2 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+                      style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1em 1em', paddingRight: '1.5rem' }}
                     >
-                      <option value="LKR">LKR</option>
-                      <option value="AED">AED</option>
+                      <option value="LKR" className="bg-gray-800 text-white">LKR</option>
+                      <option value="AED" className="bg-gray-800 text-white">AED</option>
                     </select>
                     <span className="px-3 py-2 bg-gray-800 text-gray-400 border-y border-gray-700">
                       Min
@@ -309,7 +310,7 @@ const VacancyManager = () => {
                       <button
                         type="button"
                         onClick={() => adjustNumber('salaryMin', -1000)}
-                        className="px-2 py-2 bg-gray-800 text-white hover:bg-gray-700"
+                        className="px-2 py-2 bg-gray-800 text-white hover:bg-gray-700 focus:outline-none"
                       >
                         -
                       </button>
@@ -324,7 +325,7 @@ const VacancyManager = () => {
                       <button
                         type="button"
                         onClick={() => adjustNumber('salaryMin', 1000)}
-                        className="px-2 py-2 bg-gray-800 text-white hover:bg-gray-700"
+                        className="px-2 py-2 bg-gray-800 text-white hover:bg-gray-700 focus:outline-none"
                       >
                         +
                       </button>
@@ -341,7 +342,7 @@ const VacancyManager = () => {
                       <button
                         type="button"
                         onClick={() => adjustNumber('salaryMax', -1000)}
-                        className="px-2 py-2 bg-gray-800 text-white hover:bg-gray-700"
+                        className="px-2 py-2 bg-gray-800 text-white hover:bg-gray-700 focus:outline-none"
                       >
                         -
                       </button>
@@ -356,7 +357,7 @@ const VacancyManager = () => {
                       <button
                         type="button"
                         onClick={() => adjustNumber('salaryMax', 1000)}
-                        className="px-2 py-2 bg-gray-800 text-white hover:bg-gray-700"
+                        className="px-2 py-2 bg-gray-800 text-white hover:bg-gray-700 focus:outline-none"
                       >
                         +
                       </button>
@@ -372,15 +373,15 @@ const VacancyManager = () => {
 
             {/* Working Hours */}
             <div className="mb-4">
-              <label className="block text-gray-400 mb-2">Working Schedule *</label>
+              <label className="block text-gray-400 mb-2 text-sm">Working Schedule *</label>
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center">
-                  <span className="text-gray-400 mr-2">Hours/Day:</span>
+                  <span className="text-gray-400 mr-2 text-sm">Hours/Day:</span>
                   <div className="flex border border-gray-700 rounded-lg">
                     <button
                       type="button"
                       onClick={() => adjustNumber('hoursPerDay', -1)}
-                      className="px-3 py-1 bg-gray-800 text-white hover:bg-gray-700"
+                      className="px-3 py-1 bg-gray-800 text-white hover:bg-gray-700 focus:outline-none"
                     >
                       -
                     </button>
@@ -390,19 +391,19 @@ const VacancyManager = () => {
                     <button
                       type="button"
                       onClick={() => adjustNumber('hoursPerDay', 1)}
-                      className="px-3 py-1 bg-gray-800 text-white hover:bg-gray-700"
+                      className="px-3 py-1 bg-gray-800 text-white hover:bg-gray-700 focus:outline-none"
                     >
                       +
                     </button>
                   </div>
                 </div>
                 <div className="flex items-center">
-                  <span className="text-gray-400 mr-2">Days/Week:</span>
+                  <span className="text-gray-400 mr-2 text-sm">Days/Week:</span>
                   <div className="flex border border-gray-700 rounded-lg">
                     <button
                       type="button"
                       onClick={() => adjustNumber('daysPerWeek', -1)}
-                      className="px-3 py-1 bg-gray-800 text-white hover:bg-gray-700"
+                      className="px-3 py-1 bg-gray-800 text-white hover:bg-gray-700 focus:outline-none"
                     >
                       -
                     </button>
@@ -412,7 +413,7 @@ const VacancyManager = () => {
                     <button
                       type="button"
                       onClick={() => adjustNumber('daysPerWeek', 1)}
-                      className="px-3 py-1 bg-gray-800 text-white hover:bg-gray-700"
+                      className="px-3 py-1 bg-gray-800 text-white hover:bg-gray-700 focus:outline-none"
                     >
                       +
                     </button>
@@ -422,28 +423,28 @@ const VacancyManager = () => {
             </div>
 
             <div className="mb-6">
-              <label className="block text-gray-400 mb-2">Description *</label>
+              <label className="block text-gray-400 mb-2 text-sm">Description *</label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 required
                 rows="4"
-                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold placeholder-gray-500"
+                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold placeholder-gray-500"
               />
             </div>
 
-            <div className="flex justify-end space-x-3">
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
               <button
                 type="button"
                 onClick={resetAndCloseForm}
-                className="px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-800"
+                className="px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-800 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-gold text-black rounded-lg font-medium hover:bg-gold/90"
+                className="px-4 py-2 bg-gold text-black rounded-lg font-medium hover:bg-gold/90 transition-colors whitespace-nowrap"
               >
                 {editingId ? 'Update' : 'Create'}
               </button>
@@ -456,7 +457,7 @@ const VacancyManager = () => {
       {loading ? (
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
-          <p className="mt-2 text-gray-400">Loading vacancies...</p>
+          <p className="mt-4 text-gray-400">Loading vacancies...</p>
         </div>
       ) : vacancies.length === 0 ? (
         <div className="text-center py-12 bg-gray-900/50 border border-gray-800 rounded-xl backdrop-blur-sm">
@@ -469,14 +470,14 @@ const VacancyManager = () => {
               key={vacancy._id}
               className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-gold transition-all"
             >
-              <div className="flex flex-col md:flex-row md:justify-between md:items-start">
-                <div>
+              <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                <div className="flex-1">
                   <h3 className="text-xl font-bold text-white">{vacancy.title}</h3>
                   <p className="text-gold text-sm">{vacancy.location}</p>
-                  <p className="text-gray-400 mt-1">{vacancy.salary}</p>
+                  <p className="text-gray-400 mt-1 text-sm">{vacancy.salary}</p>
                   <p className="text-gray-400 text-sm mt-1">{vacancy.shift}</p>
                 </div>
-                <div className="mt-4 md:mt-0 flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
                       vacancy.status === 'active'
@@ -488,11 +489,11 @@ const VacancyManager = () => {
                   </span>
                 </div>
               </div>
-              <p className="text-gray-300 mt-3">{vacancy.description}</p>
-              <div className="flex justify-end space-x-3 mt-4">
+              <p className="text-gray-300 mt-3 text-sm">{vacancy.description}</p>
+              <div className="flex flex-wrap justify-end gap-2 mt-4">
                 <button
                   onClick={() => toggleStatus(vacancy)}
-                  className={`px-3 py-1 rounded text-sm ${
+                  className={`px-3 py-1 rounded text-xs ${
                     vacancy.status === 'active'
                       ? 'bg-red-900/30 text-red-300 hover:bg-red-800/50'
                       : 'bg-green-900/30 text-green-300 hover:bg-green-800/50'
@@ -502,13 +503,13 @@ const VacancyManager = () => {
                 </button>
                 <button
                   onClick={() => handleEdit(vacancy)}
-                  className="px-3 py-1 bg-blue-900/30 text-blue-300 rounded hover:bg-blue-800/50 text-sm"
+                  className="px-3 py-1 bg-blue-900/30 text-blue-300 rounded hover:bg-blue-800/50 text-xs"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => handleDelete(vacancy._id)}
-                  className="px-3 py-1 bg-red-900/30 text-red-300 rounded hover:bg-red-800/50 text-sm"
+                  className="px-3 py-1 bg-red-900/30 text-red-300 rounded hover:bg-red-800/50 text-xs"
                 >
                   Delete
                 </button>

@@ -8,9 +8,8 @@ const TopInfoBar = () => {
       {/* Moving Contact Info */}
       <div className="flex items-center gap-6 whitespace-nowrap animate-marquee">
         <span>📍 <a href="https://www.google.com/maps?q=Happy+Time+(Pvt)+Ltd,+Pettah,+Colombo">49A Keyzer Street, Pettah, Colombo, Sri Lanka</a></span>
-        <span>📞 +94 77 123 4567</span>
-        <span>📞 +94 71 234 5678</span>
-        <span>✉️ info@happytime.lk</span>
+        <span>📞 <a href="tel:+94771234567">+94 77 123 4567</a> | <a href="tel:+94712345678">+94 71 234 5678</a></span>
+        <span>✉️ <a href="mailto:info@happytime.lk">info@happytime.lk</a></span>
       </div>
 
       {/* Social Icons */}
