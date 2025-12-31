@@ -1,4 +1,4 @@
-// src/pages/ProductManager.jsx
+// src/pages/AdminPages/ProductManager.jsx
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getToken } from '../../utils/auth';
@@ -20,6 +20,7 @@ const ProductManager = () => {
     gender: 'unisex',
     colors: '',
     customColors: '',
+    featured: false,
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [videoFile, setVideoFile] = useState(null);
@@ -80,8 +81,11 @@ const ProductManager = () => {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type, checked } = e.target;
+    setFormData({ 
+      ...formData, 
+      [name]: type === 'checkbox' ? checked : value 
+    });
     setError('');
   };
 
@@ -192,6 +196,7 @@ const ProductManager = () => {
     formDataToSend.append('description', formData.description.trim());
     formDataToSend.append('brand', finalBrand);
     formDataToSend.append('gender', formData.gender);
+    formDataToSend.append('featured', formData.featured.toString());
     if (formData.price) {
       formDataToSend.append('price', formData.price);
     }
@@ -245,6 +250,7 @@ const ProductManager = () => {
       gender: 'unisex',
       colors: '',
       customColors: '',
+      featured: false,
     });
     setImageFiles([]);
     setVideoFile(null);
@@ -275,6 +281,7 @@ const ProductManager = () => {
       gender: product.gender || 'unisex',
       colors,
       customColors,
+      featured: product.featured || false,
     });
     setPreviewImages(product.images || []);
     setPreviewVideo(product.video || '');
@@ -467,6 +474,23 @@ const ProductManager = () => {
               />
             </div>
 
+            {/* Featured Toggle */}
+            <div className="mb-4">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="featured"
+                  checked={formData.featured}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-gold bg-gray-700 border-gray-600 focus:ring-gold"
+                />
+                <span className="ml-2 text-white text-sm">Featured Product</span>
+              </label>
+              <p className="text-gray-500 text-xs mt-1">
+                Featured products appear in the homepage showcase (max 4)
+              </p>
+            </div>
+
             <div className="mb-4">
               <label className="block text-gray-400 mb-2 text-sm">
                 Product Images * (Max 3, max 20MB each)
@@ -570,24 +594,41 @@ const ProductManager = () => {
           {products.map((product) => (
             <div
               key={product._id}
-              className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden hover:border-gold transition-all"
+              className={`bg-gray-900/50 rounded-xl overflow-hidden transition-all ${
+                product.featured 
+                  ? 'ring-2 ring-red-500 shadow-lg shadow-red-500/20 hover:ring-red-400' 
+                  : 'border border-gray-800 hover:border-gold'
+              }`}
             >
-              {product.images?.[0] ? (
-                <div className="h-48 overflow-hidden">
-                  <img
-                    src={product.images[0]}
-                    alt={product.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                </div>
-              ) : (
-                <div className="h-48 flex items-center justify-center bg-gray-800">
-                  <span className="text-gray-500">No Image</span>
-                </div>
-              )}
+              {/* Image container with relative positioning for sticker */}
+              <div className="relative">
+                {product.images?.[0] ? (
+                  <div className="h-48 overflow-hidden">
+                    <img
+                      src={product.images[0]}
+                      alt={product.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="h-48 flex items-center justify-center bg-gray-800">
+                    <span className="text-gray-500">No Image</span>
+                  </div>
+                )}
+                
+                {/* ✅ Featured sticker positioned on image */}
+                {product.featured && (
+                  <div className="absolute top-2 right-2 z-10">
+                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                      FEATURED
+                    </span>
+                  </div>
+                )}
+              </div>
+              
               <div className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-lg font-bold text-white line-clamp-1">{product.title}</h3>

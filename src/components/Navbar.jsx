@@ -5,10 +5,14 @@ const menuItems = ["Home", "Shop", "About", "Careers", "Contact", "Login"];
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const location = useLocation(); // Get current path to detect active link
+  const location = useLocation();
 
   return (
-    <nav className="bg-black text-white sticky top-0 z-50">
+    <nav className="bg-black text-white sticky top-0 z-50 relative">
+      {/* Gold lighting effect - subtle gradient shadow */}
+      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent"></div>
+      
+      {/* Main navbar content */}
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-20">
 
