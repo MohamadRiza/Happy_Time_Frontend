@@ -38,9 +38,9 @@ function App() {
             {/* ADMIN ROUTES */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-            <Route path="admin/vacancies" element={<ProtectedRoute><VacancyManager /></ProtectedRoute>} />
-            <Route path="admin/messages" element={<ProtectedRoute><MessagesManager /></ProtectedRoute>} />
-            <Route path="admin/products" element={<ProtectedRoute><ProductManager /></ProtectedRoute>} />
+            <Route path="/admin/vacancies" element={<ProtectedRoute><VacancyManager /></ProtectedRoute>} />
+            <Route path="/admin/messages" element={<ProtectedRoute><MessagesManager /></ProtectedRoute>} />
+            <Route path="/admin/products" element={<ProtectedRoute><ProductManager /></ProtectedRoute>} />
           </Routes>
         </main>
         <Footer />
