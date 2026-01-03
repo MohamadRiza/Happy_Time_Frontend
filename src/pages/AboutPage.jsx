@@ -10,7 +10,7 @@ const branches = [
     address: '49A Keyzer Street, Pettah, Colombo 11, Sri Lanka',
     phone: '011 244 1800',
     image:
-      './public/MainBranchPettah.jpeg',
+      './MainBranchPettah.jpeg',
     mapLink:
       'https://www.google.com/maps?q=Happy+Time+(Pvt)+Ltd,+Pettah,+Colombo&output=embed',
   },
@@ -20,7 +20,7 @@ const branches = [
     address: 'No 143, 2nd Cross Street, Pettah, Colombo 11, Sri Lanka',
     phone: '+94 75 757 5565',
     image:
-      './public/143_OnlineBranch.jpeg',
+      './143_OnlineBranch.jpeg',
     mapLink:
       'https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3960.608471754673!2d79.84937707499664!3d6.937308993062671!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNsKwNTYnMTQuMyJOIDc5wrA1MScwNy4wIkU!5e0!3m2!1sen!2slk!4v1767424589827!5m2!1sen!2slk',
   },
@@ -30,7 +30,7 @@ const branches = [
     address: 'No 84, 2nd Cross Street, Pettah, Colombo, Sri Lanka',
     phone: '011 244 1800',
     image:
-      './public/2nd_CS_86.jpeg',
+      './2nd_CS_86.jpeg',
     mapLink:
       'https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3960.6176388086064!2d79.84965107499666!3d6.936218993063737!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNsKwNTYnMTAuNCJOIDc5wrA1MScwOC4wIkU!5e0!3m2!1sen!2slk!4v1767424754590!5m2!1sen!2slk',
   },
@@ -61,7 +61,7 @@ const branches = [
       'No. 102–104, Behind Masjid Bin Dafoos, Murshid Bazar, Deira, Dubai, UAE',
     phone: '011 244 1800',
     image:
-      './public/DubaiBranch1.jpeg',
+      './DubaiBranch1.jpeg',
     mapLink:
       'https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3608.041541217658!2d55.29727207538427!3d25.269187977664714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjXCsDE2JzA5LjEiTiA1NcKwMTcnNTkuNSJF!5e0!3m2!1sen!2slk!4v1767425006177!5m2!1sen!2slk',
   },
