@@ -17,7 +17,8 @@ const ProductManager = () => {
     price: '',
     modelNumber: '',
     watchShape: 'Round',
-    gender: 'unisex',
+    gender: 'men', // Default for wrist watch
+    productType: 'watch',
     colors: '',
     customColors: '',
     featured: false,
@@ -38,10 +39,17 @@ const ProductManager = () => {
     'Round', 'Square', 'Rectangular', 'Oval', 'Tonneau', 'Other'
   ];
   
-  const genders = [
+  // ✅ Gender options for wrist watches only
+  const wristWatchGenders = [
     { value: 'men', label: 'Men' },
     { value: 'women', label: 'Women' },
-    { value: 'unisex', label: 'Unisex' }
+    { value: 'boy', label: 'Boy' },
+    { value: 'girl', label: 'Girl' }
+  ];
+  
+  const productTypes = [
+    { value: 'watch', label: 'Wrist Watch' },
+    { value: 'wall_clock', label: 'Wall Clock' }
   ];
   
   const colorCombinations = [
@@ -86,6 +94,28 @@ const ProductManager = () => {
       ...formData, 
       [name]: type === 'checkbox' ? checked : value 
     });
+    setError('');
+  };
+
+  // ✅ FIXED: Typo was "productTime" instead of "productType"
+  const handleProductTypeChange = (e) => {
+    const productType = e.target.value;
+    let gender = formData.gender;
+    
+    if (productType === 'wall_clock') {
+      gender = ''; // No gender for wall clocks
+    } else {
+      // Keep current gender if valid, otherwise default to 'men'
+      if (!['men', 'women', 'boy', 'girl'].includes(gender)) {
+        gender = 'men';
+      }
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      productType, // ✅ FIXED: Was "productTime"
+      gender
+    }));
     setError('');
   };
 
@@ -175,8 +205,9 @@ const ProductManager = () => {
       setUploading(false);
       return;
     }
-    if (!formData.gender) {
-      setError('Gender is required');
+    // ✅ Only validate gender for wrist watches
+    if (formData.productType === 'watch' && !formData.gender) {
+      setError('Gender is required for wrist watches');
       setUploading(false);
       return;
     }
@@ -195,7 +226,10 @@ const ProductManager = () => {
     formDataToSend.append('title', formData.title.trim());
     formDataToSend.append('description', formData.description.trim());
     formDataToSend.append('brand', finalBrand);
-    formDataToSend.append('gender', formData.gender);
+    formDataToSend.append('productType', formData.productType);
+    if (formData.productType === 'watch') {
+      formDataToSend.append('gender', formData.gender);
+    }
     formDataToSend.append('featured', formData.featured.toString());
     if (formData.price) {
       formDataToSend.append('price', formData.price);
@@ -247,7 +281,8 @@ const ProductManager = () => {
       price: '',
       modelNumber: '',
       watchShape: 'Round',
-      gender: 'unisex',
+      gender: 'men',
+      productType: 'watch',
       colors: '',
       customColors: '',
       featured: false,
@@ -270,6 +305,11 @@ const ProductManager = () => {
     const colors = isCustomColor ? 'Other' : colorCombo;
     const customColors = isCustomColor ? colorCombo : '';
 
+    // ✅ Handle wall clocks properly (no gender)
+    const genderValue = product.productType === 'wall_clock' 
+      ? '' 
+      : (product.gender || 'men');
+
     setFormData({
       title: product.title,
       description: product.description,
@@ -278,7 +318,8 @@ const ProductManager = () => {
       price: product.price?.toString() || '',
       modelNumber: product.modelNumber || '',
       watchShape: product.watchShape,
-      gender: product.gender || 'unisex',
+      gender: genderValue,
+      productType: product.productType || 'watch',
       colors,
       customColors,
       featured: product.featured || false,
@@ -304,6 +345,36 @@ const ProductManager = () => {
       }
     } catch (err) {
       setError('Network error');
+    }
+  };
+
+  // ✅ Display logic for product categories
+  const getProductCategory = (product) => {
+    if (product.productType === 'wall_clock') {
+      return 'Wall Clock';
+    }
+    if (product.productType === 'watch') {
+      switch(product.gender) {
+        case 'men': return 'Men';
+        case 'women': return 'Women';
+        case 'boy': return 'Boy';
+        case 'girl': return 'Girl';
+        default: return 'Unisex';
+      }
+    }
+    return 'Product';
+  };
+
+  const getCategoryBadgeClass = (product) => {
+    if (product.productType === 'wall_clock') {
+      return 'bg-amber-900/30 text-amber-300'; // Gold/amber for home
+    }
+    switch(product.gender) {
+      case 'men': return 'bg-blue-900/30 text-blue-300';
+      case 'women': return 'bg-pink-900/30 text-pink-300';
+      case 'boy': return 'bg-green-900/30 text-green-300';
+      case 'girl': return 'bg-purple-900/30 text-purple-300';
+      default: return 'bg-gray-800 text-gray-300';
     }
   };
 
@@ -369,43 +440,54 @@ const ProductManager = () => {
               </div>
 
               <div>
+                <label className="block text-gray-400 mb-2 text-sm">Product Type *</label>
+                <select
+                  name="productType"
+                  value={formData.productType}
+                  onChange={handleProductTypeChange}
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+                  style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+                >
+                  {productTypes.map(type => (
+                    <option key={type.value} value={type.value} className="bg-gray-800 text-white">{type.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+              <div>
                 <label className="block text-gray-400 mb-2 text-sm">Watch Shape *</label>
                 <select
                   name="watchShape"
                   value={formData.watchShape}
                   onChange={handleChange}
                   className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+                  style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
                 >
                   {watchShapes.map(shape => (
                     <option key={shape} value={shape} className="bg-gray-800 text-white">{shape}</option>
                   ))}
                 </select>
               </div>
-            </div>
 
-            {/* Gender Selection */}
-            <div className="mb-4">
-              <label className="block text-gray-400 mb-2 text-sm">Gender *</label>
-              <div className="grid grid-cols-3 gap-3">
-                {genders.map(gender => (
-                  <label 
-                    key={gender.value} 
-                    className="flex items-center cursor-pointer"
+              {/* ✅ Gender Selection - ONLY for wrist watches */}
+              {formData.productType === 'watch' && (
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">Gender *</label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+                    style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
                   >
-                    <input
-                      type="radio"
-                      name="gender"
-                      value={gender.value}
-                      checked={formData.gender === gender.value}
-                      onChange={handleChange}
-                      className="w-4 h-4 text-gold bg-gray-700 border-gray-600 focus:ring-gold focus:ring-offset-0 focus:ring-2"
-                      required
-                    />
-                    <span className="ml-2 text-white text-sm">{gender.label}</span>
-                  </label>
-                ))}
-              </div>
+                    {wristWatchGenders.map(gender => (
+                      <option key={gender.value} value={gender.value} className="bg-gray-800 text-white">{gender.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="mb-4">
@@ -414,7 +496,7 @@ const ProductManager = () => {
                 value={formData.colors}
                 onChange={handleColorChange}
                 className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+                style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
               >
                 {colorCombinations.map(combo => (
                   <option key={combo} value={combo} className="bg-gray-800 text-white">{combo}</option>
@@ -600,7 +682,6 @@ const ProductManager = () => {
                   : 'border border-gray-800 hover:border-gold'
               }`}
             >
-              {/* Image container with relative positioning for sticker */}
               <div className="relative">
                 {product.images?.[0] ? (
                   <div className="h-48 overflow-hidden">
@@ -619,7 +700,6 @@ const ProductManager = () => {
                   </div>
                 )}
                 
-                {/* ✅ Featured sticker positioned on image */}
                 {product.featured && (
                   <div className="absolute top-2 right-2 z-10">
                     <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
@@ -642,13 +722,9 @@ const ProductManager = () => {
                   <span className="bg-gray-800 text-gray-300 text-xs px-2 py-1 rounded">
                     {product.colors?.[0] || 'N/A'}
                   </span>
-                  <span className={`text-xs px-2 py-1 rounded ${
-                    product.gender === 'men' ? 'bg-blue-900/30 text-blue-300' :
-                    product.gender === 'women' ? 'bg-pink-900/30 text-pink-300' :
-                    'bg-purple-900/30 text-purple-300'
-                  }`}>
-                    {product.gender === 'men' ? 'Men' : 
-                     product.gender === 'women' ? 'Women' : 'Unisex'}
+                  {/* ✅ CORRECT CATEGORY DISPLAY */}
+                  <span className={`text-xs px-2 py-1 rounded ${getCategoryBadgeClass(product)}`}>
+                    {getProductCategory(product)}
                   </span>
                 </div>
 

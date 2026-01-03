@@ -1,7 +1,8 @@
 // src/pages/AdminPages/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getToken } from '../../utils/auth';
+import { getToken, isAuthenticated } from '../../utils/auth';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -13,10 +14,25 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [recentActivity, setRecentActivity] = useState([]);
+  const navigate = useNavigate(); // ✅ Add navigate
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+  // ✅ ADD AUTHENTICATION CHECK
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate('/admin/login');
+      return;
+    }
+  }, [navigate]);
+
   const fetchDashboardStats = async () => {
+    // Only fetch if authenticated (extra safety check)
+    if (!isAuthenticated()) {
+      navigate('/admin/login');
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
@@ -27,6 +43,12 @@ const AdminDashboard = () => {
       });
       const productsData = await productsRes.json();
       
+      // Check if auth failed
+      if (!productsData.success && productsData.message === 'Token is not valid') {
+        navigate('/admin/login');
+        return;
+      }
+      
       // Fetch vacancies count
       const vacanciesRes = await fetch(`${API_URL}/api/vacancies`, {
         headers: { Authorization: `Bearer ${getToken()}` }
@@ -35,7 +57,7 @@ const AdminDashboard = () => {
       
       // ✅ SAFE MESSAGES FETCH - Handles missing endpoint
       let newMessages = 0;
-      let messagesData = { success: false,  messages: [] };
+      let messagesData = { success: false, messages: [] };
       
       try {
         const messagesRes = await fetch(`${API_URL}/api/messages`, {
@@ -141,19 +163,15 @@ const AdminDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) {
+  // ✅ Loading state while checking auth
+  if (loading && stats.totalProducts === 0) {
     return (
-      <AdminLayout title="Admin Dashboard">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {[1, 2, 3, 4].map((idx) => (
-            <div key={idx} className="bg-gradient-to-br from-gray-900 to-black border border-gray-800 rounded-xl p-6 animate-pulse">
-              <div className="h-8 bg-gray-800 rounded w-8 mb-4"></div>
-              <div className="h-4 bg-gray-800 rounded w-24 mb-2"></div>
-              <div className="h-8 bg-gray-800 rounded w-16"></div>
-            </div>
-          ))}
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold mb-4"></div>
+          <p className="text-gray-400">Verifying admin access...</p>
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
@@ -216,6 +234,36 @@ const AdminDashboard = () => {
             <p className="text-2xl font-bold text-white">{card.value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Recent Activity */}
+      <div className="bg-gradient-to-b from-gray-900 to-black border border-gray-800 rounded-xl p-6 shadow-lg">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-lg font-bold text-white">Recent Activity</h3>
+          <span className="text-xs text-gray-500">Last 7 days</span>
+        </div>
+        <div className="space-y-4">
+          {recentActivity.length > 0 ? (
+            recentActivity.map((activity, idx) => (
+              <div 
+                key={idx} 
+                className="flex items-start pb-4 border-b border-gray-800/50 last:border-0 last:pb-0"
+              >
+                <div className={`p-2 rounded-lg mr-3 ${activity.color.replace('text-', 'bg-').replace('-400', '-900/30').replace('-gold', '-gold/10')}`}>
+                  <span className={activity.color}>{activity.icon}</span>
+                </div>
+                <div>
+                  <p className="text-white">{activity.message}</p>
+                  <p className="text-gray-500 text-xs mt-1">{activity.time}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              No recent activity
+            </div>
+          )}
+        </div>
       </div>
     </AdminLayout>
   );

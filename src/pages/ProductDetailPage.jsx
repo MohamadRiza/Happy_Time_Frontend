@@ -91,7 +91,8 @@ const ProductDetailPage = () => {
         quantity,
         modelNumber: product.modelNumber,
         gender: product.gender,
-        watchShape: product.watchShape
+        watchShape: product.watchShape,
+        productType: product.productType // ✅ Include product type
       });
     }
     
@@ -106,13 +107,31 @@ const ProductDetailPage = () => {
     return `LKR ${price.toLocaleString()}`;
   };
 
-  // Get gender display text
-  const getGenderDisplay = (gender) => {
-    switch(gender) {
+  // ✅ Get category display text (handles both watches and wall clocks)
+  const getCategoryDisplay = () => {
+    if (product.productType === 'wall_clock') {
+      return 'Wall Clock';
+    }
+    switch(product.gender) {
       case 'men': return 'Men';
       case 'women': return 'Women';
-      case 'unisex': return 'Unisex';
+      case 'boy': return 'Boy';
+      case 'girl': return 'Girl';
       default: return 'Unisex';
+    }
+  };
+
+  // ✅ Get category badge class
+  const getCategoryBadgeClass = () => {
+    if (product.productType === 'wall_clock') {
+      return 'bg-amber-900/30 text-amber-300';
+    }
+    switch(product.gender) {
+      case 'men': return 'bg-blue-900/30 text-blue-300';
+      case 'women': return 'bg-pink-900/30 text-pink-300';
+      case 'boy': return 'bg-green-900/30 text-green-300';
+      case 'girl': return 'bg-purple-900/30 text-purple-300';
+      default: return 'bg-gray-800 text-gray-300';
     }
   };
 
@@ -261,7 +280,8 @@ const ProductDetailPage = () => {
               <p className="text-gold text-sm font-medium mb-2">{product.brand}</p>
               <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3">{product.title}</h1>
               <div className="flex items-center text-gray-400 text-sm">
-                <span>{getGenderDisplay(product.gender)}</span>
+                {/* ✅ CORRECT CATEGORY DISPLAY */}
+                <span>{getCategoryDisplay()}</span>
                 <span className="mx-2">•</span>
                 <span>{product.watchShape}</span>
               </div>
@@ -276,7 +296,7 @@ const ProductDetailPage = () => {
               {product.price === null || product.price === undefined ? (
                 <div className="space-y-4">
                   <p className="text-gray-400 text-sm">
-                    Please contact our luxury watch specialists for pricing details and availability.
+                    Please contact our luxury specialists for pricing details and availability.
                   </p>
                   <button
                     onClick={() => navigate('/contact')}
@@ -309,37 +329,48 @@ const ProductDetailPage = () => {
                     </div>
                   )}
 
-                  {/* Quantity Selector */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-3">Quantity</h3>
-                    <div className="flex items-center max-w-32">
-                      <button
-                        onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                        className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-l-lg text-white hover:bg-gray-700 transition flex items-center justify-center"
-                        aria-label="Decrease quantity"
-                      >
-                        -
-                      </button>
-                      <span className="w-12 h-10 bg-black border-y border-gray-700 text-white flex items-center justify-center">
-                        {quantity}
-                      </span>
-                      <button
-                        onClick={() => setQuantity(prev => prev + 1)}
-                        className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-r-lg text-white hover:bg-gray-700 transition flex items-center justify-center"
-                        aria-label="Increase quantity"
-                      >
-                        +
-                      </button>
+                  {/* Quantity Selector - Only for purchasable items */}
+                  {product.price !== null && product.price !== undefined && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Quantity</h3>
+                      <div className="flex items-center max-w-32">
+                        <button
+                          onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                          className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-l-lg text-white hover:bg-gray-700 transition flex items-center justify-center"
+                          aria-label="Decrease quantity"
+                        >
+                          -
+                        </button>
+                        <span className="w-12 h-10 bg-black border-y border-gray-700 text-white flex items-center justify-center">
+                          {quantity}
+                        </span>
+                        <button
+                          onClick={() => setQuantity(prev => prev + 1)}
+                          className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-r-lg text-white hover:bg-gray-700 transition flex items-center justify-center"
+                          aria-label="Increase quantity"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Add to Cart Button */}
-                  <button
-                    onClick={addToCart}
-                    className="w-full bg-gold text-black py-4 rounded-xl font-bold text-lg hover:bg-gold/90 transition"
-                  >
-                    Add to Cart
-                  </button>
+                  {product.price !== null && product.price !== undefined ? (
+                    <button
+                      onClick={addToCart}
+                      className="w-full bg-gold text-black py-4 rounded-xl font-bold text-lg hover:bg-gold/90 transition"
+                    >
+                      Add to Cart
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => navigate('/contact')}
+                      className="w-full bg-gold text-black py-4 rounded-xl font-bold text-lg hover:bg-gold/90 transition"
+                    >
+                      Contact for Purchase
+                    </button>
+                  )}
 
                   {/* Success Message */}
                   {successMessage && (
@@ -371,9 +402,12 @@ const ProductDetailPage = () => {
                   <span className="text-gray-400 text-sm">Brand</span>
                   <span className="text-white text-sm">{product.brand}</span>
                 </div>
+                {/* ✅ CORRECT CATEGORY DISPLAY IN SPECS */}
                 <div className="flex justify-between pb-2 border-b border-gray-800">
-                  <span className="text-gray-400 text-sm">Gender</span>
-                  <span className="text-white text-sm">{getGenderDisplay(product.gender)}</span>
+                  <span className="text-gray-400 text-sm">Category</span>
+                  <span className={`text-sm ${getCategoryBadgeClass()}`}>
+                    {getCategoryDisplay()}
+                  </span>
                 </div>
                 <div className="flex justify-between pb-2 border-b border-gray-800">
                   <span className="text-gray-400 text-sm">Shape</span>
@@ -386,8 +420,8 @@ const ProductDetailPage = () => {
             <div className="pt-6 border-t border-gray-800 mt-auto">
               <h3 className="text-lg font-semibold text-white mb-3">Need Assistance?</h3>
               <p className="text-gray-400 text-sm mb-4">
-                Our luxury watch specialists are available to provide personalized consultation 
-                and answer any questions about this timepiece.
+                Our specialists are available to provide personalized consultation 
+                and answer any questions about this {product.productType === 'wall_clock' ? 'wall clock' : 'timepiece'}.
               </p>
               <button
                 onClick={() => navigate('/contact')}
@@ -405,7 +439,11 @@ const ProductDetailPage = () => {
         {/* Related Products Section */}
         {relatedProducts.length > 0 && (
           <div className="mt-16 pt-8 border-t border-gray-800">
-            <h2 className="text-2xl font-bold text-white mb-6">You May Also Like</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">
+              {product.productType === 'wall_clock' 
+                ? 'You May Also Like Wall Clocks' 
+                : 'You May Also Like Watches'}
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((relatedProduct) => (
                 <div

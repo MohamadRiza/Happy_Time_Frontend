@@ -1,6 +1,7 @@
 // src/components/HeroSection.jsx
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -58,12 +59,16 @@ const HeroSection = () => {
             Discover the world’s most exquisite luxury timepieces at Happy Time, Sri Lanka’s trusted watch connoisseur since 1996.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/shop">
             <button className="bg-gold text-black font-semibold px-6 py-3 rounded-full hover:bg-gold/90 transition-all shadow-lg">
               Explore Collection
             </button>
+            </Link>
+            <Link to="/contact">
             <button className="border-2 border-gold text-gold font-semibold px-6 py-3 rounded-full hover:bg-gold hover:text-black transition-all">
-              Contact Us
+              Contact Us  
             </button>
+            </Link>
           </div>
         </div>
       </div>
