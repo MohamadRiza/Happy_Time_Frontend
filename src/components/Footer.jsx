@@ -16,24 +16,23 @@ const Footer = () => {
     'w-10 h-10 flex items-center justify-center rounded-full border border-gray-700 text-gray-400 hover:text-gold hover:border-gold hover:bg-black/40 hover:scale-110 transition-all duration-300';
 
   return (
-    <footer className="bg-black text-gray-400 pt-16 pb-8 px-4">
+    <footer className="bg-black text-gray-400 pt-16 pb-8 px-4 relative">
+      {/* ✅ GOLD LIGHTING EFFECT - Top separator */}
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent"></div>
+      
       <div className="max-w-7xl mx-auto">
-
         {/* Top Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-14">
-
           {/* Column 1: Brand Info */}
           <div>
             <img
-              src="/logo.png"
+              src="/Logo_ORG.png"
               alt="Happy Time"
-              className="h-10 mb-4"
+              className="h-16 mb-4"
             />
-
             <p className="text-sm leading-relaxed mb-5 max-w-xs">
               Sri Lanka’s premier luxury watch destination since 1996.
             </p>
-
             <div className="space-y-2 text-xs text-gray-500">
               <div className="flex gap-2">
                 <span>📍</span>
@@ -45,8 +44,8 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Column 2: Quick Links (CENTERED) */}
-          <div className="text-center">
+          {/* Column 2: Quick Links (LEFT ALIGNED FOR BETTER MOBILE UX) */}
+          <div className="md:text-center lg:text-left">
             <h3 className="text-white text-lg font-semibold tracking-wide mb-5">
               Quick Links
             </h3>
@@ -64,17 +63,24 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Column 3: Empty (Future Use) */}
-          <div />
+          {/* Column 3: Empty - Now used for Company Info */}
+          <div>
+            <h3 className="text-white text-lg font-semibold tracking-wide mb-5">
+              Our Brands
+            </h3>
+            <ul className="space-y-3 text-sm">
+              <li>• Winsor - Wrist Watch</li>
+              <li>• Orix - Wrist Watch</li>
+              <li>• Arial - Wall Clock</li>
+            </ul>
+          </div>
 
           {/* Column 4: Social Media */}
           <div>
             <h3 className="text-white text-lg font-semibold tracking-wide mb-5">
               Follow Us
             </h3>
-
             <div className="flex gap-4">
-
               {/* TikTok */}
               <a
                 href="https://tiktok.com/@happytime"
@@ -84,7 +90,7 @@ const Footer = () => {
                 className={socialClass}
               >
                 <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-                  <path d="M16 3a5.7 5.7 0 0 0 4 4v3.2a8.9 8.9 0 0 1-4-1.1V16a5 5 0 1 1-5-5c.3 0 .6 0 .9.1v3.2a2 2 0 1 0 2.1 2V3h2z" />
+                  <path d="M16 3a5.7 5.7 0 0 0 4 4v3.2 a8.9 8.9 0 0 1-4-1.1V16a5 5 0 1 1-5-5c.3 0 .6 0 .9.1v3.2a2 2 0 1 0 2.1 2V3h2z" />
                 </svg>
               </a>
 
@@ -114,7 +120,7 @@ const Footer = () => {
                 </svg>
               </a>
 
-              {/* Instagram (OFFICIAL ICON) */}
+              {/* Instagram */}
               <a
                 href="https://instagram.com/happytime"
                 target="_blank"
@@ -137,7 +143,6 @@ const Footer = () => {
                   <circle cx="17.5" cy="6.5" r="0.9" />
                 </svg>
               </a>
-
             </div>
           </div>
         </div>
@@ -165,7 +170,6 @@ const Footer = () => {
             </a>
           </div>
         </div>
-
       </div>
     </footer>
   );

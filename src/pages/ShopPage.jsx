@@ -11,7 +11,7 @@ const ShopPage = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const [filters, setFilters] = useState({
-    productType: 'all', // ✅ NEW: product type filter
+    productType: 'all',
     gender: 'all',
     brand: 'all',
     shape: 'all',
@@ -130,7 +130,7 @@ const ShopPage = () => {
     setFilters(prev => ({ 
       ...prev, 
       productType,
-      gender: productType === 'wall_clock' ? 'all' : prev.gender // Reset gender for wall clocks
+      gender: productType === 'wall_clock' ? 'all' : prev.gender
     }));
   };
 
@@ -335,11 +335,12 @@ const ShopPage = () => {
                     key={product._id}
                     className="group bg-gradient-to-b from-gray-900 to-black border border-gray-800 rounded-2xl overflow-hidden hover:border-gold hover:shadow-xl hover:shadow-gold/10 transition flex flex-col"
                   >
-                    <div className="h-56 overflow-hidden">
+                    {/* ✅ PERFECT MOBILE IMAGE CONTAINER */}
+                    <div className="aspect-square overflow-hidden">
                       <img
                         src={product.images?.[0]}
                         alt={product.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition"
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                       />
                     </div>
 
