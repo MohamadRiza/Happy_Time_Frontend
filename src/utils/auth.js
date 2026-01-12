@@ -49,15 +49,34 @@ export const isAuthenticated = () => {
   }
 };
 
-// ✅ CUSTOMER AUTH UTILITIES
+// ✅ CUSTOMER AUTH UTILITIES WITH USER-SPECIFIC CART STORAGE
 export const customerLogin = (token, customer) => {
   localStorage.setItem('customerToken', token);
   localStorage.setItem('customer', JSON.stringify(customer));
+  
+  // Load user-specific cart
+  const userCartKey = `happyTimeCart_${customer._id}`;
+  const userCart = localStorage.getItem(userCartKey);
+  if (userCart) {
+    localStorage.setItem('happyTimeCart', userCart);
+  } else {
+    localStorage.removeItem('happyTimeCart');
+  }
 };
 
 export const customerLogout = () => {
+  const customer = getCustomer();
+  if (customer) {
+    // Save current cart under user-specific key
+    const currentCart = localStorage.getItem('happyTimeCart');
+    if (currentCart) {
+      localStorage.setItem(`happyTimeCart_${customer._id}`, currentCart);
+    }
+  }
+  
   localStorage.removeItem('customerToken');
   localStorage.removeItem('customer');
+  localStorage.removeItem('happyTimeCart'); // Clear active cart
 };
 
 export const getCustomerToken = () => {

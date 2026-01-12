@@ -7,7 +7,8 @@ import {
   getCustomerToken,
   customerLogout,
   logout,
-  getAuthType
+  getAuthType,
+  isCustomerAuthenticated
 } from '../utils/auth';
 
 const menuItems = ["Home", "Shop", "About", "Careers", "Contact"];
@@ -16,28 +17,99 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authType, setAuthType] = useState('guest');
   const [customer, setCustomer] = useState(null);
+  const [cartCount, setCartCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  useEffect(() => {
+  // ✅ REAL-TIME AUTHENTICATION CHECK
+  const checkAuthStatus = () => {
     const type = getAuthType();
     setAuthType(type);
+    
     if (type === 'customer') {
-      setCustomer(getCustomer());
+      const cust = getCustomer();
+      setCustomer(cust);
+      fetchCartCount(); // ✅ Fetch from server, not localStorage
+    } else {
+      setCustomer(null);
+      setCartCount(0);
     }
+  };
+
+  // ✅ SERVER-SIDE CART COUNT (NOT LOCALSTORAGE)
+  const fetchCartCount = async () => {
+    if (!isCustomerAuthenticated()) return;
+    
+    try {
+      const token = getCustomerToken();
+      const res = await fetch(`${API_URL}/api/cart`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        const count = data.cart?.reduce((total, item) => total + (item.quantity || 1), 0) || 0;
+        setCartCount(count);
+      }
+    } catch (err) {
+      console.error('Error fetching cart count:', err);
+      setCartCount(0);
+    }
+  };
+
+  // ✅ INITIAL LOAD
+  useEffect(() => {
+    checkAuthStatus();
   }, []);
+
+  // ✅ LISTEN FOR AUTHENTICATION CHANGES
+  useEffect(() => {
+    const handleAuthChange = () => {
+      checkAuthStatus();
+    };
+    
+    const handleCartUpdate = () => {
+      if (getAuthType() === 'customer') {
+        fetchCartCount(); // ✅ Use server fetch, not localStorage
+      }
+    };
+    
+    // Listen for custom events
+    window.addEventListener('authChanged', handleAuthChange);
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    
+    return () => {
+      window.removeEventListener('authChanged', handleAuthChange);
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+    };
+  }, []);
+
+  // ✅ ALSO CHECK ON LOCATION CHANGE (for SPA navigation)
+  useEffect(() => {
+    checkAuthStatus();
+  }, [location.pathname]);
 
   const handleLogout = () => {
     if (authType === 'admin') {
       logout();
-      navigate('/admin/login');
     } else if (authType === 'customer') {
       customerLogout();
-      navigate('/login');
     }
+    
     setAuthType('guest');
     setCustomer(null);
+    setCartCount(0);
     setIsMenuOpen(false);
+    
+    // Trigger auth change event
+    window.dispatchEvent(new CustomEvent('authChanged'));
+    
+    if (authType === 'admin') {
+      navigate('/admin/login');
+    } else if (authType === 'customer') {
+      navigate('/login');
+    }
   };
 
   const getInitials = (name) => {
@@ -72,7 +144,7 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-10">
+          <div className="hidden md:flex items-center space-x-8">
             {menuItems.map((item) => {
               const path = item === "Home" ? "/" : `/${item.toLowerCase()}`;
               const isActive = location.pathname === path;
@@ -98,7 +170,25 @@ const Navbar = () => {
               );
             })}
             
-            {/* ✅ PROFESSIONAL GOLD RING AVATAR */}
+            {/* ✅ CART ICON FOR LOGGED-IN CUSTOMERS */}
+            {authType === 'customer' && (
+              <Link
+                to="/cart"
+                className="relative text-gray-300 hover:text-gold transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-gold text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {cartCount}
+                  </span>
+                )}
+                <span className="absolute left-0 -bottom-1 h-[2px] w-full bg-gold transition-all scale-x-0 group-hover:scale-x-100 origin-left"></span>
+              </Link>
+            )}
+            
+            {/* ✅ LOGIN / USER AVATAR */}
             {authType === 'guest' ? (
               <Link
                 to="/login"
@@ -107,46 +197,58 @@ const Navbar = () => {
                 Login
                 <span className="absolute left-0 -bottom-1 h-[2px] w-full bg-gold transition-all scale-x-0 group-hover:scale-x-100 origin-left"></span>
               </Link>
+            ) : authType === 'admin' ? (
+              <div className="relative group">
+                <div className="flex items-center gap-2 cursor-pointer">
+                  <div className="w-8 h-8 bg-gold text-black rounded-full flex items-center justify-center font-bold text-sm">
+                    A
+                  </div>
+                </div>
+                {/* Admin dropdown... */}
+                <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-800 rounded-xl py-2 shadow-xl shadow-gold/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <Link
+                    to="/admin/dashboard"
+                    className="block px-4 py-2 text-sm text-gray-300 hover:text-gold hover:bg-gray-800"
+                  >
+                    Admin Dashboard
+                  </Link>
+                  <div className="border-t border-gray-800 my-1"></div>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-red-400 hover:bg-gray-800"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
             ) : (
               <div className="relative group">
                 <div className="flex items-center gap-2 cursor-pointer">
-                  {/* ✅ GOLD MONOGRAM RING - LUXURY DESIGN */}
-                  <div className="w-9 h-9 rounded-full bg-black border-2 border-gold flex items-center justify-center">
-                    <span className="text-gold font-light text-sm">
-                      {authType === 'admin' ? 'A' : getInitials(customer?.fullName)}
-                    </span>
+                  <div className="w-8 h-8 bg-gold text-black rounded-full flex items-center justify-center font-bold text-sm">
+                    {getInitials(customer?.fullName)}
                   </div>
                 </div>
-                
-                {/* Desktop Dropdown Menu */}
+                {/* Customer dropdown... */}
                 <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-800 rounded-xl py-2 shadow-xl shadow-gold/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  {authType === 'admin' ? (
-                    <>
-                      <Link
-                        to="/admin/dashboard"
-                        className="block px-4 py-2 text-sm text-gray-300 hover:text-gold hover:bg-gray-800"
-                      >
-                        Admin Dashboard
-                      </Link>
-                      <div className="border-t border-gray-800 my-1"></div>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        to="/account"
-                        className="block px-4 py-2 text-sm text-gray-300 hover:text-gold hover:bg-gray-800"
-                      >
-                        My Account
-                      </Link>
-                      <Link
-                        to="/orders"
-                        className="block px-4 py-2 text-sm text-gray-300 hover:text-gold hover:bg-gray-800"
-                      >
-                        My Orders
-                      </Link>
-                      <div className="border-t border-gray-800 my-1"></div>
-                    </>
-                  )}
+                  <Link
+                    to="/account"
+                    className="block px-4 py-2 text-sm text-gray-300 hover:text-gold hover:bg-gray-800"
+                  >
+                    My Account
+                  </Link>
+                  <Link
+                    to="/orders"
+                    className="block px-4 py-2 text-sm text-gray-300 hover:text-gold hover:bg-gray-800"
+                  >
+                    My Orders
+                  </Link>
+                  <Link
+                    to="/cart"
+                    className="block px-4 py-2 text-sm text-gray-300 hover:text-gold hover:bg-gray-800"
+                  >
+                    My Cart ({cartCount})
+                  </Link>
+                  <div className="border-t border-gray-800 my-1"></div>
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-red-400 hover:bg-gray-800"
@@ -209,7 +311,7 @@ const Navbar = () => {
               );
             })}
             
-            {/* ✅ COMPLETE MOBILE AUTH MENU */}
+            {/* ✅ MOBILE CART & AUTH MENU */}
             {authType === 'guest' ? (
               <Link
                 to="/login"
@@ -249,6 +351,13 @@ const Navbar = () => {
                   className="block text-base text-gray-300 hover:text-gold"
                 >
                   My Orders
+                </Link>
+                <Link
+                  to="/cart"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block text-base text-gray-300 hover:text-gold"
+                >
+                  My Cart ({cartCount})
                 </Link>
                 <button
                   onClick={handleLogout}

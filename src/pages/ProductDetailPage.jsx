@@ -1,7 +1,13 @@
 // src/pages/ProductDetailPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ScrollToTop from '../components/ScrollToTop';
+// ✅ MAKE SURE THESE IMPORTS ARE CORRECT
+import { 
+  isCustomerAuthenticated, 
+  getCustomer,
+  getCustomerToken // ✅ Added this import
+} from '../utils/auth';
 
 const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
@@ -14,8 +20,12 @@ const ProductDetailPage = () => {
   const videoRef = useRef(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
 
+  // ✅ GET ROUTER HOOKS
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // ✅ API URL
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   // Fetch product details
@@ -46,14 +56,13 @@ const ProductDetailPage = () => {
       const data = await res.json();
       
       if (data.success) {
-        // Filter out current product and get max 4 related products
         const related = data.products
           .filter(p => p._id !== id && p.status === 'active')
           .slice(0, 4);
         setRelatedProducts(related);
       }
     } catch (err) {
-      // Silently fail - related products are optional
+      // Silently fail
     }
   };
 
@@ -64,24 +73,26 @@ const ProductDetailPage = () => {
     }
   }, [id]);
 
-  // Handle thumbnail click
   const handleThumbnailClick = (index) => {
     setMainImageIndex(index);
   };
 
-  // Add to cart function
-  const addToCart = () => {
-    if (!product || product.price === null || product.price === undefined) return;
+  // ✅ SERVER-SIDE ADD TO CART FUNCTION
+  const addToCart = async () => {
+    // ✅ DEBUG: Add console log to verify function is called
+    console.log('Add to Cart clicked!');
     
-    const existingCart = JSON.parse(localStorage.getItem('happyTimeCart') || '[]');
-    const existingItemIndex = existingCart.findIndex(
-      item => item._id === product._id && item.selectedColor === selectedColor
-    );
+    if (!product || product.price === null || product.price === undefined) {
+      console.log('Invalid product or price');
+      return;
+    }
     
-    if (existingItemIndex > -1) {
-      existingCart[existingItemIndex].quantity += quantity;
-    } else {
-      existingCart.push({
+    // ✅ Check authentication
+    if (!isCustomerAuthenticated()) {
+      console.log('User not authenticated - redirecting to login');
+      
+      // Store pending item
+      const pendingItem = {
         _id: product._id,
         title: product.title,
         brand: product.brand,
@@ -92,27 +103,61 @@ const ProductDetailPage = () => {
         modelNumber: product.modelNumber,
         gender: product.gender,
         watchShape: product.watchShape,
-        productType: product.productType // ✅ Include product type
-      });
+        productType: product.productType
+      };
+      
+      sessionStorage.setItem('pendingCartItem', JSON.stringify(pendingItem));
+      navigate('/login', { state: { from: `/shop/${id}` } });
+      return;
     }
-    
-    localStorage.setItem('happyTimeCart', JSON.stringify(existingCart));
-    setSuccessMessage('Added to cart successfully!');
-    setTimeout(() => setSuccessMessage(''), 3000);
+
+    try {
+      // ✅ Get customer token for API authentication
+      const token = getCustomerToken();
+      
+      // ✅ Make API call to server
+      const response = await fetch(`${API_URL}/api/cart`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId: product._id,
+          selectedColor,
+          quantity
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Success feedback
+        setSuccessMessage('Added to cart successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        
+        // Update navbar cart count
+        window.dispatchEvent(new CustomEvent('cartUpdated'));
+        
+        console.log('Item added to cart via API:', data.cart);
+      } else {
+        setError(data.message || 'Failed to add to cart');
+        console.error('API Error:', data);
+      }
+    } catch (err) {
+      console.error('Add to cart API error:', err);
+      setError('Network error. Please try again.');
+    }
   };
 
-  // Format price for display
   const formatPrice = (price) => {
     if (price === null || price === undefined) return 'Contact for Price';
     return `LKR ${price.toLocaleString()}`;
   };
 
-  // ✅ Get category display text (handles both watches and wall clocks)
   const getCategoryDisplay = () => {
-    if (product.productType === 'wall_clock') {
-      return 'Wall Clock';
-    }
-    switch(product.gender) {
+    if (product?.productType === 'wall_clock') return 'Wall Clock';
+    switch(product?.gender) {
       case 'men': return 'Men';
       case 'women': return 'Women';
       case 'boy': return 'Boy';
@@ -121,12 +166,9 @@ const ProductDetailPage = () => {
     }
   };
 
-  // ✅ Get category badge class
   const getCategoryBadgeClass = () => {
-    if (product.productType === 'wall_clock') {
-      return 'bg-amber-900/30 text-amber-300';
-    }
-    switch(product.gender) {
+    if (product?.productType === 'wall_clock') return 'bg-amber-900/30 text-amber-300';
+    switch(product?.gender) {
       case 'men': return 'bg-blue-900/30 text-blue-300';
       case 'women': return 'bg-pink-900/30 text-pink-300';
       case 'boy': return 'bg-green-900/30 text-green-300';
@@ -135,12 +177,10 @@ const ProductDetailPage = () => {
     }
   };
 
-  // Handle back to shop
   const handleBackToShop = () => {
     navigate('/shop');
   };
 
-  // Loading state
   if (loading) {
     return (
       <div className="bg-black text-white min-h-screen">
@@ -153,7 +193,6 @@ const ProductDetailPage = () => {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="bg-black text-white min-h-screen">
@@ -173,17 +212,10 @@ const ProductDetailPage = () => {
     );
   }
 
-  if (!product) {
-    return null;
-  }
+  if (!product) return null;
 
-  // Get all media (images + video)
   const allMedia = [...(product.images || [])];
-  if (product.video) {
-    allMedia.push(product.video);
-  }
-
-  // Check if current main is video
+  if (product.video) allMedia.push(product.video);
   const isVideo = mainImageIndex >= (product.images?.length || 0) && product.video;
 
   return (
@@ -191,7 +223,6 @@ const ProductDetailPage = () => {
       <ScrollToTop />
       
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb Navigation */}
         <div className="mb-6 sm:mb-8">
           <button
             onClick={handleBackToShop}
@@ -204,11 +235,8 @@ const ProductDetailPage = () => {
           </button>
         </div>
 
-        {/* Product Detail Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Left Column - Media Gallery */}
           <div>
-            {/* Main Media Display */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden aspect-square flex items-center justify-center mb-4">
               {isVideo ? (
                 <div className="w-full h-full">
@@ -217,9 +245,7 @@ const ProductDetailPage = () => {
                     src={product.video}
                     controls
                     className="w-full h-full object-contain"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
+                    onError={(e) => e.target.style.display = 'none'}
                   />
                 </div>
               ) : (
@@ -227,14 +253,11 @@ const ProductDetailPage = () => {
                   src={product.images?.[mainImageIndex] || ''}
                   alt={product.title}
                   className="max-h-full max-w-full object-contain p-6"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
+                  onError={(e) => e.target.style.display = 'none'}
                 />
               )}
             </div>
 
-            {/* Media Thumbnails */}
             {allMedia.length > 1 && (
               <div className="grid grid-cols-4 gap-3">
                 {allMedia.map((media, index) => {
@@ -261,9 +284,7 @@ const ProductDetailPage = () => {
                           src={media}
                           alt={`Thumbnail ${index + 1}`}
                           className="max-h-full max-w-full object-contain p-1"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
+                          onError={(e) => e.target.style.display = 'none'}
                         />
                       )}
                     </button>
@@ -273,21 +294,17 @@ const ProductDetailPage = () => {
             )}
           </div>
 
-          {/* Right Column - Product Details */}
           <div className="flex flex-col">
-            {/* Brand & Title */}
             <div className="mb-6">
               <p className="text-gold text-sm font-medium mb-2">{product.brand}</p>
               <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3">{product.title}</h1>
               <div className="flex items-center text-gray-400 text-sm">
-                {/* ✅ CORRECT CATEGORY DISPLAY */}
                 <span>{getCategoryDisplay()}</span>
                 <span className="mx-2">•</span>
                 <span>{product.watchShape}</span>
               </div>
             </div>
 
-            {/* Price */}
             <div className="mb-8">
               <div className="text-3xl sm:text-4xl font-bold text-white mb-2">
                 {formatPrice(product.price)}
@@ -307,7 +324,6 @@ const ProductDetailPage = () => {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* Colors */}
                   {product.colors?.length > 0 && (
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-3">Available Colors</h3>
@@ -329,7 +345,6 @@ const ProductDetailPage = () => {
                     </div>
                   )}
 
-                  {/* Quantity Selector - Only for purchasable items */}
                   {product.price !== null && product.price !== undefined && (
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-3">Quantity</h3>
@@ -337,7 +352,6 @@ const ProductDetailPage = () => {
                         <button
                           onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
                           className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-l-lg text-white hover:bg-gray-700 transition flex items-center justify-center"
-                          aria-label="Decrease quantity"
                         >
                           -
                         </button>
@@ -347,7 +361,6 @@ const ProductDetailPage = () => {
                         <button
                           onClick={() => setQuantity(prev => prev + 1)}
                           className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-r-lg text-white hover:bg-gray-700 transition flex items-center justify-center"
-                          aria-label="Increase quantity"
                         >
                           +
                         </button>
@@ -355,10 +368,10 @@ const ProductDetailPage = () => {
                     </div>
                   )}
 
-                  {/* Add to Cart Button */}
+                  {/* ✅ SERVER-SIDE CART BUTTON */}
                   {product.price !== null && product.price !== undefined ? (
                     <button
-                      onClick={addToCart}
+                      onClick={addToCart} // ✅ NOW USES SERVER-SIDE FUNCTION
                       className="w-full bg-gold text-black py-4 rounded-xl font-bold text-lg hover:bg-gold/90 transition"
                     >
                       Add to Cart
@@ -372,7 +385,6 @@ const ProductDetailPage = () => {
                     </button>
                   )}
 
-                  {/* Success Message */}
                   {successMessage && (
                     <p className="text-green-400 text-center text-sm">{successMessage}</p>
                   )}
@@ -380,7 +392,6 @@ const ProductDetailPage = () => {
               )}
             </div>
 
-            {/* Description */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">Description</h2>
               <p className="text-gray-300 leading-relaxed text-sm">
@@ -388,7 +399,6 @@ const ProductDetailPage = () => {
               </p>
             </div>
 
-            {/* Specifications */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">Specifications</h2>
               <div className="space-y-3">
@@ -402,7 +412,6 @@ const ProductDetailPage = () => {
                   <span className="text-gray-400 text-sm">Brand</span>
                   <span className="text-white text-sm">{product.brand}</span>
                 </div>
-                {/* ✅ CORRECT CATEGORY DISPLAY IN SPECS */}
                 <div className="flex justify-between pb-2 border-b border-gray-800">
                   <span className="text-gray-400 text-sm">Category</span>
                   <span className={`text-sm ${getCategoryBadgeClass()}`}>
@@ -416,7 +425,6 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            {/* Contact Section */}
             <div className="pt-6 border-t border-gray-800 mt-auto">
               <h3 className="text-lg font-semibold text-white mb-3">Need Assistance?</h3>
               <p className="text-gray-400 text-sm mb-4">
@@ -436,7 +444,6 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        {/* Related Products Section */}
         {relatedProducts.length > 0 && (
           <div className="mt-16 pt-8 border-t border-gray-800">
             <h2 className="text-2xl font-bold text-white mb-6">
@@ -457,9 +464,7 @@ const ProductDetailPage = () => {
                         src={relatedProduct.images[0]}
                         alt={relatedProduct.title}
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
+                        onError={(e) => e.target.style.display = 'none'}
                       />
                     </div>
                   ) : (

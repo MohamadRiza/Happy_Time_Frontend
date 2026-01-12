@@ -25,6 +25,7 @@ import CustomerAccount from './pages/CustomerAccount';
 
 // ✅ IMPORT PROTECTED ROUTES
 import { AdminProtectedRoute, CustomerProtectedRoute } from './components/CustomerProtectedRoute';
+import CartPage from './pages/CartPage';
 
 function App() {
   return (
@@ -54,6 +55,15 @@ function App() {
                 </CustomerProtectedRoute>
               } 
             />
+            // In your App.jsx routes
+<Route 
+  path="/cart" 
+  element={
+    <CustomerProtectedRoute>
+      <CartPage />
+    </CustomerProtectedRoute>
+  } 
+/>
 
             {/* ADMIN ROUTES */}
             <Route path="/admin/login" element={<AdminLogin />} />
