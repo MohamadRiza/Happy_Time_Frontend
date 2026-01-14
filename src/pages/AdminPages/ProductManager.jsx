@@ -5,6 +5,7 @@ import { getToken } from '../../utils/auth';
 
 const ProductManager = () => {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -17,7 +18,7 @@ const ProductManager = () => {
     price: '',
     modelNumber: '',
     watchShape: 'Round',
-    gender: 'men', // Default for wrist watch
+    gender: 'men',
     productType: 'watch',
     colors: '',
     customColors: '',
@@ -29,9 +30,22 @@ const ProductManager = () => {
   const [previewVideo, setPreviewVideo] = useState('');
   const [uploading, setUploading] = useState(false);
 
+  // ✅ SEARCH & FILTER STATE
+  const [searchFilters, setSearchFilters] = useState({
+    search: '',
+    brand: 'all',
+    productType: 'all',
+    gender: 'all',
+    featured: 'all'
+  });
+
+  // ✅ DYNAMIC BRANDS STATE
+  const [availableBrands, setAvailableBrands] = useState([]);
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  const brands = [
+  // ✅ Keep your existing brands for the form (creation)
+  const formBrands = [
     'Rolex', 'Omega', 'Citizen', 'Orix', 'Winsor', 'Arial', 'Patek Philippe', 'Audemars Piguet', 'Other'
   ];
   
@@ -39,19 +53,37 @@ const ProductManager = () => {
     'Round', 'Square', 'Rectangular', 'Oval', 'Tonneau', 'Other'
   ];
   
-  // ✅ Gender options for wrist watches only
+  // ✅ UPDATED: Added Unisex option
   const wristWatchGenders = [
     { value: 'men', label: 'Men' },
     { value: 'women', label: 'Women' },
+    { value: 'unisex', label: 'Unisex' }, // ✅ ADDED UNISEX
     { value: 'boy', label: 'Boy' },
     { value: 'girl', label: 'Girl' }
   ];
   
   const productTypes = [
+    { value: 'all', label: 'All Products' },
     { value: 'watch', label: 'Wrist Watch' },
     { value: 'wall_clock', label: 'Wall Clock' }
   ];
   
+  // ✅ UPDATED: Added Unisex option
+  const genderOptions = [
+    { value: 'all', label: 'All Genders' },
+    { value: 'men', label: 'Men' },
+    { value: 'women', label: 'Women' },
+    { value: 'unisex', label: 'Unisex' }, // ✅ ADDED UNISEX
+    { value: 'boy', label: 'Boy' },
+    { value: 'girl', label: 'Girl' }
+  ];
+  
+  const featuredOptions = [
+    { value: 'all', label: 'All' },
+    { value: 'true', label: 'Featured Only' },
+    { value: 'false', label: 'Non-Featured' }
+  ];
+
   const colorCombinations = [
     'Gold - Black',
     'Gold - White',
@@ -74,6 +106,11 @@ const ProductManager = () => {
       const data = await res.json();
       if (data.success) {
         setProducts(data.products || []);
+        setFilteredProducts(data.products || []);
+        
+        // ✅ EXTRACT UNIQUE BRANDS FROM PRODUCTS
+        const uniqueBrands = [...new Set((data.products || []).map(p => p.brand))];
+        setAvailableBrands(uniqueBrands.sort());
       } else {
         setError(data.message || 'Failed to load products');
       }
@@ -88,6 +125,48 @@ const ProductManager = () => {
     fetchProducts();
   }, []);
 
+  // ✅ APPLY FILTERS
+  useEffect(() => {
+    let result = [...products];
+    
+    // Search filter
+    if (searchFilters.search) {
+      const query = searchFilters.search.toLowerCase();
+      result = result.filter(product =>
+        product.title.toLowerCase().includes(query) ||
+        product.brand.toLowerCase().includes(query) ||
+        product.description.toLowerCase().includes(query) ||
+        (product.modelNumber && product.modelNumber.toLowerCase().includes(query))
+      );
+    }
+    
+    // Brand filter
+    if (searchFilters.brand !== 'all') {
+      result = result.filter(product => product.brand === searchFilters.brand);
+    }
+    
+    // Product type filter
+    if (searchFilters.productType !== 'all') {
+      result = result.filter(product => product.productType === searchFilters.productType);
+    }
+    
+    // Gender filter (only for watches)
+    if (searchFilters.gender !== 'all') {
+      result = result.filter(product => 
+        product.productType === 'wall_clock' || 
+        product.gender === searchFilters.gender
+      );
+    }
+    
+    // Featured filter
+    if (searchFilters.featured !== 'all') {
+      const isFeatured = searchFilters.featured === 'true';
+      result = result.filter(product => product.featured === isFeatured);
+    }
+    
+    setFilteredProducts(result);
+  }, [searchFilters, products]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({ 
@@ -97,23 +176,22 @@ const ProductManager = () => {
     setError('');
   };
 
-  // ✅ FIXED: Typo was "productTime" instead of "productType"
   const handleProductTypeChange = (e) => {
     const productType = e.target.value;
     let gender = formData.gender;
     
     if (productType === 'wall_clock') {
-      gender = ''; // No gender for wall clocks
+      gender = '';
     } else {
-      // Keep current gender if valid, otherwise default to 'men'
-      if (!['men', 'women', 'boy', 'girl'].includes(gender)) {
+      // ✅ Handle unisex in validation
+      if (!['men', 'women', 'unisex', 'boy', 'girl'].includes(gender)) {
         gender = 'men';
       }
     }
     
     setFormData(prev => ({
       ...prev,
-      productType, // ✅ FIXED: Was "productTime"
+      productType,
       gender
     }));
     setError('');
@@ -205,7 +283,6 @@ const ProductManager = () => {
       setUploading(false);
       return;
     }
-    // ✅ Only validate gender for wrist watches
     if (formData.productType === 'watch' && !formData.gender) {
       setError('Gender is required for wrist watches');
       setUploading(false);
@@ -260,7 +337,7 @@ const ProductManager = () => {
 
       const data = await res.json();
       if (data.success) {
-        fetchProducts();
+        fetchProducts(); // ✅ This will refresh availableBrands too
         resetForm();
       } else {
         setError(data.message || 'Failed to save product');
@@ -296,7 +373,7 @@ const ProductManager = () => {
   };
 
   const handleEdit = (product) => {
-    const isCustomBrand = !brands.includes(product.brand) || product.brand === 'Other';
+    const isCustomBrand = !formBrands.includes(product.brand) || product.brand === 'Other';
     const brand = isCustomBrand ? 'Other' : product.brand;
     const customBrand = isCustomBrand ? product.brand : '';
 
@@ -305,7 +382,7 @@ const ProductManager = () => {
     const colors = isCustomColor ? 'Other' : colorCombo;
     const customColors = isCustomColor ? colorCombo : '';
 
-    // ✅ Handle wall clocks properly (no gender)
+    // ✅ Handle unisex gender
     const genderValue = product.productType === 'wall_clock' 
       ? '' 
       : (product.gender || 'men');
@@ -318,7 +395,7 @@ const ProductManager = () => {
       price: product.price?.toString() || '',
       modelNumber: product.modelNumber || '',
       watchShape: product.watchShape,
-      gender: genderValue,
+      gender: genderValue, // ✅ Now includes unisex
       productType: product.productType || 'watch',
       colors,
       customColors,
@@ -339,7 +416,7 @@ const ProductManager = () => {
       });
       const data = await res.json();
       if (data.success) {
-        fetchProducts();
+        fetchProducts(); // ✅ Refresh availableBrands after delete
       } else {
         setError(data.message || 'Failed to delete product');
       }
@@ -348,7 +425,7 @@ const ProductManager = () => {
     }
   };
 
-  // ✅ Display logic for product categories
+  // ✅ UPDATED: Handle wall clocks and unisex properly
   const getProductCategory = (product) => {
     if (product.productType === 'wall_clock') {
       return 'Wall Clock';
@@ -357,6 +434,7 @@ const ProductManager = () => {
       switch(product.gender) {
         case 'men': return 'Men';
         case 'women': return 'Women';
+        case 'unisex': return 'Unisex'; // ✅ ADDED UNISEX
         case 'boy': return 'Boy';
         case 'girl': return 'Girl';
         default: return 'Unisex';
@@ -365,17 +443,39 @@ const ProductManager = () => {
     return 'Product';
   };
 
+  // ✅ UPDATED: Handle unisex badge class
   const getCategoryBadgeClass = (product) => {
     if (product.productType === 'wall_clock') {
-      return 'bg-amber-900/30 text-amber-300'; // Gold/amber for home
+      return 'bg-amber-900/30 text-amber-300';
     }
     switch(product.gender) {
       case 'men': return 'bg-blue-900/30 text-blue-300';
       case 'women': return 'bg-pink-900/30 text-pink-300';
+      case 'unisex': return 'bg-gray-800 text-gray-300'; // ✅ UNISEX USES GRAY
       case 'boy': return 'bg-green-900/30 text-green-300';
       case 'girl': return 'bg-purple-900/30 text-purple-300';
       default: return 'bg-gray-800 text-gray-300';
     }
+  };
+
+  // ✅ HANDLE FILTER CHANGES
+  const handleFilterChange = (field, value) => {
+    setSearchFilters(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    // Filters are applied automatically via useEffect
+  };
+
+  const resetFilters = () => {
+    setSearchFilters({
+      search: '',
+      brand: 'all',
+      productType: 'all',
+      gender: 'all',
+      featured: 'all'
+    });
   };
 
   return (
@@ -391,6 +491,101 @@ const ProductManager = () => {
         >
           + Add New Product
         </button>
+      </div>
+
+      {/* ✅ SEARCH & FILTER SECTION */}
+      <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 mb-8 backdrop-blur-sm">
+        <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          {/* Search Input */}
+          <div className="lg:col-span-2 xl:col-span-3">
+            <label className="block text-gray-400 mb-2 text-sm">Search Products</label>
+            <input
+              type="text"
+              placeholder="Search by name, brand, or model..."
+              value={searchFilters.search}
+              onChange={(e) => handleFilterChange('search', e.target.value)}
+              className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
+            />
+          </div>
+          
+          {/* Brand Filter - NOW DYNAMIC */}
+          <div>
+            <label className="block text-gray-400 mb-2 text-sm">Brand</label>
+            <select
+              value={searchFilters.brand}
+              onChange={(e) => handleFilterChange('brand', e.target.value)}
+              className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+              style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+            >
+              <option value="all" className="bg-gray-800 text-white">All Brands</option>
+              {availableBrands.map(brand => (
+                <option key={brand} value={brand} className="bg-gray-800 text-white">{brand}</option>
+              ))}
+            </select>
+          </div>
+          
+          {/* Product Type Filter */}
+          <div>
+            <label className="block text-gray-400 mb-2 text-sm">Type</label>
+            <select
+              value={searchFilters.productType}
+              onChange={(e) => handleFilterChange('productType', e.target.value)}
+              className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+              style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+            >
+              {productTypes.map(type => (
+                <option key={type.value} value={type.value} className="bg-gray-800 text-white">{type.label}</option>
+              ))}
+            </select>
+          </div>
+          
+          {/* Gender Filter */}
+          <div>
+            <label className="block text-gray-400 mb-2 text-sm">Gender</label>
+            <select
+              value={searchFilters.gender}
+              onChange={(e) => handleFilterChange('gender', e.target.value)}
+              className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+              style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+            >
+              {genderOptions.map(option => (
+                <option key={option.value} value={option.value} className="bg-gray-800 text-white">{option.label}</option>
+              ))}
+            </select>
+          </div>
+          
+          {/* Featured Filter */}
+          <div>
+            <label className="block text-gray-400 mb-2 text-sm">Featured</label>
+            <select
+              value={searchFilters.featured}
+              onChange={(e) => handleFilterChange('featured', e.target.value)}
+              className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+              style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+            >
+              {featuredOptions.map(option => (
+                <option key={option.value} value={option.value} className="bg-gray-800 text-white">{option.label}</option>
+              ))}
+            </select>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex gap-2 mt-auto">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-gold text-black rounded-lg font-medium hover:bg-gold/90 transition whitespace-nowrap"
+            >
+              Apply
+            </button>
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="px-4 py-2 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition whitespace-nowrap"
+            >
+              Reset
+            </button>
+          </div>
+        </form>
       </div>
 
       {error && <p className="text-red-400 mb-4">{error}</p>}
@@ -421,9 +616,9 @@ const ProductManager = () => {
                   value={formData.brand}
                   onChange={handleBrandChange}
                   className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+                  style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
                 >
-                  {brands.map(brand => (
+                  {formBrands.map(brand => (
                     <option key={brand} value={brand} className="bg-gray-800 text-white">{brand}</option>
                   ))}
                 </select>
@@ -448,7 +643,7 @@ const ProductManager = () => {
                   className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
                   style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
                 >
-                  {productTypes.map(type => (
+                  {productTypes.filter(t => t.value !== 'all').map(type => (
                     <option key={type.value} value={type.value} className="bg-gray-800 text-white">{type.label}</option>
                   ))}
                 </select>
@@ -471,7 +666,6 @@ const ProductManager = () => {
                 </select>
               </div>
 
-              {/* ✅ Gender Selection - ONLY for wrist watches */}
               {formData.productType === 'watch' && (
                 <div>
                   <label className="block text-gray-400 mb-2 text-sm">Gender *</label>
@@ -556,7 +750,6 @@ const ProductManager = () => {
               />
             </div>
 
-            {/* Featured Toggle */}
             <div className="mb-4">
               <label className="flex items-center cursor-pointer">
                 <input
@@ -667,13 +860,19 @@ const ProductManager = () => {
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
           <p className="mt-4 text-gray-400">Loading products...</p>
         </div>
-      ) : products.length === 0 ? (
+      ) : filteredProducts.length === 0 ? (
         <div className="text-center py-12 bg-gray-900/50 border border-gray-800 rounded-xl">
-          <p className="text-gray-500">No products created yet.</p>
+          <p className="text-gray-500">No products match your current filters.</p>
+          <button
+            onClick={resetFilters}
+            className="mt-4 bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition"
+          >
+            Clear Filters
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <div
               key={product._id}
               className={`bg-gray-900/50 rounded-xl overflow-hidden transition-all ${
@@ -722,7 +921,6 @@ const ProductManager = () => {
                   <span className="bg-gray-800 text-gray-300 text-xs px-2 py-1 rounded">
                     {product.colors?.[0] || 'N/A'}
                   </span>
-                  {/* ✅ CORRECT CATEGORY DISPLAY */}
                   <span className={`text-xs px-2 py-1 rounded ${getCategoryBadgeClass(product)}`}>
                     {getProductCategory(product)}
                   </span>

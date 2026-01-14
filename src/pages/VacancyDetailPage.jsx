@@ -33,7 +33,12 @@ const VacancyDetailPage = () => {
   }, [id]);
 
   const handleApply = () => {
-    navigate(`/careers/apply/${id}`);
+    if (!vacancy?._id) return;
+    navigate(
+      `/apply-job?positionId=${vacancy._id}&positionTitle=${encodeURIComponent(
+        vacancy.title
+      )}`
+    );
   };
 
   /* -------------------- LOADING -------------------- */

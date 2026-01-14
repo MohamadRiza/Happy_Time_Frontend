@@ -1,6 +1,6 @@
 // src/pages/AdminPages/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { getToken, isAuthenticated } from '../../utils/auth';
 
@@ -14,11 +14,11 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [recentActivity, setRecentActivity] = useState([]);
-  const navigate = useNavigate(); // ✅ Add navigate
+  const navigate = useNavigate();
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  // ✅ ADD AUTHENTICATION CHECK
+  // ✅ AUTHENTICATION CHECK
   useEffect(() => {
     if (!isAuthenticated()) {
       navigate('/admin/login');
@@ -27,7 +27,6 @@ const AdminDashboard = () => {
   }, [navigate]);
 
   const fetchDashboardStats = async () => {
-    // Only fetch if authenticated (extra safety check)
     if (!isAuthenticated()) {
       navigate('/admin/login');
       return;
@@ -43,7 +42,6 @@ const AdminDashboard = () => {
       });
       const productsData = await productsRes.json();
       
-      // Check if auth failed
       if (!productsData.success && productsData.message === 'Token is not valid') {
         navigate('/admin/login');
         return;
@@ -55,38 +53,48 @@ const AdminDashboard = () => {
       });
       const vacanciesData = await vacanciesRes.json();
       
-      // ✅ SAFE MESSAGES FETCH - Handles missing endpoint
+      // ✅ FETCH CUSTOMERS COUNT
+      let customersCount = 0;
+      try {
+        const customersRes = await fetch(`${API_URL}/api/admin/customers?limit=1`, {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        });
+        const customersData = await customersRes.json();
+        
+        if (customersData.success) {
+          customersCount = customersData.data.pagination?.total || 0;
+        }
+      } catch (customersError) {
+        console.warn('Customers API not available:', customersError);
+      }
+
+      // ✅ SAFE MESSAGES FETCH
       let newMessages = 0;
-      let messagesData = { success: false, messages: [] };
-      
       try {
         const messagesRes = await fetch(`${API_URL}/api/messages`, {
           headers: { Authorization: `Bearer ${getToken()}` }
         });
-        messagesData = await messagesRes.json();
+        const messagesData = await messagesRes.json();
         
-        // ✅ Handle both possible response structures
         if (messagesData.success) {
           const messagesArray = messagesData.messages || messagesData.data || [];
           newMessages = messagesArray.filter(m => m.status === 'unread').length;
         }
       } catch (messagesError) {
         console.warn('Messages API not available:', messagesError);
-        // Keep newMessages = 0 if API fails
       }
 
-      // Calculate other stats
+      // Calculate stats
       const totalProducts = productsData.success ? (productsData.products || []).length : 0;
       const openVacancies = vacanciesData.success 
         ? (vacanciesData.data || []).filter(v => v.status === 'active').length 
         : 0;
-      const customers = 0;
 
       setStats({
         totalProducts,
         openVacancies,
         newMessages,
-        customers
+        customers: customersCount
       });
 
       // Build recent activity
@@ -121,29 +129,63 @@ const AdminDashboard = () => {
         activity.push(...recentVacancies);
       }
 
-      // ✅ Add recent messages (if available)
-      if (messagesData.success && (messagesData.messages || messagesData.data)) {
-        const messagesArray = messagesData.messages || messagesData.data || [];
-        const recentMessages = messagesArray
-          .slice(0, 2)
-          .map(message => ({
-            type: 'message',
-            message: `New message from: ${message.name || 'Customer'}`,
-            time: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : 'Unknown',
-            icon: '✉️',
-            color: 'text-emerald-400'
-          }));
-        activity.push(...recentMessages);
+      // ✅ Add recent customers
+      if (customersCount > 0) {
+        try {
+          const recentCustomersRes = await fetch(`${API_URL}/api/admin/customers?page=1&limit=2`, {
+            headers: { Authorization: `Bearer ${getToken()}` }
+          });
+          const recentCustomersData = await recentCustomersRes.json();
+          
+          if (recentCustomersData.success) {
+            const recentCustomers = (recentCustomersData.data.customers || [])
+              .slice(0, 2)
+              .map(customer => ({
+                type: 'customer',
+                message: `New customer registered: ${customer.fullName}`,
+                time: customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : 'Unknown',
+                icon: '👤',
+                color: 'text-purple-400'
+              }));
+            activity.push(...recentCustomers);
+          }
+        } catch (customersError) {
+          console.warn('Recent customers fetch failed:', customersError);
+        }
       }
 
-      // Sort by time (newest first) and limit to 4 items
+      // Add recent messages (if available)
+      try {
+        const messagesRes = await fetch(`${API_URL}/api/messages?limit=2`, {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        });
+        const messagesData = await messagesRes.json();
+        
+        if (messagesData.success) {
+          const messagesArray = messagesData.messages || messagesData.data || [];
+          const recentMessages = messagesArray
+            .slice(0, 2)
+            .map(message => ({
+              type: 'message',
+              message: `New message from: ${message.name || 'Customer'}`,
+              time: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : 'Unknown',
+              icon: '✉️',
+              color: 'text-emerald-400'
+            }));
+          activity.push(...recentMessages);
+        }
+      } catch (messagesError) {
+        console.warn('Recent messages fetch failed:', messagesError);
+      }
+
+      // Sort by time (newest first) and limit to 6 items
       const sortedActivity = activity
         .sort((a, b) => {
           const dateA = new Date(a.time);
           const dateB = new Date(b.time);
           return isNaN(dateB) ? -1 : isNaN(dateA) ? 1 : dateB - dateA;
         })
-        .slice(0, 4);
+        .slice(0, 6);
 
       setRecentActivity(sortedActivity);
 
@@ -163,7 +205,7 @@ const AdminDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // ✅ Loading state while checking auth
+  // ✅ Loading state
   if (loading && stats.totalProducts === 0) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -218,21 +260,26 @@ const AdminDashboard = () => {
             title: 'Customers', 
             value: stats.customers, 
             icon: '👤', 
-            color: 'text-purple-400',
-            subtitle: 'Coming soon'
+            color: 'text-purple-400'
           }
         ].map((card, idx) => (
-          <div
+          <Link
             key={idx}
-            className="bg-gradient-to-br from-gray-900 to-black border border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+            to={
+              card.title === 'Customers' ? '/admin/customers' :
+              card.title === 'Total Products' ? '/admin/products' :
+              card.title === 'Open Vacancies' ? '/admin/vacancies' :
+              '/admin/messages'
+            }
+            className="bg-gradient-to-br from-gray-900 to-black border border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl hover:border-gold transition-all duration-300 cursor-pointer group"
           >
-            <div className={`text-3xl mb-3 ${card.color}`}>{card.icon}</div>
+            <div className={`text-3xl mb-3 ${card.color} group-hover:scale-110 transition-transform`}>
+              {card.icon}
+            </div>
             <h3 className="text-gray-400 text-sm font-medium mb-1">{card.title}</h3>
-            {card.subtitle && (
-              <p className="text-gray-500 text-xs mb-1">{card.subtitle}</p>
-            )}
-            <p className="text-2xl font-bold text-white">{card.value}</p>
-          </div>
+            <p className="text-2xl font-bold text-white">{card.value.toLocaleString()}</p>
+            <div className="mt-2 w-full h-0.5 bg-gray-800 group-hover:bg-gold transition-colors"></div>
+          </Link>
         ))}
       </div>
 
@@ -240,23 +287,32 @@ const AdminDashboard = () => {
       <div className="bg-gradient-to-b from-gray-900 to-black border border-gray-800 rounded-xl p-6 shadow-lg">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-lg font-bold text-white">Recent Activity</h3>
-          <span className="text-xs text-gray-500">Last 7 days</span>
+          <span className="text-xs text-gray-500">Latest updates</span>
         </div>
         <div className="space-y-4">
           {recentActivity.length > 0 ? (
             recentActivity.map((activity, idx) => (
-              <div 
-                key={idx} 
-                className="flex items-start pb-4 border-b border-gray-800/50 last:border-0 last:pb-0"
+              <Link
+                key={idx}
+                to={
+                  activity.type === 'customer' ? `/admin/customers` :
+                  activity.type === 'product' ? `/admin/products` :
+                  activity.type === 'vacancy' ? `/admin/vacancies` :
+                  '/admin/messages'
+                }
+                className="flex items-start pb-4 border-b border-gray-800/50 last:border-0 last:pb-0 hover:bg-gray-800/30 p-2 rounded-lg transition-colors cursor-pointer"
               >
                 <div className={`p-2 rounded-lg mr-3 ${activity.color.replace('text-', 'bg-').replace('-400', '-900/30').replace('-gold', '-gold/10')}`}>
                   <span className={activity.color}>{activity.icon}</span>
                 </div>
-                <div>
-                  <p className="text-white">{activity.message}</p>
+                <div className="flex-1">
+                  <p className="text-white hover:text-gold transition-colors">{activity.message}</p>
                   <p className="text-gray-500 text-xs mt-1">{activity.time}</p>
                 </div>
-              </div>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-600 group-hover:text-gold transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             ))
           ) : (
             <div className="text-center py-8 text-gray-500">

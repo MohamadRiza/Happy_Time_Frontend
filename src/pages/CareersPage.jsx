@@ -219,7 +219,7 @@ const CareersPage = () => {
                 Don't see the perfect opportunity? Send us your resume and we'll keep you in mind for future positions that match your expertise.
               </p>
               <Link
-                to="/contact"
+                to="/apply-job"
                 className="inline-block bg-gold text-black px-8 py-3 rounded-xl font-bold hover:bg-yellow-400 transition shadow-lg hover:shadow-gold/20"
               >
                 Send Your Resume

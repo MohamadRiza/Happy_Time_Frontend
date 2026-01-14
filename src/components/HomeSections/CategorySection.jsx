@@ -6,105 +6,142 @@ const categories = [
   {
     id: 'men',
     name: 'Men',
-    description: 'Classic & modern styles',
-    image: 'ManW.jpg',
+    description: 'Classic & modern timepieces for the distinguished gentleman',
+    image: 'https://images.pexels.com/photos/290436/pexels-photo-290436.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    gradient: 'from-blue-900/20 to-blue-800/10'
   },
   {
     id: 'women',
     name: 'Women',
-    description: 'Elegant timepieces',
-    image: 'WomenW.jpg',
+    description: 'Elegant and sophisticated watches for every occasion',
+    image: 'https://images.pexels.com/photos/2259283/pexels-photo-2259283.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    gradient: 'from-pink-900/20 to-pink-800/10'
   },
   {
-    id: 'smart-watch',
-    name: 'Smart Watch',
-    description: 'Technology-driven watches',
-    image:
-      'https://4elementsclothing.co.uk/cdn/shop/products/telsatelsa-uk-waterproof-smart-watch-t410-sports-fitness-digital-watch-military-style-mens-with-touch-screen-display-fitness-watch-smart-watch-for-men-ios-andro-795028.jpg?v=1706428380',
+    id: 'boy',
+    name: 'Boy',
+    description: 'Durable and fun timepieces for young adventurers',
+    image: 'https://images.pexels.com/photos/730547/pexels-photo-730547.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    gradient: 'from-green-900/20 to-green-800/10'
+  },
+  {
+    id: 'girl',
+    name: 'Girl',
+    description: 'Colorful and stylish watches for little fashionistas',
+    image: 'https://images.pexels.com/photos/1095511/pexels-photo-1095511.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    gradient: 'from-purple-900/20 to-purple-800/10'
+  },
+  {
+    id: 'wall_clock',
+    name: 'Wall Clocks',
+    description: 'Premium wall clocks for home and office',
+    image: 'https://images.pexels.com/photos/730546/pexels-photo-730546.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    gradient: 'from-amber-900/20 to-amber-800/10'
   },
   {
     id: 'premium',
     name: 'Premium',
-    description: 'Luxury collections',
-    image: '/categories/premium.jpg',
-  },
-  {
-    id: 'kids',
-    name: 'Kids',
-    description: 'Fun & durable watches',
-    image: '/categories/kids.jpg',
-  },
-  {
-    id: 'clocks',
-    name: 'Clocks',
-    description: 'Wall & table clocks',
-    image: '/categories/clocks.jpg',
-  },
-  {
-    id: 'striped',
-    name: 'Striped',
-    description: 'Bold striped designs',
-    image:
-      'https://fossil.scene7.com/is/image/FossilPartners/FS5963_main?$sfcc_fos_large$',
-  },
-  {
-    id: 'gold-steel',
-    name: 'Gold & Steel',
-    description: 'Gold and steel finishes',
-    image:
-      'https://www.casio.com/content/casio/locales/europe/en-gb/products/watches/types/men-watches-gold/_jcr_content/root/responsivegrid/container_671877457_/accordion_copy_copy_/item_1/container_4844771_co/container_copy/container_1032216771/container_copy_copy_/container_copy/image_copy_153882584.casiocoreimg.png/1757701873011/mtp-b145g-9av.png',
-  },
-  {
-    id: 'sports',
-    name: 'Sports',
-    description: 'Built for active lifestyle',
-    image: '/categories/sports.jpg',
-  },
+    description: 'Luxury collections from world-renowned brands',
+    image: 'https://images.pexels.com/photos/145300/pexels-photo-145300.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    gradient: 'from-gold/20 to-yellow-800/10'
+  }
 ];
 
 const CategorySection = () => {
   return (
-    <section className="bg-black py-20 px-4">
-      <div className="max-w-7xl mx-auto">
-
+    <section className="bg-black py-20 px-4 relative overflow-hidden">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/20 via-transparent to-black/30"></div>
+      
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white">
-            Shop by <span className="text-gold">Category</span>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Shop by <span className="text-gold bg-gradient-to-r from-gold/20 to-transparent bg-clip-text">Category</span>
           </h2>
-          <div className="w-24 h-1 bg-gold mx-auto my-4 rounded-full" />
-          <p className="text-gray-400 max-w-xl mx-auto">
-            Find the perfect watch for every style and occasion.
+          <div className="w-32 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto my-6 rounded-full" />
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
+            Discover our curated collection of luxury timepieces, meticulously crafted for every style and occasion.
           </p>
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 md:gap-8">
           {categories.map((category) => (
             <Link
               key={category.id}
-              to={`/shop?category=${category.id}`}
-              className="group text-center"
+              to={`/shop?productType=${category.id === 'wall_clock' ? 'wall_clock' : 'watch'}${category.id !== 'wall_clock' && category.id !== 'premium' ? `&gender=${category.id}` : ''}`}
+              className="group block"
             >
-              <div className="relative mx-auto w-32 h-32 rounded-full overflow-hidden border border-gray-800 group-hover:border-gold transition-all duration-300 shadow-lg bg-gradient-to-br from-gray-900 to-black">
-                <img
-                  src={category.image}
-                  alt={category.name}
-                  loading="lazy"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-              </div>
+              <div className="bg-gradient-to-b from-gray-900/50 to-black border border-gray-800 rounded-2xl overflow-hidden hover:border-gold hover:shadow-2xl hover:shadow-gold/10 transition-all duration-500 transform hover:-translate-y-1 h-full flex flex-col">
+                {/* Image Container */}
+                <div className="relative h-48 overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-t ${category.gradient} opacity-80`}></div>
+                  <img
+                    src={category.image}
+                    alt={category.name}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  {/* Overlay effect */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                  
+                  {/* Category Badge */}
+                  <div className="absolute top-4 left-4">
+                    <span className="bg-black/60 backdrop-blur-sm text-gold text-xs font-bold px-3 py-1.5 rounded-full border border-gold/30">
+                      {category.name}
+                    </span>
+                  </div>
+                </div>
 
-              <h3 className="mt-5 text-white font-semibold text-lg group-hover:text-gold transition-colors">
-                {category.name}
-              </h3>
-              <p className="text-gray-400 text-sm mt-1">
-                {category.description}
-              </p>
+                {/* Content */}
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="text-white font-bold text-xl mb-2 group-hover:text-gold transition-colors">
+                    {category.name}
+                  </h3>
+                  <p className="text-gray-400 text-sm leading-relaxed flex-1">
+                    {category.description}
+                  </p>
+                  
+                  {/* Explore Button */}
+                  <div className="mt-4">
+                    <div className="inline-flex items-center text-gold hover:text-yellow-300 text-sm font-medium group-hover:gap-2 transition-all duration-300">
+                      <span>Explore Collection</span>
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        className="h-4 w-4 transition-transform group-hover:translate-x-1" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </Link>
           ))}
         </div>
 
+        {/* View All Button */}
+        <div className="text-center mt-12">
+          <Link
+            to="/shop"
+            className="inline-flex items-center bg-gold text-black px-8 py-3 rounded-xl font-bold hover:bg-gold/90 transition-all duration-300 group"
+          >
+            <span>View All Collections</span>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+        </div>
       </div>
     </section>
   );

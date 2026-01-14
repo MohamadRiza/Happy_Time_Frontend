@@ -1,7 +1,7 @@
 // src/components/AdminLayout.jsx
 import React from 'react';
 import { logout } from '../utils/auth';
-import { useNavigate, useLocation, Link } from 'react-router-dom'; // ✅ Import Link
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 const AdminLayout = ({ children, title = "Admin Dashboard" }) => {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ const AdminLayout = ({ children, title = "Admin Dashboard" }) => {
     { name: 'Vacancies', icon: '👥', path: '/admin/vacancies' },
     { name: 'Messages', icon: '✉️', path: '/admin/messages' },
     { name: 'Customers', icon: '👤', path: '/admin/customers' },
+    { name: 'Applicants', icon: '📋', path: '/admin/applications' }, // ✅ ADDED APPLICANTS
   ];
 
   return (
@@ -30,7 +31,6 @@ const AdminLayout = ({ children, title = "Admin Dashboard" }) => {
         </div>
         <nav className="flex-1 mt-6 px-3">
           {navItems.map((item) => (
-            // ✅ CORRECT - Use Link instead of <a>
             <Link
               key={item.name}
               to={item.path}
