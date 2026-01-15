@@ -38,6 +38,7 @@ import CustomerDetail from "./pages/AdminPages/CustomerDetail";
 import CustomerList from "./pages/AdminPages/CustomerList";
 import ApplyJobPage from "./pages/ApplyJobPage";
 import ApplicantsList from "./pages/AdminPages/ApplicantsList";
+import AdminSettings from "./pages/AdminPages/AdminSettings";
 
 function App() {
   return (
@@ -127,6 +128,16 @@ function App() {
                 </AdminProtectedRoute>
               }
             />
+
+            <Route 
+  path="/admin/settings" 
+  element={
+    <AdminProtectedRoute>
+      <AdminSettings />
+    </AdminProtectedRoute>
+  } 
+/>
+
             <Route path="/admin/applications" element={<AdminProtectedRoute><ApplicantsList /></AdminProtectedRoute>}></Route>
             {/* ✅ CATCH ALL - REDIRECT TO HOME */}
             <Route path="*" element={<Navigate to="/" replace />} />
