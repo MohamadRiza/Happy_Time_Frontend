@@ -116,7 +116,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-black text-white sticky top-0 z-50 relative">
+    <nav className="bg-black/90 text-white sticky top-0 z-50 relative">
       {/* Gold lighting effect - subtle gradient shadow */}
       <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent"></div>
       
@@ -284,7 +284,7 @@ const Navbar = () => {
 
       {/* Mobile Menu - HAMBURGER MENU (without customer items) */}
       {isMenuOpen && (
-        <div className="md:hidden bg-black border-t border-gray-800">
+        <div className="md:hidden bg-black/40 border-t border-gray-800">
           <div className="px-6 py-4 space-y-3">
             {menuItems.map((item) => {
               const path = item === "Home" ? "/" : `/${item.toLowerCase()}`;
@@ -346,7 +346,7 @@ const Navbar = () => {
 
       {/* ✅ MOBILE BOTTOM NAVIGATION FOR LOGGED-IN CUSTOMERS */}
       {authType === 'customer' && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900/90 backdrop-blur border-t border-gray-800 z-40">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur border-t border-gray-800 z-40 bg-gradient-to-br from-gold/20 via-black/50 to-black/80">
           <div className="flex justify-around items-center py-3 px-2">
             <Link
               to="/account"

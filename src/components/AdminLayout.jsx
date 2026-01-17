@@ -3,7 +3,7 @@ import React from 'react';
 import { logout } from '../utils/auth';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 
-// SVG Icons (professional, consistent, scalable)
+// SVG Icons
 const DashboardIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
     <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
@@ -16,9 +16,17 @@ const ProductsIcon = () => (
   </svg>
 );
 
-const VacanciesIcon = () => (
+const CustomersIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path fillRule="evenodd" d="M12.636 11.892a1 1 0 01.264.708v1.75a1 1 0 01-1 1H3a1 1 0 01-1-1v-1.75a1 1 0 01.264-.708l2.44-2.88A9.97 9.97 0 0110 3c1.94 0 3.79.66 5.36 1.892l2.44 2.88zM15 12a1 1 0 11-2 0 1 1 0 012 0z" clipRule="evenodd" />
+  </svg>
+);
+
+const OrdersIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M3 4a1 1 0 000 2h1.465a1 1 0 01.93.57l1.07 2.139a1 1 0 001.465.465l2.139-1.07a1 1 0 01.93.57L11.5 9H16a1 1 0 000-2H9.5a1 1 0 01-.93-.57l-1.07-2.139a1 1 0 00-1.465-.465L4.4 5.57A1 1 0 013.465 5H3z" />
+    <path d="M14 13a2 2 0 100-4 2 2 0 000 4z" />
   </svg>
 );
 
@@ -28,10 +36,9 @@ const MessagesIcon = () => (
   </svg>
 );
 
-const CustomersIcon = () => (
+const VacanciesIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path fillRule="evenodd" d="M12.636 11.892a1 1 0 01.264.708v1.75a1 1 0 01-1 1H3a1 1 0 01-1-1v-1.75a1 1 0 01.264-.708l2.44-2.88A9.97 9.97 0 0110 3c1.94 0 3.79.66 5.36 1.892l2.44 2.88zM15 12a1 1 0 11-2 0 1 1 0 012 0z" clipRule="evenodd" />
+    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
   </svg>
 );
 
@@ -62,11 +69,12 @@ const AdminLayout = ({ children, title = "Admin Dashboard" }) => {
     navigate('/admin/login');
   };
 
-  // Reordered logically: Dashboard → Core Data → Operations → HR → Settings
+  // Updated nav order: Dashboard → Products → Customers → Orders → Messages → HR → Settings
   const navItems = [
     { name: 'Dashboard', icon: <DashboardIcon />, path: '/admin/dashboard' },
     { name: 'Products', icon: <ProductsIcon />, path: '/admin/products' },
     { name: 'Customers', icon: <CustomersIcon />, path: '/admin/customers' },
+    { name: 'Orders', icon: <OrdersIcon />, path: '/admin/orders' }, // ✅ Now with proper SVG
     { name: 'Messages', icon: <MessagesIcon />, path: '/admin/messages' },
     { name: 'Vacancies', icon: <VacanciesIcon />, path: '/admin/vacancies' },
     { name: 'Applications', icon: <ApplicationsIcon />, path: '/admin/applications' },
@@ -82,7 +90,7 @@ const AdminLayout = ({ children, title = "Admin Dashboard" }) => {
           <div className="flex items-center space-x-3">
             <div className="bg-gold/10 p-2 rounded-lg">
               <img
-                src="/logo.png" // 🔴 Ensure this path is correct
+                src="/logo.png"
                 alt="Happy Time"
                 className="h-8 w-auto object-contain"
               />
@@ -114,7 +122,6 @@ const AdminLayout = ({ children, title = "Admin Dashboard" }) => {
           ))}
         </nav>
 
-        {/* Spacer */}
         <div className="py-4"></div>
       </div>
 

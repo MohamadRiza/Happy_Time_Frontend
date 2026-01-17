@@ -39,6 +39,8 @@ import CustomerList from "./pages/AdminPages/CustomerList";
 import ApplyJobPage from "./pages/ApplyJobPage";
 import ApplicantsList from "./pages/AdminPages/ApplicantsList";
 import AdminSettings from "./pages/AdminPages/AdminSettings";
+import CustomerOrders from "./pages/CustomerOrders";
+import OrdersList from "./pages/AdminPages/OrdersList";
 
 function App() {
   return (
@@ -67,6 +69,7 @@ function App() {
                 </CustomerProtectedRoute>
               }
             />
+            <Route path="/orders" element={<CustomerProtectedRoute><CustomerOrders /></CustomerProtectedRoute>} />
             // In your App.jsx routes
             <Route
               path="/cart"
@@ -137,6 +140,8 @@ function App() {
     </AdminProtectedRoute>
   } 
 />
+
+<Route path="/admin/orders" element={<AdminProtectedRoute><OrdersList /></AdminProtectedRoute>} />
 
             <Route path="/admin/applications" element={<AdminProtectedRoute><ApplicantsList /></AdminProtectedRoute>}></Route>
             {/* ✅ CATCH ALL - REDIRECT TO HOME */}
