@@ -9,7 +9,9 @@ const AdminDashboard = () => {
     totalProducts: 0,
     openVacancies: 0,
     newMessages: 0,
-    customers: 0
+    customers: 0,
+    pendingOrders: 0,      // ✅ NEW: Pending orders
+    jobApplicants: 0       // ✅ NEW: Job applicants
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -68,6 +70,40 @@ const AdminDashboard = () => {
         console.warn('Customers API not available:', customersError);
       }
 
+      // ✅ FETCH PENDING ORDERS COUNT
+      let pendingOrdersCount = 0;
+      try {
+        const ordersRes = await fetch(`${API_URL}/api/admin/orders`, {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        });
+        const ordersData = await ordersRes.json();
+        
+        if (ordersData.success) {
+          pendingOrdersCount = ordersData.orders.filter(order => 
+            order.status === 'pending_payment' || 
+            order.status === 'processing' ||
+            order.status === 'confirmed'
+          ).length;
+        }
+      } catch (ordersError) {
+        console.warn('Orders API not available:', ordersError);
+      }
+
+      // ✅ FETCH JOB APPLICANTS COUNT
+      let jobApplicantsCount = 0;
+      try {
+        const applicationsRes = await fetch(`${API_URL}/api/admin/applications`, {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        });
+        const applicationsData = await applicationsRes.json();
+        
+        if (applicationsData.success) {
+          jobApplicantsCount = applicationsData.data.length || 0;
+        }
+      } catch (applicationsError) {
+        console.warn('Applications API not available:', applicationsError);
+      }
+
       // ✅ SAFE MESSAGES FETCH
       let newMessages = 0;
       try {
@@ -94,7 +130,9 @@ const AdminDashboard = () => {
         totalProducts,
         openVacancies,
         newMessages,
-        customers: customersCount
+        customers: customersCount,
+        pendingOrders: pendingOrdersCount,    // ✅ NEW STAT
+        jobApplicants: jobApplicantsCount    // ✅ NEW STAT
       });
 
       // Build recent activity
@@ -129,7 +167,57 @@ const AdminDashboard = () => {
         activity.push(...recentVacancies);
       }
 
-      // ✅ Add recent customers
+      // ✅ Add recent orders
+      if (pendingOrdersCount > 0) {
+        try {
+          const recentOrdersRes = await fetch(`${API_URL}/api/admin/orders?page=1&limit=2`, {
+            headers: { Authorization: `Bearer ${getToken()}` }
+          });
+          const recentOrdersData = await recentOrdersRes.json();
+          
+          if (recentOrdersData.success) {
+            const recentOrders = (recentOrdersData.orders || [])
+              .slice(0, 2)
+              .map(order => ({
+                type: 'order',
+                message: `New order placed: #${order._id.substring(order._id.length - 6)}`,
+                time: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Unknown',
+                icon: '📦',
+                color: 'text-orange-400'
+              }));
+            activity.push(...recentOrders);
+          }
+        } catch (ordersError) {
+          console.warn('Recent orders fetch failed:', ordersError);
+        }
+      }
+
+      // ✅ Add recent job applicants
+      if (jobApplicantsCount > 0) {
+        try {
+          const recentApplicationsRes = await fetch(`${API_URL}/api/admin/applications?page=1&limit=2`, {
+            headers: { Authorization: `Bearer ${getToken()}` }
+          });
+          const recentApplicationsData = await recentApplicationsRes.json();
+          
+          if (recentApplicationsData.success) {
+            const recentApplications = (recentApplicationsData.data || [])
+              .slice(0, 2)
+              .map(application => ({
+                type: 'application',
+                message: `New job application: ${application.fullName}`,
+                time: application.createdAt ? new Date(application.createdAt).toLocaleDateString() : 'Unknown',
+                icon: '📋',
+                color: 'text-cyan-400'
+              }));
+            activity.push(...recentApplications);
+          }
+        } catch (applicationsError) {
+          console.warn('Recent applications fetch failed:', applicationsError);
+        }
+      }
+
+      // Add recent customers
       if (customersCount > 0) {
         try {
           const recentCustomersRes = await fetch(`${API_URL}/api/admin/customers?page=1&limit=2`, {
@@ -178,14 +266,14 @@ const AdminDashboard = () => {
         console.warn('Recent messages fetch failed:', messagesError);
       }
 
-      // Sort by time (newest first) and limit to 6 items
+      // Sort by time (newest first) and limit to 8 items
       const sortedActivity = activity
         .sort((a, b) => {
           const dateA = new Date(a.time);
           const dateB = new Date(b.time);
           return isNaN(dateB) ? -1 : isNaN(dateA) ? 1 : dateB - dateA;
         })
-        .slice(0, 6);
+        .slice(0, 8);
 
       setRecentActivity(sortedActivity);
 
@@ -235,42 +323,55 @@ const AdminDashboard = () => {
 
   return (
     <AdminLayout title="Admin Dashboard">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Stats Grid - Now 3 rows for better organization */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
         {[
           { 
             title: 'Total Products', 
             value: stats.totalProducts, 
             icon: '⌚', 
-            color: 'text-gold' 
+            color: 'text-gold',
+            link: '/admin/products'
           },
           { 
             title: 'Open Vacancies', 
             value: stats.openVacancies, 
             icon: '👥', 
-            color: 'text-blue-400' 
+            color: 'text-blue-400',
+            link: '/admin/vacancies'
           },
           { 
-            title: 'New Messages', 
-            value: stats.newMessages, 
-            icon: '✉️', 
-            color: 'text-emerald-400' 
+            title: 'Pending Orders',     // ✅ NEW CARD
+            value: stats.pendingOrders, 
+            icon: '📦', 
+            color: 'text-orange-400',
+            link: '/admin/orders'
+          },
+          { 
+            title: 'Job Applicants',     // ✅ NEW CARD
+            value: stats.jobApplicants, 
+            icon: '📋', 
+            color: 'text-cyan-400',
+            link: '/admin/applicants'
           },
           { 
             title: 'Customers', 
             value: stats.customers, 
             icon: '👤', 
-            color: 'text-purple-400'
+            color: 'text-purple-400',
+            link: '/admin/customers'
+          },
+          { 
+            title: 'New Messages', 
+            value: stats.newMessages, 
+            icon: '✉️', 
+            color: 'text-emerald-400',
+            link: '/admin/messages'
           }
         ].map((card, idx) => (
           <Link
             key={idx}
-            to={
-              card.title === 'Customers' ? '/admin/customers' :
-              card.title === 'Total Products' ? '/admin/products' :
-              card.title === 'Open Vacancies' ? '/admin/vacancies' :
-              '/admin/messages'
-            }
+            to={card.link}
             className="bg-gradient-to-br from-gray-900 to-black border border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl hover:border-gold transition-all duration-300 cursor-pointer group"
           >
             <div className={`text-3xl mb-3 ${card.color} group-hover:scale-110 transition-transform`}>
@@ -298,6 +399,8 @@ const AdminDashboard = () => {
                   activity.type === 'customer' ? `/admin/customers` :
                   activity.type === 'product' ? `/admin/products` :
                   activity.type === 'vacancy' ? `/admin/vacancies` :
+                  activity.type === 'order' ? `/admin/orders` :           // ✅ NEW LINK
+                  activity.type === 'application' ? `/admin/applications` :  // ✅ NEW LINK
                   '/admin/messages'
                 }
                 className="flex items-start pb-4 border-b border-gray-800/50 last:border-0 last:pb-0 hover:bg-gray-800/30 p-2 rounded-lg transition-colors cursor-pointer"
