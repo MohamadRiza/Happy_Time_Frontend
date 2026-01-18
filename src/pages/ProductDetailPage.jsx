@@ -1,13 +1,33 @@
 // src/pages/ProductDetailPage.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import ScrollToTop from '../components/ScrollToTop';
-// ✅ MAKE SURE THESE IMPORTS ARE CORRECT
 import { 
   isCustomerAuthenticated, 
-  getCustomer,
-  getCustomerToken // ✅ Added this import
+  getCustomerToken 
 } from '../utils/auth';
+
+const Toast = ({ message, isVisible, onClose }) => {
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(onClose, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, onClose]);
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50">
+      <div className="bg-gold text-black px-5 py-3 rounded-xl shadow-lg font-medium flex items-center gap-2 animate-fade-in-up">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+        </svg>
+        {message}
+      </div>
+    </div>
+  );
+};
 
 const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
@@ -15,20 +35,14 @@ const ProductDetailPage = () => {
   const [error, setError] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [toastMessage, setToastMessage] = useState('');
   const [mainImageIndex, setMainImageIndex] = useState(0);
-  const videoRef = useRef(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
 
-  // ✅ GET ROUTER HOOKS
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  
-  // ✅ API URL
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  // Fetch product details
   const fetchProduct = async () => {
     try {
       const res = await fetch(`${API_URL}/api/products/${id}`);
@@ -49,7 +63,6 @@ const ProductDetailPage = () => {
     }
   };
 
-  // Fetch related products
   const fetchRelatedProducts = async () => {
     try {
       const res = await fetch(`${API_URL}/api/products`);
@@ -73,25 +86,10 @@ const ProductDetailPage = () => {
     }
   }, [id]);
 
-  const handleThumbnailClick = (index) => {
-    setMainImageIndex(index);
-  };
-
-  // ✅ SERVER-SIDE ADD TO CART FUNCTION
   const addToCart = async () => {
-    // ✅ DEBUG: Add console log to verify function is called
-    console.log('Add to Cart clicked!');
+    if (!product || product.price === null || product.price === undefined) return;
     
-    if (!product || product.price === null || product.price === undefined) {
-      console.log('Invalid product or price');
-      return;
-    }
-    
-    // ✅ Check authentication
     if (!isCustomerAuthenticated()) {
-      console.log('User not authenticated - redirecting to login');
-      
-      // Store pending item
       const pendingItem = {
         _id: product._id,
         title: product.title,
@@ -112,10 +110,7 @@ const ProductDetailPage = () => {
     }
 
     try {
-      // ✅ Get customer token for API authentication
       const token = getCustomerToken();
-      
-      // ✅ Make API call to server
       const response = await fetch(`${API_URL}/api/cart`, {
         method: 'POST',
         headers: {
@@ -132,20 +127,12 @@ const ProductDetailPage = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Success feedback
-        setSuccessMessage('Added to cart successfully!');
-        setTimeout(() => setSuccessMessage(''), 3000);
-        
-        // Update navbar cart count
+        setToastMessage('Added to cart successfully!');
         window.dispatchEvent(new CustomEvent('cartUpdated'));
-        
-        console.log('Item added to cart via API:', data.cart);
       } else {
         setError(data.message || 'Failed to add to cart');
-        console.error('API Error:', data);
       }
     } catch (err) {
-      console.error('Add to cart API error:', err);
       setError('Network error. Please try again.');
     }
   };
@@ -160,8 +147,7 @@ const ProductDetailPage = () => {
     switch(product?.gender) {
       case 'men': return 'Men';
       case 'women': return 'Women';
-      case 'boy': return 'Boy';
-      case 'girl': return 'Girl';
+      case 'kids': return 'Kids';
       default: return 'Unisex';
     }
   };
@@ -171,8 +157,7 @@ const ProductDetailPage = () => {
     switch(product?.gender) {
       case 'men': return 'bg-blue-900/30 text-blue-300';
       case 'women': return 'bg-pink-900/30 text-pink-300';
-      case 'boy': return 'bg-green-900/30 text-green-300';
-      case 'girl': return 'bg-purple-900/30 text-purple-300';
+      case 'kids': return 'bg-green-900/30 text-green-300';
       default: return 'bg-gray-800 text-gray-300';
     }
   };
@@ -219,16 +204,22 @@ const ProductDetailPage = () => {
   const isVideo = mainImageIndex >= (product.images?.length || 0) && product.video;
 
   return (
-    <div className="bg-black text-white min-h-screen">
+    <div className="bg-black text-white min-h-screen relative">
       <ScrollToTop />
       
+      <Toast 
+        message={toastMessage} 
+        isVisible={!!toastMessage} 
+        onClose={() => setToastMessage('')} 
+      />
+
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-6 sm:mb-8">
           <button
             onClick={handleBackToShop}
-            className="flex items-center text-gray-400 hover:text-gold transition text-sm"
+            className="flex items-center text-gray-400 hover:text-gold transition text-sm group"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 group-hover:-translate-x-0.5 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back to Collection
@@ -236,23 +227,21 @@ const ProductDetailPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          {/* Media Gallery */}
           <div>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden aspect-square flex items-center justify-center mb-4">
+            <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-2xl overflow-hidden aspect-square flex items-center justify-center mb-4">
               {isVideo ? (
-                <div className="w-full h-full">
-                  <video
-                    ref={videoRef}
-                    src={product.video}
-                    controls
-                    className="w-full h-full object-contain"
-                    onError={(e) => e.target.style.display = 'none'}
-                  />
-                </div>
+                <video
+                  src={product.video}
+                  controls
+                  className="w-full h-full object-contain"
+                  onError={(e) => e.target.style.display = 'none'}
+                />
               ) : (
                 <img
                   src={product.images?.[mainImageIndex] || ''}
                   alt={product.title}
-                  className="max-h-full max-w-full object-contain p-6"
+                  className="max-h-[85%] max-w-[85%] object-contain"
                   onError={(e) => e.target.style.display = 'none'}
                 />
               )}
@@ -266,15 +255,15 @@ const ProductDetailPage = () => {
                     <button
                       key={index}
                       onClick={() => setMainImageIndex(index)}
-                      className={`bg-gray-900 border rounded-lg overflow-hidden aspect-square flex items-center justify-center transition-all ${
+                      className={`bg-gray-900/40 backdrop-blur border rounded-lg overflow-hidden aspect-square flex items-center justify-center transition-all ${
                         mainImageIndex === index 
                           ? 'border-gold shadow-lg shadow-gold/20' 
                           : 'border-gray-800 hover:border-gray-600'
                       }`}
                     >
                       {isThumbVideo ? (
-                        <div className="flex items-center justify-center w-full h-full">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="flex items-center justify-center w-full h-full text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
@@ -283,7 +272,7 @@ const ProductDetailPage = () => {
                         <img
                           src={media}
                           alt={`Thumbnail ${index + 1}`}
-                          className="max-h-full max-w-full object-contain p-1"
+                          className="max-h-[80%] max-w-[80%] object-contain p-0.5"
                           onError={(e) => e.target.style.display = 'none'}
                         />
                       )}
@@ -294,19 +283,20 @@ const ProductDetailPage = () => {
             )}
           </div>
 
+          {/* Product Info */}
           <div className="flex flex-col">
             <div className="mb-6">
-              <p className="text-gold text-sm font-medium mb-2">{product.brand}</p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3">{product.title}</h1>
-              <div className="flex items-center text-gray-400 text-sm">
+              <p className="text-gold text-sm font-semibold tracking-wide mb-2">{product.brand}</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3 leading-tight">{product.title}</h1>
+              <div className="flex items-center text-gray-400 text-sm space-x-2">
                 <span>{getCategoryDisplay()}</span>
-                <span className="mx-2">•</span>
+                <span>•</span>
                 <span>{product.watchShape}</span>
               </div>
             </div>
 
             <div className="mb-8">
-              <div className="text-3xl sm:text-4xl font-bold text-white mb-2">
+              <div className="text-3xl sm:text-4xl font-bold text-white mb-4">
                 {formatPrice(product.price)}
               </div>
               
@@ -317,7 +307,7 @@ const ProductDetailPage = () => {
                   </p>
                   <button
                     onClick={() => navigate('/contact')}
-                    className="w-full sm:w-auto bg-gold text-black px-8 py-3 rounded-xl font-bold hover:bg-gold/90 transition"
+                    className="w-full sm:w-auto bg-gold text-black px-8 py-3 rounded-xl font-bold hover:bg-gold/90 transition shadow-lg shadow-gold/20"
                   >
                     Contact for Pricing
                   </button>
@@ -334,7 +324,7 @@ const ProductDetailPage = () => {
                             onClick={() => setSelectedColor(color)}
                             className={`px-4 py-2.5 rounded-lg text-sm font-medium transition ${
                               selectedColor === color
-                                ? 'bg-gold text-black'
+                                ? 'bg-gold text-black shadow-md'
                                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                             }`}
                           >
@@ -345,49 +335,33 @@ const ProductDetailPage = () => {
                     </div>
                   )}
 
-                  {product.price !== null && product.price !== undefined && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-3">Quantity</h3>
-                      <div className="flex items-center max-w-32">
-                        <button
-                          onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                          className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-l-lg text-white hover:bg-gray-700 transition flex items-center justify-center"
-                        >
-                          -
-                        </button>
-                        <span className="w-12 h-10 bg-black border-y border-gray-700 text-white flex items-center justify-center">
-                          {quantity}
-                        </span>
-                        <button
-                          onClick={() => setQuantity(prev => prev + 1)}
-                          className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-r-lg text-white hover:bg-gray-700 transition flex items-center justify-center"
-                        >
-                          +
-                        </button>
-                      </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-3">Quantity</h3>
+                    <div className="flex items-center max-w-32">
+                      <button
+                        onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                        className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-l-lg text-white hover:bg-gray-700 transition flex items-center justify-center"
+                      >
+                        −
+                      </button>
+                      <span className="w-12 h-10 bg-black border-y border-gray-700 text-white flex items-center justify-center">
+                        {quantity}
+                      </span>
+                      <button
+                        onClick={() => setQuantity(prev => prev + 1)}
+                        className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-r-lg text-white hover:bg-gray-700 transition flex items-center justify-center"
+                      >
+                        +
+                      </button>
                     </div>
-                  )}
+                  </div>
 
-                  {/* ✅ SERVER-SIDE CART BUTTON */}
-                  {product.price !== null && product.price !== undefined ? (
-                    <button
-                      onClick={addToCart} // ✅ NOW USES SERVER-SIDE FUNCTION
-                      className="w-full bg-gold text-black py-4 rounded-xl font-bold text-lg hover:bg-gold/90 transition"
-                    >
-                      Add to Cart
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => navigate('/contact')}
-                      className="w-full bg-gold text-black py-4 rounded-xl font-bold text-lg hover:bg-gold/90 transition"
-                    >
-                      Contact for Purchase
-                    </button>
-                  )}
-
-                  {successMessage && (
-                    <p className="text-green-400 text-center text-sm">{successMessage}</p>
-                  )}
+                  <button
+                    onClick={addToCart}
+                    className="w-full bg-gold text-black py-4 rounded-xl font-bold text-lg hover:bg-gold/90 transition shadow-lg shadow-gold/20"
+                  >
+                    Add to Cart
+                  </button>
                 </div>
               )}
             </div>
@@ -403,29 +377,58 @@ const ProductDetailPage = () => {
               <h2 className="text-xl font-semibold text-white mb-4">Specifications</h2>
               <div className="space-y-3">
                 {product.modelNumber && product.modelNumber !== 'N/A' && (
-                  <div className="flex justify-between pb-2 border-b border-gray-800">
+                  <div className="flex justify-between pb-2 border-b border-gray-800/50">
                     <span className="text-gray-400 text-sm">Model Number</span>
                     <span className="text-white text-sm">{product.modelNumber}</span>
                   </div>
                 )}
-                <div className="flex justify-between pb-2 border-b border-gray-800">
+                <div className="flex justify-between pb-2 border-b border-gray-800/50">
                   <span className="text-gray-400 text-sm">Brand</span>
                   <span className="text-white text-sm">{product.brand}</span>
                 </div>
-                <div className="flex justify-between pb-2 border-b border-gray-800">
+                <div className="flex justify-between pb-2 border-b border-gray-800/50">
                   <span className="text-gray-400 text-sm">Category</span>
-                  <span className={`text-sm ${getCategoryBadgeClass()}`}>
+                  <span className={`text-sm px-2 py-0.5 rounded ${getCategoryBadgeClass()}`}>
                     {getCategoryDisplay()}
                   </span>
                 </div>
-                <div className="flex justify-between pb-2 border-b border-gray-800">
+                <div className="flex justify-between pb-2 border-b border-gray-800/50">
                   <span className="text-gray-400 text-sm">Shape</span>
                   <span className="text-white text-sm">{product.watchShape}</span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-6 border-t border-gray-800 mt-auto">
+            {/* Return & Warranty */}
+            <div className="pt-6 border-t border-gray-800/50 mt-auto">
+              <div className="flex flex-col sm:flex-row gap-4 mb-5">
+                <div className="flex items-center gap-2 bg-black/40 border border-gray-800 rounded-lg px-4 py-2.5">
+                  <div className="bg-gold/20 p-1.5 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-medium">7-Day Returns</p>
+                    <p className="text-gray-400 text-xs">Hassle-free returns</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 bg-black/40 border border-gray-800 rounded-lg px-4 py-2.5">
+                  <div className="bg-gray-700 p-1.5 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <Link 
+                    to="/privacy" 
+                    className="text-white text-sm font-medium hover:text-gold transition"
+                  >
+                    Privacy Policy
+                  </Link>
+                </div>
+              </div>
+
               <h3 className="text-lg font-semibold text-white mb-3">Need Assistance?</h3>
               <p className="text-gray-400 text-sm mb-4">
                 Our specialists are available to provide personalized consultation 
@@ -433,10 +436,10 @@ const ProductDetailPage = () => {
               </p>
               <button
                 onClick={() => navigate('/contact')}
-                className="text-gold hover:text-white text-sm font-medium flex items-center"
+                className="text-gold hover:text-white text-sm font-medium flex items-center group"
               >
                 Contact Our Experts
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 group-hover:translate-x-0.5 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -444,40 +447,44 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
+        {/* ✅ REDESIGNED RELATED PRODUCTS */}
         {relatedProducts.length > 0 && (
-          <div className="mt-16 pt-8 border-t border-gray-800">
-            <h2 className="text-2xl font-bold text-white mb-6">
+          <div className="mt-16 pt-8 border-t border-gray-800/50">
+            <h2 className="text-2xl font-bold text-white mb-6 text-center">
               {product.productType === 'wall_clock' 
                 ? 'You May Also Like Wall Clocks' 
                 : 'You May Also Like Watches'}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {relatedProducts.map((relatedProduct) => (
                 <div
                   key={relatedProduct._id}
-                  className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-gold transition-all cursor-pointer"
+                  className="group cursor-pointer"
                   onClick={() => navigate(`/shop/${relatedProduct._id}`)}
                 >
-                  {relatedProduct.images?.[0] ? (
-                    <div className="h-48 overflow-hidden">
+                  {/* Image Container - Mobile Optimized */}
+                  <div className="aspect-square bg-gray-900/40 border border-gray-800 rounded-xl overflow-hidden mb-3 transition-all hover:border-gold">
+                    {relatedProduct.images?.[0] ? (
                       <img
                         src={relatedProduct.images[0]}
                         alt={relatedProduct.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
                         onError={(e) => e.target.style.display = 'none'}
                       />
-                    </div>
-                  ) : (
-                    <div className="h-48 flex items-center justify-center bg-gray-800">
-                      <span className="text-gray-500">No Image</span>
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <h3 className="text-lg font-bold text-white line-clamp-1 mb-1">
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-600 text-sm">
+                        No Image
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Product Info */}
+                  <div className="text-center">
+                    <h3 className="text-white text-sm font-semibold line-clamp-1 mb-1">
                       {relatedProduct.title}
                     </h3>
-                    <span className="text-gold text-xs">{relatedProduct.brand}</span>
-                    <p className="text-gray-400 text-sm mt-2">
+                    <p className="text-gray-400 text-xs mb-1">{relatedProduct.brand}</p>
+                    <p className="text-gold text-sm font-medium">
                       {formatPrice(relatedProduct.price)}
                     </p>
                   </div>

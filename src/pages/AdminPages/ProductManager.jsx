@@ -1,5 +1,5 @@
 // src/pages/AdminPages/ProductManager.jsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getToken } from '../../utils/auth';
 
@@ -53,13 +53,12 @@ const ProductManager = () => {
     'Round', 'Square', 'Rectangular', 'Oval', 'Tonneau', 'Other'
   ];
   
-  // ✅ UPDATED: Added Unisex option
+  // ✅ UPDATED: Replaced Boy/Girl with Kids
   const wristWatchGenders = [
     { value: 'men', label: 'Men' },
     { value: 'women', label: 'Women' },
-    { value: 'unisex', label: 'Unisex' }, // ✅ ADDED UNISEX
-    { value: 'boy', label: 'Boy' },
-    { value: 'girl', label: 'Girl' }
+    { value: 'unisex', label: 'Unisex' },
+    { value: 'kids', label: 'Kids' } // ✅ REPLACED BOY/GIRL WITH KIDS
   ];
   
   const productTypes = [
@@ -68,14 +67,13 @@ const ProductManager = () => {
     { value: 'wall_clock', label: 'Wall Clock' }
   ];
   
-  // ✅ UPDATED: Added Unisex option
+  // ✅ UPDATED: Replaced Boy/Girl with Kids
   const genderOptions = [
     { value: 'all', label: 'All Genders' },
     { value: 'men', label: 'Men' },
     { value: 'women', label: 'Women' },
-    { value: 'unisex', label: 'Unisex' }, // ✅ ADDED UNISEX
-    { value: 'boy', label: 'Boy' },
-    { value: 'girl', label: 'Girl' }
+    { value: 'unisex', label: 'Unisex' },
+    { value: 'kids', label: 'Kids' } // ✅ REPLACED BOY/GIRL WITH KIDS
   ];
   
   const featuredOptions = [
@@ -183,8 +181,8 @@ const ProductManager = () => {
     if (productType === 'wall_clock') {
       gender = '';
     } else {
-      // ✅ Handle unisex in validation
-      if (!['men', 'women', 'unisex', 'boy', 'girl'].includes(gender)) {
+      // ✅ Handle kids in validation
+      if (!['men', 'women', 'unisex', 'kids'].includes(gender)) {
         gender = 'men';
       }
     }
@@ -382,10 +380,12 @@ const ProductManager = () => {
     const colors = isCustomColor ? 'Other' : colorCombo;
     const customColors = isCustomColor ? colorCombo : '';
 
-    // ✅ Handle unisex gender
-    const genderValue = product.productType === 'wall_clock' 
-      ? '' 
-      : (product.gender || 'men');
+    // ✅ Handle kids gender
+    let genderValue = product.gender || 'men';
+    // Convert old boy/girl values to kids if they exist
+    if (genderValue === 'boy' || genderValue === 'girl') {
+      genderValue = 'kids';
+    }
 
     setFormData({
       title: product.title,
@@ -395,7 +395,7 @@ const ProductManager = () => {
       price: product.price?.toString() || '',
       modelNumber: product.modelNumber || '',
       watchShape: product.watchShape,
-      gender: genderValue, // ✅ Now includes unisex
+      gender: genderValue, // ✅ Now uses kids instead of boy/girl
       productType: product.productType || 'watch',
       colors,
       customColors,
@@ -425,7 +425,7 @@ const ProductManager = () => {
     }
   };
 
-  // ✅ UPDATED: Handle wall clocks and unisex properly
+  // ✅ UPDATED: Handle wall clocks and kids properly
   const getProductCategory = (product) => {
     if (product.productType === 'wall_clock') {
       return 'Wall Clock';
@@ -434,16 +434,15 @@ const ProductManager = () => {
       switch(product.gender) {
         case 'men': return 'Men';
         case 'women': return 'Women';
-        case 'unisex': return 'Unisex'; // ✅ ADDED UNISEX
-        case 'boy': return 'Boy';
-        case 'girl': return 'Girl';
-        default: return 'Unisex';
+        case 'unisex': return 'Unisex';
+        case 'kids': return 'Kids'; // ✅ KIDS CATEGORY
+        default: return 'N/A';
       }
     }
     return 'Product';
   };
 
-  // ✅ UPDATED: Handle unisex badge class
+  // ✅ UPDATED: Handle kids badge class
   const getCategoryBadgeClass = (product) => {
     if (product.productType === 'wall_clock') {
       return 'bg-amber-900/30 text-amber-300';
@@ -451,9 +450,8 @@ const ProductManager = () => {
     switch(product.gender) {
       case 'men': return 'bg-blue-900/30 text-blue-300';
       case 'women': return 'bg-pink-900/30 text-pink-300';
-      case 'unisex': return 'bg-gray-800 text-gray-300'; // ✅ UNISEX USES GRAY
-      case 'boy': return 'bg-green-900/30 text-green-300';
-      case 'girl': return 'bg-purple-900/30 text-purple-300';
+      case 'unisex': return 'bg-gray-800 text-gray-300';
+      case 'kids': return 'bg-green-900/30 text-green-300'; // ✅ KIDS USES GREEN
       default: return 'bg-gray-800 text-gray-300';
     }
   };
@@ -493,100 +491,102 @@ const ProductManager = () => {
         </button>
       </div>
 
-      {/* ✅ SEARCH & FILTER SECTION */}
-      <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 mb-8 backdrop-blur-sm">
-        <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {/* Search Input */}
-          <div className="lg:col-span-2 xl:col-span-3">
-            <label className="block text-gray-400 mb-2 text-sm">Search Products</label>
-            <input
-              type="text"
-              placeholder="Search by name, brand, or model..."
-              value={searchFilters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
-            />
-          </div>
-          
-          {/* Brand Filter - NOW DYNAMIC */}
-          <div>
-            <label className="block text-gray-400 mb-2 text-sm">Brand</label>
-            <select
-              value={searchFilters.brand}
-              onChange={(e) => handleFilterChange('brand', e.target.value)}
-              className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-              style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
-            >
-              <option value="all" className="bg-gray-800 text-white">All Brands</option>
-              {availableBrands.map(brand => (
-                <option key={brand} value={brand} className="bg-gray-800 text-white">{brand}</option>
-              ))}
-            </select>
-          </div>
-          
-          {/* Product Type Filter */}
-          <div>
-            <label className="block text-gray-400 mb-2 text-sm">Type</label>
-            <select
-              value={searchFilters.productType}
-              onChange={(e) => handleFilterChange('productType', e.target.value)}
-              className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-              style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
-            >
-              {productTypes.map(type => (
-                <option key={type.value} value={type.value} className="bg-gray-800 text-white">{type.label}</option>
-              ))}
-            </select>
-          </div>
-          
-          {/* Gender Filter */}
-          <div>
-            <label className="block text-gray-400 mb-2 text-sm">Gender</label>
-            <select
-              value={searchFilters.gender}
-              onChange={(e) => handleFilterChange('gender', e.target.value)}
-              className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-              style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
-            >
-              {genderOptions.map(option => (
-                <option key={option.value} value={option.value} className="bg-gray-800 text-white">{option.label}</option>
-              ))}
-            </select>
-          </div>
-          
-          {/* Featured Filter */}
-          <div>
-            <label className="block text-gray-400 mb-2 text-sm">Featured</label>
-            <select
-              value={searchFilters.featured}
-              onChange={(e) => handleFilterChange('featured', e.target.value)}
-              className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-              style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
-            >
-              {featuredOptions.map(option => (
-                <option key={option.value} value={option.value} className="bg-gray-800 text-white">{option.label}</option>
-              ))}
-            </select>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="flex gap-2 mt-auto">
-            <button
-              type="submit"
-              className="px-4 py-2 bg-gold text-black rounded-lg font-medium hover:bg-gold/90 transition whitespace-nowrap"
-            >
-              Apply
-            </button>
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="px-4 py-2 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition whitespace-nowrap"
-            >
-              Reset
-            </button>
-          </div>
-        </form>
-      </div>
+      {/* ✅ SEARCH & FILTER SECTION — HIDDEN WHEN FORM IS OPEN */}
+      {!showForm && (
+        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 mb-8 backdrop-blur-sm">
+          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {/* Search Input */}
+            <div className="lg:col-span-2 xl:col-span-3">
+              <label className="block text-gray-400 mb-2 text-sm">Search Products</label>
+              <input
+                type="text"
+                placeholder="Search by name, brand, or model..."
+                value={searchFilters.search}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
+                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
+              />
+            </div>
+            
+            {/* Brand Filter - NOW DYNAMIC */}
+            <div>
+              <label className="block text-gray-400 mb-2 text-sm">Brand</label>
+              <select
+                value={searchFilters.brand}
+                onChange={(e) => handleFilterChange('brand', e.target.value)}
+                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+                style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+              >
+                <option value="all" className="bg-gray-800 text-white">All Brands</option>
+                {availableBrands.map(brand => (
+                  <option key={brand} value={brand} className="bg-gray-800 text-white">{brand}</option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Product Type Filter */}
+            <div>
+              <label className="block text-gray-400 mb-2 text-sm">Type</label>
+              <select
+                value={searchFilters.productType}
+                onChange={(e) => handleFilterChange('productType', e.target.value)}
+                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+                style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+              >
+                {productTypes.map(type => (
+                  <option key={type.value} value={type.value} className="bg-gray-800 text-white">{type.label}</option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Gender Filter */}
+            <div>
+              <label className="block text-gray-400 mb-2 text-sm">Gender</label>
+              <select
+                value={searchFilters.gender}
+                onChange={(e) => handleFilterChange('gender', e.target.value)}
+                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+                style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+              >
+                {genderOptions.map(option => (
+                  <option key={option.value} value={option.value} className="bg-gray-800 text-white">{option.label}</option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Featured Filter */}
+            <div>
+              <label className="block text-gray-400 mb-2 text-sm">Featured</label>
+              <select
+                value={searchFilters.featured}
+                onChange={(e) => handleFilterChange('featured', e.target.value)}
+                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+                style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+              >
+                {featuredOptions.map(option => (
+                  <option key={option.value} value={option.value} className="bg-gray-800 text-white">{option.label}</option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex gap-2 mt-auto">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-gold text-black rounded-lg font-medium hover:bg-gold/90 transition whitespace-nowrap"
+              >
+                Apply
+              </button>
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="px-4 py-2 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition whitespace-nowrap"
+              >
+                Reset
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {error && <p className="text-red-400 mb-4">{error}</p>}
 
@@ -918,7 +918,7 @@ const ProductManager = () => {
                 <p className="text-gray-400 text-sm mb-3 line-clamp-2">{product.description}</p>
                 
                 <div className="flex flex-wrap gap-1 mb-3">
-                  <span className="bg-gray-800 text-gray-300 text-xs px-2 py-1 rounded">
+                  <span className="bg-gray-80 text-gray-300 text-xs px-2 py-1 rounded">
                     {product.colors?.[0] || 'N/A'}
                   </span>
                   <span className={`text-xs px-2 py-1 rounded ${getCategoryBadgeClass(product)}`}>

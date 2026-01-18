@@ -19,7 +19,7 @@ const categories = [
     id: 'kids',
     name: 'Kids',
     description: 'Fun, durable watches for young explorers',
-    image: '/images/kids-watch.png',
+    image: '/Watch3.png',
   },
   {
     id: 'wall_clock',
