@@ -20,6 +20,15 @@ const CartPage = () => {
   const [receiptFile, setReceiptFile] = useState(null);
   const [receiptPreview, setReceiptPreview] = useState('');
   
+  // Customer info
+  const [customerInfo, setCustomerInfo] = useState(null);
+  
+  // Confirmation state
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [addressConfirmed, setAddressConfirmed] = useState(false);
+  const [receiptConfirmed, setReceiptConfirmed] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  
   // Bank account info
   const bankInfo = {
     accountNumber: '1234567890',
@@ -38,15 +47,27 @@ const CartPage = () => {
 
     try {
       const token = getCustomerToken();
-      const res = await fetch(`${API_URL}/api/cart`, {
+      
+      // Fetch cart
+      const cartRes = await fetch(`${API_URL}/api/cart`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const data = await res.json();
+      const cartData = await cartRes.json();
 
-      if (data.success) {
-        setCartItems(data.cart || []);
+      // Fetch customer info
+      const customerRes = await fetch(`${API_URL}/api/customers/profile`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const customerData = await customerRes.json();
+
+      if (cartData.success) {
+        setCartItems(cartData.cart || []);
       } else {
-        setError(data.message || 'Failed to load cart');
+        setError(cartData.message || 'Failed to load cart');
+      }
+
+      if (customerData.success) {
+        setCustomerInfo(customerData.data);
       }
     } catch (err) {
       console.error(err);
@@ -135,7 +156,24 @@ const CartPage = () => {
       setReceiptFile(file);
       setReceiptPreview(URL.createObjectURL(file));
       setError('');
+      setReceiptConfirmed(false); // Reset confirmation when new file uploaded
     }
+  };
+
+  const validateConfirmation = () => {
+    if (!addressConfirmed) {
+      setError('Please confirm your delivery address is correct');
+      return false;
+    }
+    if (!receiptConfirmed) {
+      setError('Please confirm your payment receipt is correct');
+      return false;
+    }
+    if (!termsAccepted) {
+      setError('Please accept our Terms and Conditions');
+      return false;
+    }
+    return true;
   };
 
   const placeOrder = async () => {
@@ -146,6 +184,17 @@ const CartPage = () => {
 
     if (!receiptFile) {
       setError('Please upload a bank transfer receipt');
+      return;
+    }
+
+    if (!showConfirmation) {
+      // Show confirmation modal first
+      setShowConfirmation(true);
+      return;
+    }
+
+    // Validate confirmation checkboxes
+    if (!validateConfirmation()) {
       return;
     }
 
@@ -203,6 +252,17 @@ const CartPage = () => {
 
   const formatPrice = (p) =>
     p == null ? 'Contact for Price' : `LKR ${p.toLocaleString()}`;
+
+  const formatAddress = (addressObj) => {
+    if (!addressObj) return 'Address not provided';
+    const { address, city, province, country } = addressObj;
+    const parts = [];
+    if (address) parts.push(address);
+    if (city) parts.push(city);
+    if (province) parts.push(province);
+    if (country) parts.push(country);
+    return parts.join(', ') || 'Address not provided';
+  };
 
   if (loading) {
     return (
@@ -333,6 +393,19 @@ const CartPage = () => {
                 </div>
               </div>
 
+              {/* DELIVERY ADDRESS */}
+              <div className="mb-6 p-4 bg-purple-900/20 border border-purple-800 rounded-lg">
+                <h4 className="font-medium text-purple-300 mb-2">Delivery Address</h4>
+                <div className="text-sm text-gray-300 mb-3">
+                  {customerInfo ? formatAddress(customerInfo) : 'Loading address...'}
+                </div>
+                {!showConfirmation && (
+                  <p className="text-xs text-gray-500">
+                    Please ensure your delivery address is correct before placing the order.
+                  </p>
+                )}
+              </div>
+
               {/* BANK TRANSFER DETAILS */}
               <div className="mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
                 <h4 className="font-medium text-blue-300 mb-2">Bank Transfer Instructions</h4>
@@ -376,6 +449,51 @@ const CartPage = () => {
                 </div>
               </div>
 
+              {/* CONFIRMATION CHECKBOXES (Only shown when placing order) */}
+              {showConfirmation && (
+                <div className="mb-6 p-4 bg-gray-800/50 border border-gray-700 rounded-lg">
+                  <h4 className="font-medium text-white mb-4">Order Confirmation</h4>
+                  
+                  <div className="space-y-3">
+                    <label className="flex items-start cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={addressConfirmed}
+                        onChange={(e) => setAddressConfirmed(e.target.checked)}
+                        className="mt-1 mr-3 w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold"
+                      />
+                      <span className="text-sm">
+                        I confirm that my delivery address is correct and complete.
+                      </span>
+                    </label>
+                    
+                    <label className="flex items-start cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={receiptConfirmed}
+                        onChange={(e) => setReceiptConfirmed(e.target.checked)}
+                        className="mt-1 mr-3 w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold"
+                      />
+                      <span className="text-sm">
+                        I confirm that the payment receipt shows the correct amount and transaction details.
+                      </span>
+                    </label>
+                    
+                    <label className="flex items-start cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={termsAccepted}
+                        onChange={(e) => setTermsAccepted(e.target.checked)}
+                        className="mt-1 mr-3 w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold"
+                      />
+                      <span className="text-sm">
+                        I agree to the <a href="/terms" target="_blank" className="text-gold hover:underline">Terms of Service</a> and <a href="/privacy" target="_blank" className="text-gold hover:underline">Privacy Policy</a>.
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
               <button
                 onClick={placeOrder}
                 disabled={isProcessing}
@@ -385,7 +503,9 @@ const CartPage = () => {
                     : 'bg-gold text-black hover:bg-gold/90'
                 }`}
               >
-                {isProcessing ? 'Processing...' : 'Place Order'}
+                {showConfirmation 
+                  ? (isProcessing ? 'Confirming Order...' : 'Confirm Order') 
+                  : 'Place Order'}
               </button>
               
               <p className="text-gray-500 text-xs mt-3 text-center">

@@ -1,5 +1,6 @@
 // src/pages/AdminPages/OrdersList.jsx
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // ✅ Added Link import
 import AdminLayout from '../../components/AdminLayout';
 import { getToken } from '../../utils/auth';
 
@@ -208,7 +209,17 @@ const OrdersList = () => {
                     <td className="py-4 px-6">
                       <div className="text-white">{order.items.length} items</div>
                       <div className="text-gray-400 text-sm">
-                        {order.items[0]?.productId?.title}
+                        {/* ✅ ADD LINK TO FIRST PRODUCT */}
+                        {order.items[0]?.productId?._id ? (
+                          <Link 
+                            to={`/shop/${order.items[0].productId._id}`}
+                            className="hover:text-gold transition-colors"
+                          >
+                            {order.items[0]?.productId?.title}
+                          </Link>
+                        ) : (
+                          order.items[0]?.productId?.title || 'Product'
+                        )}
                         {order.items.length > 1 && ` +${order.items.length - 1}`}
                       </div>
                     </td>
@@ -303,7 +314,13 @@ const OrdersList = () => {
                         </div>
                       )}
                       <div className="flex-1">
-                        <h5 className="font-medium text-white">{item.productId?.title}</h5>
+                        {/* ✅ ADD PRODUCT LINK */}
+                        <Link 
+                          to={`/shop/${item.productId?._id}`}
+                          className="font-medium text-white hover:text-gold transition-colors"
+                        >
+                          {item.productId?.title}
+                        </Link>
                         <p className="text-gray-400 text-sm">{item.productId?.brand}</p>
                         <p className="text-gray-400 text-sm">Color: {item.selectedColor}</p>
                         <div className="flex justify-between items-center mt-2">

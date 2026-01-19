@@ -7,7 +7,7 @@ const categories = [
     id: 'men',
     name: 'Men',
     description: 'Timeless elegance for the modern gentleman',
-    image: '/watch1.png', // ← your PNG
+    image: '/watch1.png',
   },
   {
     id: 'women',
@@ -25,17 +25,17 @@ const categories = [
     id: 'wall_clock',
     name: 'Wall Clocks',
     description: 'Statement timepieces for home & office',
-    image: '/images/wall-clock.png',
+    image: '/WC1.png',
   }
 ];
 
 const CategorySection = () => {
   return (
-    <section className="bg-black py-24 px-4 relative overflow-hidden">
-      {/* Ambient gold glow */}
+    <section className="bg-black py-28 px-4 relative overflow-hidden">
+      {/* Ambient glow */}
       <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-gold rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-amber-700 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-amber-700 rounded-full blur-3xl"></div>
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
@@ -50,40 +50,43 @@ const CategorySection = () => {
           </p>
         </div>
 
-        {/* Floating Watch Grid — NO CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-24 gap-x-8 justify-items-center">
+        {/* 3D Watch Display Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-20 gap-x-6 justify-items-center">
           {categories.map((category) => (
             <div
               key={category.id}
-              className="group flex flex-col items-center text-center max-w-xs"
+              className="group flex flex-col items-center text-center max-w-[220px]"
             >
-              {/* Floating 3D Watch Display */}
               <Link
                 to={`/shop?productType=${category.id === 'wall_clock' ? 'wall_clock' : 'watch'}${
                   category.id !== 'wall_clock' && category.id !== 'kids' ? `&gender=${category.id}` : ''
                 }`}
-                className="block mb-6"
+                className="block mb-8"
               >
+                {/* 3D Floating Watch Stand */}
                 <div className="relative">
-                  {/* Soft shadow for depth */}
-                  <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-48 h-16 bg-black/40 blur-2xl rounded-full"></div>
+                  {/* Glass base with reflection */}
+                  <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-40 h-2.5 bg-gradient-to-r from-transparent via-gray-700 to-transparent rounded-full opacity-40"></div>
                   
-                  {/* Your PNG watch — centered, scalable */}
-                  <img
-                    src={category.image}
-                    alt={`${category.name} Collection`}
-                    className="relative z-10 max-h-52 max-w-full object-contain drop-shadow-xl
-                              transition-transform duration-700 group-hover:scale-110"
-                    loading="lazy"
-                  />
+                  {/* Strong shadow for depth */}
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-48 h-16 bg-black/50 blur-2xl rounded-full"></div>
+
+                  {/* Watch with 3D tilt on hover */}
+                  <div className="relative z-10 transition-transform duration-700 group-hover:rotate-x-[-10deg] group-hover:rotate-y-[-5deg] group-hover:scale-110">
+                    <img
+                      src={category.image}
+                      alt={`${category.name} Collection`}
+                      className="max-h-56 max-w-full object-contain drop-shadow-2xl"
+                      loading="lazy"
+                    />
+                  </div>
                 </div>
               </Link>
 
-              {/* Text Content */}
               <h3 className="text-white text-2xl font-semibold mb-3 group-hover:text-gold transition-colors">
                 {category.name}
               </h3>
-              <p className="text-gray-400 text-sm leading-relaxed mb-5 max-w-xs">
+              <p className="text-gray-400 text-sm leading-relaxed mb-5">
                 {category.description}
               </p>
 
@@ -91,10 +94,9 @@ const CategorySection = () => {
                 to={`/shop?productType=${category.id === 'wall_clock' ? 'wall_clock' : 'watch'}${
                   category.id !== 'wall_clock' && category.id !== 'kids' ? `&gender=${category.id}` : ''
                 }`}
-                className="inline-flex items-center text-gold hover:text-yellow-300 text-sm font-medium 
-                          group-hover:gap-2 transition-all duration-300"
+                className="inline-flex items-center text-gold hover:text-yellow-300 text-sm font-medium group-hover:gap-2 transition-all duration-300"
               >
-                <span>Explore Collection</span>
+                <span>Explore</span>
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   className="h-4 w-4 transition-transform group-hover:translate-x-1" 
@@ -109,17 +111,15 @@ const CategorySection = () => {
           ))}
         </div>
 
-        {/* View All Button */}
-        <div className="text-center mt-20">
+        <div className="text-center mt-24">
           <Link
             to="/shop"
-            className="inline-flex items-center bg-gold text-black px-8 py-3.5 rounded-xl font-bold tracking-wide 
-                      hover:bg-gold/90 transition-all duration-300 group shadow-lg shadow-gold/20"
+            className="inline-flex items-center bg-gold text-black px-9 py-4 rounded-xl font-bold tracking-wide hover:bg-gold/90 transition-all duration-300 group shadow-xl shadow-gold/20"
           >
             <span>View All Collections</span>
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1" 
+              className="h-5 w-5 ml-2.5 transition-transform group-hover:translate-x-1" 
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"
