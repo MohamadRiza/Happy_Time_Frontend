@@ -1,6 +1,6 @@
 // src/pages/ShopPage.jsx
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom'; // ✅ Added useSearchParams
 import ScrollToTop from '../components/ScrollToTop';
 
 const ShopPage = () => {
@@ -13,15 +13,21 @@ const ShopPage = () => {
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
-  const [filters, setFilters] = useState({
-    productType: 'all',
-    gender: 'all',
-    brand: 'all',
-    shape: 'all',
-    minPrice: '',
-    maxPrice: '',
-    color: 'all',
-  });
+  // ✅ Use useSearchParams to read and update URL
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // ✅ Initialize filters from URL
+  const initialFilters = {
+    productType: searchParams.get('productType') || 'all',
+    gender: searchParams.get('gender') || 'all',
+    brand: searchParams.get('brand') || 'all',
+    shape: searchParams.get('shape') || 'all',
+    minPrice: searchParams.get('minPrice') || '',
+    maxPrice: searchParams.get('maxPrice') || '',
+    color: searchParams.get('color') || 'all',
+  };
+
+  const [filters, setFilters] = useState(initialFilters);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -79,6 +85,24 @@ const ShopPage = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  /* ✅ Sync filters → URL */
+  useEffect(() => {
+    const params = {};
+    
+    // Only add non-default values to keep URL clean
+    if (searchQuery) params.q = searchQuery;
+    if (filters.productType !== 'all') params.productType = filters.productType;
+    if (filters.gender !== 'all' && filters.productType !== 'wall_clock') params.gender = filters.gender;
+    if (filters.brand !== 'all') params.brand = filters.brand;
+    if (filters.shape !== 'all') params.shape = filters.shape;
+    if (filters.color !== 'all') params.color = filters.color;
+    if (filters.minPrice) params.minPrice = filters.minPrice;
+    if (filters.maxPrice) params.maxPrice = filters.maxPrice;
+    if (sortBy !== 'featured') params.sortBy = sortBy;
+
+    setSearchParams(params, { replace: true });
+  }, [filters, searchQuery, sortBy, setSearchParams]);
 
   /* -------------------- FILTER LOGIC -------------------- */
   useEffect(() => {
@@ -167,6 +191,7 @@ const ShopPage = () => {
     });
     setSearchQuery('');
     setSortBy('featured');
+    // URL will auto-update via useEffect
   };
 
   const handlePriceChange = (type, value) => {
