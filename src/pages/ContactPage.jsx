@@ -1,5 +1,7 @@
 // src/pages/ContactPage.jsx
 import React, { useState, useEffect } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import ScrollToTop from '../components/ScrollToTop';
 
 // ✅ All URLs and names cleaned - NO trailing spaces
@@ -51,13 +53,51 @@ const branches = [
   },
 ];
 
+// ✅ Country codes data
+const countryCodes = [
+  { code: '+94', name: 'Sri Lanka' },
+  { code: '+1', name: 'United States' },
+  { code: '+44', name: 'United Kingdom' },
+  { code: '+91', name: 'India' },
+  { code: '+971', name: 'United Arab Emirates' },
+  { code: '+86', name: 'China' },
+  { code: '+81', name: 'Japan' },
+  { code: '+49', name: 'Germany' },
+  { code: '+33', name: 'France' },
+  { code: '+39', name: 'Italy' },
+  { code: '+7', name: 'Russia' },
+  { code: '+55', name: 'Brazil' },
+  { code: '+61', name: 'Australia' },
+  { code: '+82', name: 'South Korea' },
+  { code: '+34', name: 'Spain' },
+  { code: '+31', name: 'Netherlands' },
+  { code: '+46', name: 'Sweden' },
+  { code: '+47', name: 'Norway' },
+  { code: '+45', name: 'Denmark' },
+  { code: '+358', name: 'Finland' },
+  { code: '+41', name: 'Switzerland' },
+  { code: '+43', name: 'Austria' },
+  { code: '+32', name: 'Belgium' },
+  { code: '+353', name: 'Ireland' },
+  { code: '+351', name: 'Portugal' },
+  { code: '+30', name: 'Greece' },
+  { code: '+48', name: 'Poland' },
+  { code: '+420', name: 'Czech Republic' },
+  { code: '+36', name: 'Hungary' },
+  { code: '+421', name: 'Slovakia' }
+].sort((a, b) => a.name.localeCompare(b.name));
+
 const ContactPage = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    email: '', 
+    phone: '', 
+    countryCode: '+94', // Default to Sri Lanka
+    message: '' 
+  });
   const [selectedBranchId, setSelectedBranchId] = useState(1);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [error, setError] = useState('');
 
   // ✅ Guaranteed to always have a valid branch
   const getSelectedBranch = () => {
@@ -67,48 +107,67 @@ const ContactPage = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
+    const { name, value } = e.target;
+    
+    if (name === 'phone') {
+      // ✅ Only allow digits and limit to 10 characters
+      const digitsOnly = value.replace(/\D/g, '');
+      const limitedDigits = digitsOnly.slice(0, 10);
+      setFormData({ ...formData, phone: limitedDigits });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    // ✅ Get branch FIRST
-    const selectedBranch = getSelectedBranch();
-    const branchName = selectedBranch.name.trim();
-
-    // ✅ Trim all values
+  const validateForm = () => {
+    // Trim all values
     const nameTrimmed = formData.name.trim();
     const emailTrimmed = formData.email.trim();
     const phoneTrimmed = formData.phone.trim();
     const messageTrimmed = formData.message.trim();
 
-    // ✅ Validate every single field
+    // Required fields validation
     if (!nameTrimmed) {
-      setError('Please enter your name.');
-      return;
+      toast.error('Please enter your name.');
+      return false;
     }
     if (!emailTrimmed) {
-      setError('Please enter your email.');
-      return;
+      toast.error('Please enter your email.');
+      return false;
     }
     if (!messageTrimmed) {
-      setError('Please enter your message.');
-      return;
+      toast.error('Please enter your message.');
+      return false;
     }
-    if (!branchName) {
-      setError('Please select a branch.');
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailTrimmed)) {
+      toast.error('Please enter a valid email address.');
+      return false;
+    }
+
+    // Phone validation (optional but if provided, must be 9-10 digits)
+    if (phoneTrimmed) {
+      if (phoneTrimmed.length < 9 || phoneTrimmed.length > 10) {
+        toast.error('Phone number must contain 9-10 digits.');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
       return;
     }
 
-    // ✅ Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(emailTrimmed)) {
-      setError('Please enter a valid email address.');
-      return;
-    }
+    // ✅ Get branch FIRST
+    const selectedBranch = getSelectedBranch();
+    const branchName = selectedBranch.name.trim();
 
     setSubmitting(true);
 
@@ -119,10 +178,10 @@ const ContactPage = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: nameTrimmed,
-          email: emailTrimmed,
-          phone: phoneTrimmed,
-          message: messageTrimmed,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim() ? `${formData.countryCode}${formData.phone.trim()}` : '',
+          message: formData.message.trim(),
           branch: branchName,
         }),
       });
@@ -130,37 +189,42 @@ const ContactPage = () => {
       const data = await response.json();
 
       if (data.success) {
-        setSubmitSuccess(true);
-        setFormData({ name: '', email: '', phone: '', message: '' });
-        setTimeout(() => setSubmitSuccess(false), 5000);
+        toast.success('Thank you! Your message has been sent successfully.');
+        setFormData({ name: '', email: '', phone: '', countryCode: '+94', message: '' });
       } else {
         // ✅ Show EXACT error from backend
         const errorMsg = 
           data.message || 
           (Array.isArray(data.errors) ? data.errors.join(', ') : 'Failed to send your message.');
-        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
       console.error('Submission error:', err);
-      setError('Network error. Please check your internet connection.');
+      toast.error('Network error. Please check your internet connection.');
     } finally {
       setSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    let timer;
-    if (submitSuccess) {
-      timer = setTimeout(() => setSubmitSuccess(false), 5000);
-    }
-    return () => clearTimeout(timer);
-  }, [submitSuccess]);
 
   const selectedBranch = getSelectedBranch();
 
   return (
     <div className="bg-black text-white min-h-screen font-sans">
       <ScrollToTop />
+      
+      {/* TOAST CONTAINER */}
+      <ToastContainer 
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       
       {/* HERO */}
       <div className="relative h-[70vh] md:h-[80vh]">
@@ -221,11 +285,6 @@ const ContactPage = () => {
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <h3 className="text-2xl font-bold text-white mb-6">Send a Message</h3>
               
-              {error && <p className="text-red-400 mb-4">{error}</p>}
-              {submitSuccess && (
-                <p className="text-green-400 mb-4">Thank you! Your message has been sent successfully.</p>
-              )}
-
               <form onSubmit={handleSubmit} className="space-y-5">
                 <input
                   type="text"
@@ -243,14 +302,38 @@ const ContactPage = () => {
                   onChange={handleChange}
                   className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
                 />
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="Phone (Optional)"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
-                />
+                
+                {/* ✅ PHONE WITH COUNTRY CODE AND STRICT VALIDATION */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="md:col-span-1">
+                    <label className="sr-only">Country Code</label>
+                    <select
+                      name="countryCode"
+                      value={formData.countryCode}
+                      onChange={handleChange}
+                      className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
+                    >
+                      {countryCodes.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.code} ({country.name})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="sr-only">Phone Number</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      placeholder="Phone (9-10 digits)"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      maxLength="10"
+                      className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
+                    />
+                  </div>
+                </div>
+                
                 <textarea
                   name="message"
                   rows="5"

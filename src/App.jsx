@@ -41,6 +41,8 @@ import ApplicantsList from "./pages/AdminPages/ApplicantsList";
 import AdminSettings from "./pages/AdminPages/AdminSettings";
 import CustomerOrders from "./pages/CustomerOrders";
 import OrdersList from "./pages/AdminPages/OrdersList";
+import ApplicationStatusCheck from "./pages/ApplicationStatusCheck";
+import ApplicationSuccess from "./pages/ApplicationSuccess";
 
 function App() {
   return (
@@ -140,6 +142,11 @@ function App() {
     </AdminProtectedRoute>
   } 
 />
+
+
+<Route path="/application-success" element={<ApplicationSuccess />} />
+<Route path="/application-status" element={<ApplicationStatusCheck />} />
+
 
 <Route path="/admin/orders" element={<AdminProtectedRoute><OrdersList /></AdminProtectedRoute>} />
 

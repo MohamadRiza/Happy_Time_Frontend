@@ -50,14 +50,12 @@ const ApplicantsList = () => {
       const data = await res.json();
       
       if (data.success) {
-        // Update local state
         setApplicants(prev => 
           prev.map(applicant => 
             applicant._id === id ? { ...applicant, status: newStatus } : applicant
           )
         );
         
-        // Close modal if open
         if (selectedApplicant && selectedApplicant._id === id) {
           setSelectedApplicant({ ...selectedApplicant, status: newStatus });
         }
@@ -81,15 +79,14 @@ const ApplicantsList = () => {
     return badges[status] || 'bg-gray-800 text-gray-300';
   };
 
-  const getStatusColor = (status) => {
-    const colors = {
-      pending: 'text-yellow-400',
-      reviewing: 'text-blue-400',
-      shortlisted: 'text-green-400',
-      rejected: 'text-red-400',
-      hired: 'text-purple-400'
-    };
-    return colors[status] || 'text-gray-400';
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const filteredApplicants = statusFilter === 'all' 
@@ -143,9 +140,9 @@ const ApplicantsList = () => {
               <thead className="border-b border-gray-800">
                 <tr>
                   <th className="text-left py-4 px-6 text-gray-400 font-medium text-sm uppercase">Applicant</th>
+                  <th className="text-left py-4 px-6 text-gray-400 font-medium text-sm uppercase">Contact</th>
                   <th className="text-left py-4 px-6 text-gray-400 font-medium text-sm uppercase">Position</th>
-                  <th className="text-left py-4 px-6 text-gray-400 font-medium text-sm uppercase">Experience</th>
-                  <th className="text-left py-4 px-6 text-gray-400 font-medium text-sm uppercase">Branch</th>
+                  <th className="text-left py-4 px-6 text-gray-400 font-medium text-sm uppercase">Application Code</th>
                   <th className="text-left py-4 px-6 text-gray-400 font-medium text-sm uppercase">Status</th>
                   <th className="text-left py-4 px-6 text-gray-400 font-medium text-sm uppercase">Actions</th>
                 </tr>
@@ -165,21 +162,20 @@ const ApplicantsList = () => {
                       </div>
                     </td>
                     <td className="py-4 px-6">
+                      <div className="text-white text-sm">{applicant.applicantEmail}</div>
+                      {applicant.referenceEmail && (
+                        <div className="text-gray-400 text-xs mt-1">Ref: {applicant.referenceEmail}</div>
+                      )}
+                    </td>
+                    <td className="py-4 px-6">
                       <div className="text-white">{applicant.positionTitle}</div>
                       <div className="text-gray-400 text-sm">
-                        Applied: {new Date(applicant.createdAt).toLocaleDateString()}
+                        Applied: {formatDate(applicant.createdAt)}
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <div className="text-white">{applicant.yearsExperience}</div>
-                      <div className="text-gray-400 text-sm">
-                        {applicant.canWork9to5 ? '✅ 9-5 Available' : '❌ Not 9-5'}
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="text-white">{applicant.interestedBranch}</div>
-                      <div className="text-gray-400 text-sm">
-                        {applicant.canWorkLegally ? '✅ Legal Work' : '❌ Work Permit Needed'}
+                      <div className="bg-gray-800/50 text-gold px-2 py-1 rounded text-xs font-mono">
+                        {applicant.applicationCode}
                       </div>
                     </td>
                     <td className="py-4 px-6">
@@ -218,6 +214,31 @@ const ApplicantsList = () => {
             </div>
             
             <div className="p-6 space-y-6">
+              {/* Application Information */}
+              <div className="bg-gray-800/30 p-4 rounded-xl">
+                <h4 className="text-lg font-semibold text-white mb-4">Application Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex justify-between pb-2 border-b border-gray-700">
+                    <span className="text-gray-400">Application Code</span>
+                    <span className="text-gold font-mono">{selectedApplicant.applicationCode}</span>
+                  </div>
+                  <div className="flex justify-between pb-2 border-b border-gray-700">
+                    <span className="text-gray-400">Applied On</span>
+                    <span className="text-white">{formatDate(selectedApplicant.createdAt)}</span>
+                  </div>
+                  <div className="flex justify-between pb-2 border-b border-gray-700">
+                    <span className="text-gray-400">Last Updated</span>
+                    <span className="text-white">{formatDate(selectedApplicant.updatedAt)}</span>
+                  </div>
+                  <div className="flex justify-between pb-2 border-b border-gray-700">
+                    <span className="text-gray-400">Status</span>
+                    <span className={`font-medium ${getStatusBadge(selectedApplicant.status).split(' ')[1]}`}>
+                      {selectedApplicant.status.charAt(0).toUpperCase() + selectedApplicant.status.slice(1)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Personal Information */}
               <div className="bg-gray-800/30 p-4 rounded-xl">
                 <h4 className="text-lg font-semibold text-white mb-4">Personal Information</h4>
@@ -225,6 +246,10 @@ const ApplicantsList = () => {
                   <div className="flex justify-between pb-2 border-b border-gray-700">
                     <span className="text-gray-400">Full Name</span>
                     <span className="text-white">{selectedApplicant.fullName}</span>
+                  </div>
+                  <div className="flex justify-between pb-2 border-b border-gray-700">
+                    <span className="text-gray-400">Email</span>
+                    <span className="text-white">{selectedApplicant.applicantEmail}</span>
                   </div>
                   <div className="flex justify-between pb-2 border-b border-gray-700">
                     <span className="text-gray-400">Age</span>
@@ -245,6 +270,10 @@ const ApplicantsList = () => {
                   <div className="flex justify-between pb-2 border-b border-gray-700">
                     <span className="text-gray-400">City</span>
                     <span className="text-white">{selectedApplicant.city}</span>
+                  </div>
+                  <div className="flex justify-between pb-2 border-b border-gray-700">
+                    <span className="text-gray-400">Mobile</span>
+                    <span className="text-white">{selectedApplicant.mobileNumber || 'Not provided'}</span>
                   </div>
                   <div className="flex justify-between pb-2 border-b border-gray-700 md:col-span-2">
                     <span className="text-gray-400">Address</span>
@@ -322,7 +351,7 @@ const ApplicantsList = () => {
                       rel="noopener noreferrer"
                       className="text-gold hover:text-yellow-300"
                     >
-                      View CV File
+                      Download CV File
                     </a>
                   </div>
                 ) : selectedApplicant.cvGoogleDriveLink ? (
