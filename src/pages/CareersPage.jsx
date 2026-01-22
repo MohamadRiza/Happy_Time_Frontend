@@ -5,7 +5,6 @@ import ScrollToTop from '../components/ScrollToTop';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-// Branch options (must match your admin locations)
 const BRANCHES = [
   { id: 'all', name: 'All Locations' },
   { id: 'colombo-head', name: 'Head Office - Colombo' },
@@ -22,7 +21,6 @@ const CareersPage = () => {
   const [error, setError] = useState('');
   const [selectedBranch, setSelectedBranch] = useState('all');
 
-  // Map location string to branch ID for filtering
   const getLocationId = (location) => {
     if (location.includes('No 143, 2nd Cross Street, Pettah, Colombo')) return 'colombo-head';
     if (location.includes('No 49A, Keyzer Street, Pettah, Colombo')) return 'colombo-49a';
@@ -55,7 +53,6 @@ const CareersPage = () => {
     fetchVacancies();
   }, []);
 
-  // Filter when branch changes
   useEffect(() => {
     if (selectedBranch === 'all') {
       setFilteredVacancies(vacancies);
@@ -67,7 +64,6 @@ const CareersPage = () => {
     }
   }, [selectedBranch, vacancies]);
 
-  // Format salary for display
   const formatSalary = (salary) => {
     if (!salary) return 'Competitive Salary';
     return salary;
@@ -76,27 +72,48 @@ const CareersPage = () => {
   return (
     <div className="bg-black text-white min-h-screen">
       {/* Hero Banner */}
-      <div className="relative h-80">
+      <div className="relative h-[500px] md:h-[600px]">
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/40 z-10"></div>
         <img
           src="https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg"
           alt="Happy Time Careers"
           className="w-full h-full object-cover object-center"
         />
-        <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gold text-center px-4">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-gold mb-6">
             Join Our Team
           </h1>
+          <p className="text-gray-300 max-w-2xl text-lg leading-relaxed mb-8">
+            Shape the future of luxury timekeeping with Sri Lanka’s most trusted watch connoisseur since 1996.
+          </p>
+          
+          {/* CTA Buttons in Hero */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/apply-job"
+              className="bg-gold text-black px-6 py-3 rounded-xl font-bold hover:bg-yellow-400 transition shadow-lg"
+            >
+              Send Your Resume
+            </Link>
+            <Link
+              to="/application-status"
+              className="bg-gray-800 text-gold px-6 py-3 rounded-xl font-bold hover:bg-gray-700 transition border border-gray-700"
+            >
+              Check Application Status
+            </Link>
+          </div>
         </div>
         <ScrollToTop />
       </div>
 
-      {/* Main Content */}
+      {/* Vacancies Section */}
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Current <span className="text-gold">Opportunities</span>
+          </h2>
           <p className="text-gray-400 text-lg leading-relaxed">
-            At Happy Time Pvt Ltd, we’re passionate about luxury, precision, and exceptional service. 
-            Explore current opportunities across our prestigious locations worldwide.
+            Explore open positions across our prestigious locations worldwide.
           </p>
         </div>
 
@@ -152,26 +169,21 @@ const CareersPage = () => {
               >
                 <div className="bg-gradient-to-b from-gray-900/80 to-black border border-gray-800 rounded-2xl overflow-hidden hover:border-gold hover:shadow-2xl hover:shadow-gold/10 transition-all duration-500 h-full flex flex-col">
                   <div className="p-6 flex flex-col h-full">
-                    {/* Job Title */}
                     <h3 className="text-xl font-bold text-white mb-3 group-hover:text-gold transition-colors">
                       {vacancy.title}
                     </h3>
                     
-                    {/* Location Badge */}
                     <div className="flex flex-wrap gap-2 mb-4">
                       <span className="bg-gold/10 text-gold text-xs px-3 py-1.5 rounded-full font-medium">
                         {vacancy.location}
                       </span>
                     </div>
                     
-                    {/* Description */}
                     <p className="text-gray-400 text-sm mb-5 line-clamp-3 flex-grow leading-relaxed">
                       {vacancy.description}
                     </p>
                     
-                    {/* Details Grid */}
                     <div className="space-y-2 mt-auto pt-4 border-t border-gray-800/50">
-                      {/* Salary */}
                       <div className="flex justify-between items-center">
                         <span className="text-gray-500 text-xs uppercase tracking-wider">Compensation</span>
                         <span className="text-white font-semibold text-sm">
@@ -179,7 +191,6 @@ const CareersPage = () => {
                         </span>
                       </div>
                       
-                      {/* Work Schedule */}
                       <div className="flex justify-between items-center">
                         <span className="text-gray-500 text-xs uppercase tracking-wider">Schedule</span>
                         <span className="text-gray-300 text-sm">
@@ -188,7 +199,6 @@ const CareersPage = () => {
                       </div>
                     </div>
                     
-                    {/* Apply Button */}
                     <div className="mt-6">
                       <div className="inline-flex items-center text-gold text-sm font-medium group-hover:text-yellow-300 transition-colors">
                         <span>View Details</span>
@@ -209,37 +219,6 @@ const CareersPage = () => {
             ))}
           </div>
         )}
-        
-        {/* CTA Section */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {/* Send Resume */}
-          <div className="bg-gradient-to-r from-gray-900/50 to-black/50 border border-gray-800 rounded-2xl p-6 text-center">
-            <h3 className="text-xl font-bold text-white mb-3">Interested in a Different Role?</h3>
-            <p className="text-gray-400 text-sm mb-4">
-              Don't see the perfect opportunity? Send us your resume for future consideration.
-            </p>
-            <Link
-              to="/apply-job"
-              className="inline-block bg-gold text-black px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-yellow-400 transition shadow"
-            >
-              Send Your Resume
-            </Link>
-          </div>
-
-          {/* Check Application Status */}
-          <div className="bg-gradient-to-r from-gray-900/50 to-black/50 border border-gray-800 rounded-2xl p-6 text-center">
-            <h3 className="text-xl font-bold text-white mb-3">Already Applied?</h3>
-            <p className="text-gray-400 text-sm mb-4">
-              Track the status of your job application with us.
-            </p>
-            <Link
-              to="/application-status"
-              className="inline-block bg-gray-800 text-gold px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-gray-700 transition border border-gray-700"
-            >
-              Check Application Status
-            </Link>
-          </div>
-        </div>
       </div>
     </div>
   );
