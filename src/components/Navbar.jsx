@@ -11,7 +11,13 @@ import {
   isCustomerAuthenticated
 } from '../utils/auth';
 
-const menuItems = ["Home", "Shop", "About", "Careers", "Contact"];
+const menuItems = [
+  { name: "Home", path: "/", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
+  { name: "Shop", path: "/shop", icon: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" },
+  { name: "About", path: "/about", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
+  { name: "Careers", path: "/careers", icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
+  { name: "Contact", path: "/contact", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" }
+];
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,7 +28,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  // ✅ REAL-TIME AUTHENTICATION CHECK
   const checkAuthStatus = () => {
     const type = getAuthType();
     setAuthType(type);
@@ -37,7 +42,6 @@ const Navbar = () => {
     }
   };
 
-  // ✅ SERVER-SIDE CART COUNT (NOT LOCALSTORAGE)
   const fetchCartCount = async () => {
     if (!isCustomerAuthenticated()) return;
     
@@ -58,17 +62,12 @@ const Navbar = () => {
     }
   };
 
-  // ✅ INITIAL LOAD
   useEffect(() => {
     checkAuthStatus();
   }, []);
 
-  // ✅ LISTEN FOR AUTHENTICATION CHANGES
   useEffect(() => {
-    const handleAuthChange = () => {
-      checkAuthStatus();
-    };
-    
+    const handleAuthChange = () => checkAuthStatus();
     const handleCartUpdate = () => {
       if (getAuthType() === 'customer') {
         fetchCartCount();
@@ -84,7 +83,6 @@ const Navbar = () => {
     };
   }, []);
 
-  // ✅ ALSO CHECK ON LOCATION CHANGE (for SPA navigation)
   useEffect(() => {
     checkAuthStatus();
   }, [location.pathname]);
@@ -117,13 +115,11 @@ const Navbar = () => {
 
   return (
     <nav className="bg-black/90 text-white sticky top-0 z-50 relative">
-      {/* Gold lighting effect - subtle gradient shadow */}
+      {/* Gold lighting effect */}
       <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent"></div>
       
-      {/* Main navbar content */}
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-20">
-
           {/* Logo + Brand */}
           <Link to="/" className="flex items-center gap-3">
             <img
@@ -144,20 +140,19 @@ const Navbar = () => {
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
             {menuItems.map((item) => {
-              const path = item === "Home" ? "/" : `/${item.toLowerCase()}`;
-              const isActive = location.pathname === path;
+              const isActive = location.pathname === item.path;
 
               return (
                 <Link
-                  key={item}
-                  to={path}
+                  key={item.name}
+                  to={item.path}
                   className={`relative text-sm tracking-wide transition-colors ${
                     isActive
                       ? "text-gold font-semibold"
                       : "text-gray-300 hover:text-gold"
                   }`}
                 >
-                  {item}
+                  {item.name}
                   <span
                     className={`absolute left-0 -bottom-1 h-[2px] w-full bg-gold transition-all ${
                       isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
@@ -167,7 +162,7 @@ const Navbar = () => {
               );
             })}
             
-            {/* ✅ CART ICON FOR LOGGED-IN CUSTOMERS */}
+            {/* Cart Icon */}
             {authType === 'customer' && (
               <Link
                 to="/cart"
@@ -185,7 +180,7 @@ const Navbar = () => {
               </Link>
             )}
             
-            {/* ✅ LOGIN / USER AVATAR */}
+            {/* Auth / User Avatar */}
             {authType === 'guest' ? (
               <Link
                 to="/login"
@@ -271,117 +266,171 @@ const Navbar = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d={
-                  isMenuOpen
-                    ? "M6 18L18 6M6 6l12 12"
-                    : "M4 6h16M4 12h16M4 18h16"
-                }
+                d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
               />
             </svg>
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu - HAMBURGER MENU (without customer items) */}
+      {/* ✅ MOBILE MENU — ENHANCED WITH ICONS & COMPACT LAYOUT */}
       {isMenuOpen && (
-        <div className="md:hidden bg-black/40 border-t border-gray-800">
-          <div className="px-6 py-4 space-y-3">
+        <div className="md:hidden bg-black/40 border-t border-b border-gray-800">
+          <div className="px-4 py-3 space-y-2">
             {menuItems.map((item) => {
-              const path = item === "Home" ? "/" : `/${item.toLowerCase()}`;
-              const isActive = location.pathname === path;
+              const isActive = location.pathname === item.path;
 
               return (
                 <Link
-                  key={item}
-                  to={path}
+                  key={item.name}
+                  to={item.path}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block text-base transition ${
+                  className={`flex items-center gap-3 py-2.5 px-3 rounded-lg transition ${
                     isActive
-                      ? "text-gold font-semibold border-b-2 border-gold pb-1"
-                      : "text-gray-300 hover:text-gold"
+                      ? "bg-gold/10 text-gold"
+                      : "text-gray-300 hover:text-gold hover:bg-gray-800/50"
                   }`}
                 >
-                  {item}
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                  </svg>
+                  <span className="font-medium">{item.name}</span>
                 </Link>
               );
             })}
             
-            {/* ✅ MOBILE AUTH MENU (only login/logout, no customer items) */}
             {authType === 'guest' ? (
               <Link
                 to="/login"
                 onClick={() => setIsMenuOpen(false)}
-                className="block text-base text-gray-300 hover:text-gold"
+                className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-gray-300 hover:text-gold hover:bg-gray-800/50 transition"
               >
-                Login
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+                <span className="font-medium">Login</span>
               </Link>
             ) : authType === 'admin' ? (
               <>
                 <Link
                   to="/admin/dashboard"
                   onClick={() => setIsMenuOpen(false)}
-                  className="block text-base text-gray-300 hover:text-gold"
+                  className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-gray-300 hover:text-gold hover:bg-gray-800/50 transition"
                 >
-                  Admin Dashboard
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  <span className="font-medium">Admin Dashboard</span>
                 </Link>
                 <button
-                  onClick={handleLogout}
-                  className="block text-base text-gray-300 hover:text-red-400 text-left w-full"
+                  onClick={() => {
+                    handleLogout();
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 w-full text-left py-2.5 px-3 rounded-lg text-gray-300 hover:text-red-400 hover:bg-gray-800/50 transition"
                 >
-                  Logout
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span className="font-medium">Logout</span>
                 </button>
               </>
             ) : (
-              // ✅ For customers, only show logout in hamburger menu
               <button
-                onClick={handleLogout}
-                className="block text-base text-gray-300 hover:text-red-400 text-left w-full"
+                onClick={() => {
+                  handleLogout();
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center gap-3 w-full text-left py-2.5 px-3 rounded-lg text-gray-300 hover:text-red-400 hover:bg-gray-800/50 transition"
               >
-                Logout
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span className="font-medium">Logout</span>
               </button>
             )}
           </div>
         </div>
       )}
 
-      {/* ✅ MOBILE BOTTOM NAVIGATION FOR LOGGED-IN CUSTOMERS */}
-      {authType === 'customer' && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur border-t border-gray-800 z-40 bg-gradient-to-br from-gold/20 via-black/50 to-black/80">
+      {/* Mobile Bottom Navigation */}
+      {(authType === 'customer' || authType === 'guest') && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur border-t border-gray-800 z-40">
           <div className="flex justify-around items-center py-3 px-2">
             <Link
-              to="/account"
-              className="flex flex-col items-center text-gray-400 hover:text-gold transition"
+              to="/"
+              className={`flex flex-col items-center text-xs transition ${
+                location.pathname === '/' 
+                  ? 'text-gold' 
+                  : 'text-gray-400 hover:text-gold'
+              }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              <span className="text-xs mt-1">Account</span>
+              <span className="mt-1">Home</span>
             </Link>
             
             <Link
-              to="/orders"
-              className="flex flex-col items-center text-gray-400 hover:text-gold transition"
+              to="/shop"
+              className={`flex flex-col items-center text-xs transition ${
+                location.pathname === '/shop' 
+                  ? 'text-gold' 
+                  : 'text-gray-400 hover:text-gold'
+              }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
-              <span className="text-xs mt-1">Orders</span>
+              <span className="mt-1">Shop</span>
             </Link>
             
             <Link
-              to="/cart"
-              className="flex flex-col items-center text-gray-400 hover:text-gold transition relative"
+              to="/contact"
+              className={`flex flex-col items-center text-xs transition ${
+                location.pathname === '/contact' 
+                  ? 'text-gold' 
+                  : 'text-gray-400 hover:text-gold'
+              }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gold text-black text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">
-                  {cartCount}
-                </span>
-              )}
-              <span className="text-xs mt-1">Cart</span>
+              <span className="mt-1">Contact</span>
             </Link>
+
+            {authType === 'customer' && (
+              <>
+                <Link
+                  to="/cart"
+                  className="flex flex-col items-center text-gray-400 hover:text-gold transition relative"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-gold text-black text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">
+                      {cartCount}
+                    </span>
+                  )}
+                  <span className="text-xs mt-1">Cart</span>
+                </Link>
+
+                <Link
+                  to="/account"
+                  className={`flex flex-col items-center text-xs transition ${
+                    location.pathname === '/account' 
+                      ? 'text-gold' 
+                      : 'text-gray-400 hover:text-gold'
+                  }`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span className="mt-1">Account</span>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
