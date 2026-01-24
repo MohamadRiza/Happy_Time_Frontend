@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { customerLogin } from '../utils/auth';
+import ScrollToTop from '../components/ScrollToTop';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -55,6 +56,7 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white flex items-center justify-center p-4 relative overflow-hidden">
       {/* Optional subtle background pattern or texture */}
+      <ScrollToTop />
       <div 
         className="absolute inset-0 opacity-10"
         style={{
