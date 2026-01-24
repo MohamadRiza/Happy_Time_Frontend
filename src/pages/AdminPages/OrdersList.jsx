@@ -1,6 +1,6 @@
 // src/pages/AdminPages/OrdersList.jsx
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // ✅ Added Link import
+import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { getToken } from '../../utils/auth';
 
@@ -11,17 +11,15 @@ const OrdersList = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [receiptStatusFilter, setReceiptStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState(''); // ✅ NEW: Search state
   
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  // ✅ Helper to handle both Cloudinary and local image paths
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '';
-    // If it's already a full URL (Cloudinary), return as-is
     if (imagePath.startsWith('http')) {
       return imagePath;
     }
-    // If it's a local path, prefix with API_URL
     return `${API_URL}/${imagePath}`;
   };
 
@@ -117,10 +115,21 @@ const OrdersList = () => {
     });
   };
 
+  // ✅ Enhanced filtering with search
   const filteredOrders = orders.filter(order => {
-    const statusMatch = statusFilter === 'all' || order.status === statusFilter;
-    const receiptMatch = receiptStatusFilter === 'all' || order.receiptStatus === receiptStatusFilter;
-    return statusMatch && receiptMatch;
+    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    const matchesReceipt = receiptStatusFilter === 'all' || order.receiptStatus === receiptStatusFilter;
+    
+    // ✅ Search across multiple fields
+    const searchLower = searchQuery.toLowerCase().trim();
+    const matchesSearch = !searchLower || 
+      order._id.toLowerCase().includes(searchLower) ||
+      (order.customer?.fullName || '').toLowerCase().includes(searchLower) ||
+      (order.customer?.email || '').toLowerCase().includes(searchLower) ||
+      (order.customer?.username || '').toLowerCase().includes(searchLower) ||
+      order.totalAmount.toString().includes(searchLower);
+
+    return matchesStatus && matchesReceipt && matchesSearch;
   });
 
   if (loading) {
@@ -136,9 +145,31 @@ const OrdersList = () => {
 
   return (
     <AdminLayout title="Manage Orders">
+      {/* ✅ SEARCH & FILTER BAR */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <h2 className="text-2xl font-bold text-white">All Orders</h2>
-        <div className="flex gap-3">
+        
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+          {/* ✅ Search Input */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by name, email, order #, or amount..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-gold w-full sm:w-64"            
+            />
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -152,6 +183,7 @@ const OrdersList = () => {
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
           </select>
+          
           <select
             value={receiptStatusFilter}
             onChange={(e) => setReceiptStatusFilter(e.target.value)}
@@ -162,7 +194,8 @@ const OrdersList = () => {
             <option value="verified">Receipt Verified</option>
             <option value="rejected">Receipt Rejected</option>
           </select>
-          <div className="text-gray-400">
+          
+          <div className="text-gray-400 whitespace-nowrap">
             Total: {filteredOrders.length} orders
           </div>
         </div>
@@ -172,7 +205,7 @@ const OrdersList = () => {
 
       {filteredOrders.length === 0 ? (
         <div className="text-center py-12 bg-gray-900/50 border border-gray-800 rounded-xl">
-          <p className="text-gray-500">No orders found</p>
+          <p className="text-gray-500">No orders match your search and filters</p>
         </div>
       ) : (
         <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
@@ -199,7 +232,6 @@ const OrdersList = () => {
                       <div className="font-semibold text-white">{order.customer?.fullName}</div>
                       <div className="text-gray-400 text-sm">@{order.customer?.username}</div>
                       <div className="text-gray-500 text-xs">{order.customer?.email}</div>
-                      {/* ✅ Mobile number display */}
                       {order.customer?.mobileNumber && (
                         <div className="text-gray-400 text-xs mt-1">
                           📱 {order.customer.mobileNumber}
@@ -209,7 +241,6 @@ const OrdersList = () => {
                     <td className="py-4 px-6">
                       <div className="text-white">{order.items.length} items</div>
                       <div className="text-gray-400 text-sm">
-                        {/* ✅ ADD LINK TO FIRST PRODUCT */}
                         {order.items[0]?.productId?._id ? (
                           <Link 
                             to={`/shop/${order.items[0].productId._id}`}
@@ -302,7 +333,6 @@ const OrdersList = () => {
                     <div key={index} className="flex gap-4">
                       {item.productId?.images?.[0] && (
                         <div className="w-16 h-16">
-                          {/* ✅ FIXED: Proper image URL handling */}
                           <img
                             src={getImageUrl(item.productId.images[0])}
                             alt={item.productId.title}
@@ -314,7 +344,6 @@ const OrdersList = () => {
                         </div>
                       )}
                       <div className="flex-1">
-                        {/* ✅ ADD PRODUCT LINK */}
                         <Link 
                           to={`/shop/${item.productId?._id}`}
                           className="font-medium text-white hover:text-gold transition-colors"
@@ -371,7 +400,6 @@ const OrdersList = () => {
               <div className="bg-gray-800/30 p-4 rounded-xl">
                 <h4 className="text-lg font-semibold text-white mb-4">Order Management</h4>
                 
-                {/* Order Status */}
                 <div className="mb-4">
                   <label className="block text-gray-400 mb-2 text-sm">Order Status</label>
                   <select
@@ -388,7 +416,6 @@ const OrdersList = () => {
                   </select>
                 </div>
 
-                {/* Receipt Status */}
                 <div className="mb-4">
                   <label className="block text-gray-400 mb-2 text-sm">Receipt Status</label>
                   <select
@@ -402,7 +429,6 @@ const OrdersList = () => {
                   </select>
                 </div>
 
-                {/* Admin Notes */}
                 <div>
                   <label className="block text-gray-400 mb-2 text-sm">Admin Notes</label>
                   <textarea

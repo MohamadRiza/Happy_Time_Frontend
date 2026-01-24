@@ -9,7 +9,9 @@ const ApplicantsList = () => {
   const [error, setError] = useState('');
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
-  
+  const [hasReferenceFilter, setHasReferenceFilter] = useState('all'); // ✅ NEW FILTER
+  const [searchQuery, setSearchQuery] = useState(''); // ✅ NEW SEARCH
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const fetchApplicants = async () => {
@@ -89,9 +91,25 @@ const ApplicantsList = () => {
     });
   };
 
-  const filteredApplicants = statusFilter === 'all' 
-    ? applicants 
-    : applicants.filter(app => app.status === statusFilter);
+  // ✅ Enhanced filtering with search and reference filter
+  const filteredApplicants = applicants.filter(applicant => {
+    // Status filter
+    const matchesStatus = statusFilter === 'all' || applicant.status === statusFilter;
+    
+    // Reference filter
+    const hasReference = applicant.referenceName || applicant.referenceEmail || applicant.referenceWorkplace;
+    const matchesReference = hasReferenceFilter === 'all' || 
+      (hasReferenceFilter === 'yes' && hasReference) || 
+      (hasReferenceFilter === 'no' && !hasReference);
+    
+    // Search filter
+    const searchLower = searchQuery.toLowerCase().trim();
+    const matchesSearch = !searchLower || 
+      applicant.fullName.toLowerCase().includes(searchLower) ||
+      applicant.applicationCode.toLowerCase().includes(searchLower);
+
+    return matchesStatus && matchesReference && matchesSearch;
+  });
 
   if (loading) {
     return (
@@ -106,9 +124,32 @@ const ApplicantsList = () => {
 
   return (
     <AdminLayout title="Job Applicants">
+      {/* ✅ SEARCH & FILTER BAR */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <h2 className="text-2xl font-bold text-white">All Job Applicants</h2>
-        <div className="flex gap-3">
+        
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+          {/* ✅ Search Input */}
+          <div className="relative w-full sm:w-64">
+            <input
+              type="text"
+              placeholder="Search by name or code..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-gold"
+            />
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          {/* Status Filter */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -121,7 +162,19 @@ const ApplicantsList = () => {
             <option value="rejected">Rejected</option>
             <option value="hired">Hired</option>
           </select>
-          <div className="text-gray-400">
+
+          {/* ✅ Has Reference Filter */}
+          <select
+            value={hasReferenceFilter}
+            onChange={(e) => setHasReferenceFilter(e.target.value)}
+            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-gold"
+          >
+            <option value="all">All References</option>
+            <option value="yes">With Reference</option>
+            <option value="no">No Reference</option>
+          </select>
+
+          <div className="text-gray-400 whitespace-nowrap">
             Total: {filteredApplicants.length} applicants
           </div>
         </div>
@@ -131,13 +184,13 @@ const ApplicantsList = () => {
 
       {filteredApplicants.length === 0 ? (
         <div className="text-center py-12 bg-gray-900/50 border border-gray-800 rounded-xl">
-          <p className="text-gray-500">No applicants found</p>
+          <p className="text-gray-500">No applicants match your search and filters</p>
         </div>
       ) : (
         <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-gray-800">
+          <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+            <table className="w-full min-w-full">
+              <thead className="sticky top-0 z-10 bg-gray-900/90 backdrop-blur border-b border-gray-800">
                 <tr>
                   <th className="text-left py-4 px-6 text-gray-400 font-medium text-sm uppercase">Applicant</th>
                   <th className="text-left py-4 px-6 text-gray-400 font-medium text-sm uppercase">Contact</th>
