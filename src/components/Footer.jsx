@@ -13,6 +13,20 @@ const Footer = () => {
     { name: 'ADMIN', path: '/admin/login' },
   ];
 
+  // ✅ Updated Locations with Google Maps links
+  const locations = [
+    {
+      name: 'Colombo – Head Office',
+      address: '49A Keyzer Street, Pettah, Colombo, Sri Lanka',
+      mapUrl: 'https://www.google.com/maps?ll=6.9369,79.851087&z=16&t=m&hl=en-US&gl=US&mapclient=embed&cid=7268797266332012530'
+    },
+    {
+      name: 'Dubai – UAE Branch',
+      address: 'Business Bay, Dubai, United Arab Emirates',
+      mapUrl: 'https://www.google.com/maps?ll=25.269188,55.297272&z=16&t=m&hl=en&gl=LK&mapclient=embed&q=25%C2%B016%2709.1%22N+55%C2%B017%2759.5%22E+25.269194,+55.299861@25.2691944,55.29986109999999'
+    }
+  ];
+
   const socialClass =
     'w-11 h-11 flex items-center justify-center rounded-full border border-gray-700 text-gray-400 hover:text-gold hover:border-gold hover:bg-black/30 transition-all duration-300 group';
 
@@ -25,8 +39,6 @@ const Footer = () => {
       >
         <div className="absolute inset-0 bg-black/90"></div>
       </div>
-
-      {/* Mobile: solid black (no image) — already covered by bg-black on <footer> */}
 
       {/* Gold top accent line */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent z-10"></div>
@@ -45,21 +57,51 @@ const Footer = () => {
             <p className="text-sm leading-relaxed mb-6 max-w-xs text-gray-500">
               Sri Lanka’s premier luxury watch destination since 1996.
             </p>
-            <div className="space-y-3 text-sm">
+            <div className="space-y-4 text-sm">
+              {/* Location */}
               <div className="flex items-start gap-3">
-                <span className="mt-0.5 text-gold">📍</span>
-                <span>49A Keyzer Street, Pettah, Colombo, Sri Lanka</span>
+                <div className="mt-0.5 text-gold hover:text-white transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-medium text-white mb-1">Our Locations</p>
+                  {locations.map((loc, idx) => (
+                    <a
+                      key={idx}
+                      href={loc.mapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-gray-400 hover:text-gold transition-colors mt-1 first:mt-0"
+                    >
+                      {loc.name}
+                    </a>
+                  ))}
+                </div>
               </div>
+
+              {/* Phone */}
               <div className="flex items-center gap-3">
-                <span className="text-gold">📞</span>
-                <span>+94 77 123 4567</span>
+                <div className="text-gold hover:text-white transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.74 21 3 14.26 3 6V5z" />
+                  </svg>
+                </div>
+                <div>
+                  <a href="tel:+94771234567" className="block hover:text-gold transition-colors">+94 77 123 4567</a>
+                  <a href="tel:+94719876543" className="block hover:text-gold transition-colors mt-1">+94 71 987 6543</a>
+                </div>
               </div>
+
+              {/* Email */}
               <div className="flex items-center gap-3">
-                <span className="text-gold">📞</span>
-                <span>+94 71 987 6543</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-gold">✉️</span>
+                <div className="text-gold hover:text-white transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
                 <a href="mailto:info@happytime.lk" className="hover:text-gold transition-colors">
                   info@happytime.lk
                 </a>
@@ -92,18 +134,33 @@ const Footer = () => {
             <h3 className="text-white text-lg font-semibold tracking-wide mb-5 pb-2 border-b border-gray-800/60">
               Our Brands
             </h3>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2">
-                <span className="text-gold">•</span>
-                <span>Winsor – Wrist Watch</span>
+            <ul className="space-y-4">
+              <li>
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 w-2 h-2 bg-gold rounded-full"></div>
+                  <div>
+                    <p className="font-medium text-white">Winsor</p>
+                    <p className="text-gray-400 text-sm">Premium wrist watches for discerning collectors</p>
+                  </div>
+                </div>
               </li>
-              <li className="flex items-center gap-2">
-                <span className="text-gold">•</span>
-                <span>Orix – Wrist Watch</span>
+              <li>
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 w-2 h-2 bg-gold rounded-full"></div>
+                  <div>
+                    <p className="font-medium text-white">Orix</p>
+                    <p className="text-gray-400 text-sm">Elegant timepieces blending tradition and innovation</p>
+                  </div>
+                </div>
               </li>
-              <li className="flex items-center gap-2">
-                <span className="text-gold">•</span>
-                <span>Arial – Wall Clock</span>
+              <li>
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 w-2 h-2 bg-gold rounded-full"></div>
+                  <div>
+                    <p className="font-medium text-white">Arial</p>
+                    <p className="text-gray-400 text-sm">Luxury wall clocks for home and office</p>
+                  </div>
+                </div>
               </li>
             </ul>
           </div>
@@ -149,7 +206,7 @@ const Footer = () => {
               ].map(({ platform, url, icon }) => (
                 <a
                   key={platform}
-                  href={url.trim()}
+                  href={url}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={platform}
@@ -163,18 +220,18 @@ const Footer = () => {
         </div>
 
         {/* Bottom Divider */}
-        <div className="border-t border-gray-800/70 pt-8 text-center">
-          <p className="text-gray-500 text-sm">
+        <div className="border-t border-gray-800/70 pt-8 pb-11 text-center">
+          <p className="text-gray-400 text-sm">
             &copy; {new Date().getFullYear()}{' '}
             <span className="text-white font-medium">Happy Time Pvt Ltd</span>. All Rights Reserved.
           </p>
 
-          <p className="mt-2 text-gray-600 text-sm max-w-2xl mx-auto">
+          <p className="mt-2 text-gray-400 text-sm max-w-2xl mx-auto">
             Trusted luxury watch retailer in Pettah, Colombo since 1996.
           </p>
 
           <div className="mt-4">
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-400 text-sm">
               Developed with precision by{' '}
               <a
                 href="https://www.nexasoft.site/"
