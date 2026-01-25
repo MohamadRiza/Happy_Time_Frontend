@@ -1,6 +1,6 @@
 // src/pages/ShopPage.jsx
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom'; // ✅ Added useSearchParams
+import { Link, useSearchParams } from 'react-router-dom';
 import ScrollToTop from '../components/ScrollToTop';
 
 const ShopPage = () => {
@@ -34,9 +34,27 @@ const ShopPage = () => {
   /* -------------------- HELPERS -------------------- */
   const getUniqueBrands = () => [...new Set(products.map(p => p.brand))];
   const getUniqueShapes = () => [...new Set(products.map(p => p.watchShape))];
+  
+  // ✅ FIXED: Handle colors as array of objects
   const getUniqueColors = () => {
-    const allColors = products.flatMap(p => p.colors || []);
-    return [...new Set(allColors)];
+    const allColors = products.flatMap(p => {
+      // Handle both old format (array of strings) and new format (array of objects)
+      if (!p.colors || !Array.isArray(p.colors)) return [];
+      
+      return p.colors.map(color => {
+        // If it's an object with a name property, return the name
+        if (typeof color === 'object' && color.name) {
+          return color.name;
+        }
+        // If it's a string (old format), return as is
+        if (typeof color === 'string') {
+          return color;
+        }
+        return null;
+      }).filter(Boolean); // Remove null values
+    });
+    
+    return [...new Set(allColors)].sort();
   };
 
   const formatPrice = (price) => {
@@ -50,6 +68,7 @@ const ShopPage = () => {
       case 'men': return 'Men';
       case 'women': return 'Women';
       case 'kids': return 'Kids';
+      case 'unisex': return 'Unisex';
       default: return 'Unisex';
     }
   };
@@ -60,8 +79,32 @@ const ShopPage = () => {
       case 'men': return 'bg-blue-900/30 text-blue-300';
       case 'women': return 'bg-pink-900/30 text-pink-300';
       case 'kids': return 'bg-green-900/30 text-green-300';
+      case 'unisex': return 'bg-gray-800 text-gray-300';
       default: return 'bg-gray-800 text-gray-300';
     }
+  };
+
+  // ✅ HELPER: Get display colors for a product
+  const getProductColors = (product) => {
+    if (!product.colors || !Array.isArray(product.colors)) return [];
+    
+    return product.colors.map(color => {
+      // Handle object format
+      if (typeof color === 'object' && color.name) {
+        return {
+          name: color.name,
+          quantity: color.quantity || null
+        };
+      }
+      // Handle string format (old data)
+      if (typeof color === 'string') {
+        return {
+          name: color,
+          quantity: null
+        };
+      }
+      return null;
+    }).filter(Boolean);
   };
 
   /* -------------------- API -------------------- */
@@ -75,7 +118,8 @@ const ShopPage = () => {
       } else {
         setError('Failed to load products');
       }
-    } catch {
+    } catch (err) {
+      console.error('Fetch products error:', err);
       setError('Network error');
     } finally {
       setLoading(false);
@@ -134,13 +178,33 @@ const ShopPage = () => {
     if (filters.shape !== 'all')
       result = result.filter(p => p.watchShape === filters.shape);
 
-    if (filters.color !== 'all')
-      result = result.filter(p => p.colors?.includes(filters.color));
+    // ✅ FIXED: Color filtering with new structure
+    if (filters.color !== 'all') {
+      result = result.filter(p => {
+        if (!p.colors || !Array.isArray(p.colors)) return false;
+        
+        return p.colors.some(color => {
+          // Handle object format
+          if (typeof color === 'object' && color.name) {
+            return color.name === filters.color;
+          }
+          // Handle string format (old data)
+          if (typeof color === 'string') {
+            return color === filters.color;
+          }
+          return false;
+        });
+      });
+    }
 
     if (filters.minPrice || filters.maxPrice) {
       const min = filters.minPrice ? parseFloat(filters.minPrice) : 0;
       const max = filters.maxPrice ? parseFloat(filters.maxPrice) : Infinity;
-      result = result.filter(p => p.price >= min && p.price <= max);
+      result = result.filter(p => {
+        // Skip products without price (Contact for Price)
+        if (!p.price) return filters.minPrice === '' && filters.maxPrice === '';
+        return p.price >= min && p.price <= max;
+      });
     }
 
     result = sortProducts(result, sortBy);
@@ -341,7 +405,7 @@ const ShopPage = () => {
                     >
                       {options.map(opt => (
                         <option key={opt} value={opt}>
-                          {opt === 'all' ? 'All' : opt.charAt(0).toUpperCase() + opt.slice(1)}
+                          {opt === 'all' ? 'All' : opt}
                         </option>
                       ))}
                     </select>
@@ -411,63 +475,73 @@ const ShopPage = () => {
                 ? "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
                 : "space-y-6"
               }>
-                {filteredProducts.map(product => (
-                  <div
-                    key={product._id}
-                    className={`bg-gray-900/40 border border-gray-800 rounded-xl overflow-hidden hover:border-gold transition ${
-                      viewMode === 'list' ? 'flex gap-6 p-4' : ''
-                    }`}
-                  >
-                    {/* Image */}
-                    <div className={viewMode === 'list' 
-                      ? "w-32 h-32 flex-shrink-0" 
-                      : "aspect-square overflow-hidden"
-                    }>
-                      <img
-                        src={product.images?.[0] || '/placeholder.png'}
-                        alt={product.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
+                {filteredProducts.map(product => {
+                  const productColors = getProductColors(product);
+                  
+                  return (
+                    <div
+                      key={product._id}
+                      className={`bg-gray-900/40 border border-gray-800 rounded-xl overflow-hidden hover:border-gold transition ${
+                        viewMode === 'list' ? 'flex gap-6 p-4' : ''
+                      }`}
+                    >
+                      {/* Image */}
+                      <div className={viewMode === 'list' 
+                        ? "w-32 h-32 flex-shrink-0" 
+                        : "aspect-square overflow-hidden"
+                      }>
+                        <img
+                          src={product.images?.[0] || '/placeholder.png'}
+                          alt={product.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
 
-                    {/* Content */}
-                    <div className={viewMode === 'list' ? "flex-1" : "p-4"}>
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-sm sm:text-base line-clamp-1">{product.title}</h3>
-                        <span className="text-gold text-sm font-medium whitespace-nowrap">
-                          {formatPrice(product.price)}
+                      {/* Content */}
+                      <div className={viewMode === 'list' ? "flex-1" : "p-4"}>
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="font-semibold text-sm sm:text-base line-clamp-1">{product.title}</h3>
+                          <span className="text-gold text-sm font-medium whitespace-nowrap ml-2">
+                            {formatPrice(product.price)}
+                          </span>
+                        </div>
+                        
+                        <span className="text-gray-400 text-xs uppercase mb-2 block">
+                          {product.brand}
                         </span>
-                      </div>
-                      
-                      <span className="text-gray-400 text-xs uppercase mb-2 block">
-                        {product.brand}
-                      </span>
 
-                      <p className={`text-gray-400 text-xs mb-3 ${viewMode === 'list' ? 'line-clamp-2' : 'line-clamp-2'}`}>
-                        {product.description}
-                      </p>
+                        <p className={`text-gray-400 text-xs mb-3 ${viewMode === 'list' ? 'line-clamp-2' : 'line-clamp-2'}`}>
+                          {product.description}
+                        </p>
 
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        <span className={`text-[10px] px-2 py-1 rounded ${getGenderBadgeClass(product.gender, product.productType)}`}>
-                          {getGenderDisplay(product.gender, product.productType)}
-                        </span>
-                      </div>
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          <span className={`text-[10px] px-2 py-1 rounded ${getGenderBadgeClass(product.gender, product.productType)}`}>
+                            {getGenderDisplay(product.gender, product.productType)}
+                          </span>
+                          {/* ✅ Display first color if available */}
+                          {productColors.length > 0 && (
+                            <span className="text-[10px] px-2 py-1 rounded bg-gray-800 text-gray-300">
+                              {productColors[0].name}
+                            </span>
+                          )}
+                        </div>
 
-                      <div className="mt-auto">
-                        <Link 
-                          to={`/shop/${product._id}`} 
-                          className="text-gold hover:text-yellow-300 text-sm font-medium flex items-center gap-1 group-hover:gap-2 transition"
-                        >
-                          View Details
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </Link>
+                        <div className="mt-auto">
+                          <Link 
+                            to={`/shop/${product._id}`} 
+                            className="text-gold hover:text-yellow-300 text-sm font-medium flex items-center gap-1 group-hover:gap-2 transition"
+                          >
+                            View Details
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Link>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </main>

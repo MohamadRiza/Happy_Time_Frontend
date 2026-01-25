@@ -33,7 +33,7 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedColorObj, setSelectedColorObj] = useState(null); // ✅ Store full color object
   const [quantity, setQuantity] = useState(1);
   const [toastMessage, setToastMessage] = useState('');
   const [mainImageIndex, setMainImageIndex] = useState(0);
@@ -43,6 +43,29 @@ const ProductDetailPage = () => {
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+  // ✅ HELPER: Parse colors from product
+  const parseProductColors = (product) => {
+    if (!product?.colors || !Array.isArray(product.colors)) return [];
+    
+    return product.colors.map(color => {
+      // Handle object format {name: "Gold - Black", quantity: 5}
+      if (typeof color === 'object' && color.name) {
+        return {
+          name: color.name,
+          quantity: color.quantity !== null && color.quantity !== undefined ? color.quantity : null
+        };
+      }
+      // Handle old string format for backward compatibility
+      if (typeof color === 'string') {
+        return {
+          name: color,
+          quantity: null
+        };
+      }
+      return null;
+    }).filter(Boolean);
+  };
+
   const fetchProduct = async () => {
     try {
       const res = await fetch(`${API_URL}/api/products/${id}`);
@@ -50,13 +73,19 @@ const ProductDetailPage = () => {
       
       if (data.success) {
         setProduct(data.product);
-        if (data.product.colors?.length > 0) {
-          setSelectedColor(data.product.colors[0]);
+        
+        // ✅ Parse colors and set default selection
+        const colors = parseProductColors(data.product);
+        if (colors.length > 0) {
+          setSelectedColorObj(colors[0]);
+          // ✅ Set quantity to 1 by default (will be validated against available stock)
+          setQuantity(1);
         }
       } else {
         setError('Product not found');
       }
     } catch (err) {
+      console.error('Fetch product error:', err);
       setError('Network error');
     } finally {
       setLoading(false);
@@ -75,7 +104,7 @@ const ProductDetailPage = () => {
         setRelatedProducts(related);
       }
     } catch (err) {
-      // Silently fail
+      console.error('Fetch related products error:', err);
     }
   };
 
@@ -86,8 +115,28 @@ const ProductDetailPage = () => {
     }
   }, [id]);
 
+  // ✅ Reset quantity when color changes
+  useEffect(() => {
+    if (selectedColorObj) {
+      setQuantity(1);
+    }
+  }, [selectedColorObj]);
+
   const addToCart = async () => {
     if (!product || product.price === null || product.price === undefined) return;
+    
+    if (!selectedColorObj) {
+      setError('Please select a color');
+      return;
+    }
+
+    // ✅ Validate quantity against available stock
+    if (selectedColorObj.quantity !== null) {
+      if (quantity > selectedColorObj.quantity) {
+        setError(`Only ${selectedColorObj.quantity} available in stock`);
+        return;
+      }
+    }
     
     if (!isCustomerAuthenticated()) {
       const pendingItem = {
@@ -96,7 +145,7 @@ const ProductDetailPage = () => {
         brand: product.brand,
         price: product.price,
         images: product.images,
-        selectedColor,
+        selectedColor: selectedColorObj.name,
         quantity,
         modelNumber: product.modelNumber,
         gender: product.gender,
@@ -119,7 +168,7 @@ const ProductDetailPage = () => {
         },
         body: JSON.stringify({
           productId: product._id,
-          selectedColor,
+          selectedColor: selectedColorObj.name,
           quantity
         })
       });
@@ -128,11 +177,13 @@ const ProductDetailPage = () => {
       
       if (data.success) {
         setToastMessage('Added to cart successfully!');
+        setError(''); // Clear any errors
         window.dispatchEvent(new CustomEvent('cartUpdated'));
       } else {
         setError(data.message || 'Failed to add to cart');
       }
     } catch (err) {
+      console.error('Add to cart error:', err);
       setError('Network error. Please try again.');
     }
   };
@@ -148,6 +199,7 @@ const ProductDetailPage = () => {
       case 'men': return 'Men';
       case 'women': return 'Women';
       case 'kids': return 'Kids';
+      case 'unisex': return 'Unisex';
       default: return 'Unisex';
     }
   };
@@ -158,12 +210,35 @@ const ProductDetailPage = () => {
       case 'men': return 'bg-blue-900/30 text-blue-300';
       case 'women': return 'bg-pink-900/30 text-pink-300';
       case 'kids': return 'bg-green-900/30 text-green-300';
+      case 'unisex': return 'bg-gray-800 text-gray-300';
       default: return 'bg-gray-800 text-gray-300';
     }
   };
 
   const handleBackToShop = () => {
     navigate('/shop');
+  };
+
+  // ✅ Handle quantity change with validation
+  const handleQuantityChange = (newQty) => {
+    if (!selectedColorObj) return;
+    
+    // Validate against available stock
+    if (selectedColorObj.quantity !== null) {
+      const maxQty = selectedColorObj.quantity;
+      setQuantity(Math.max(1, Math.min(newQty, maxQty)));
+    } else {
+      // No stock limit
+      setQuantity(Math.max(1, newQty));
+    }
+  };
+
+  // ✅ Get max quantity for selected color
+  const getMaxQuantity = () => {
+    if (!selectedColorObj || selectedColorObj.quantity === null) {
+      return 999; // No limit
+    }
+    return selectedColorObj.quantity;
   };
 
   if (loading) {
@@ -178,7 +253,7 @@ const ProductDetailPage = () => {
     );
   }
 
-  if (error) {
+  if (error && !product) {
     return (
       <div className="bg-black text-white min-h-screen">
         <ScrollToTop />
@@ -202,6 +277,9 @@ const ProductDetailPage = () => {
   const allMedia = [...(product.images || [])];
   if (product.video) allMedia.push(product.video);
   const isVideo = mainImageIndex >= (product.images?.length || 0) && product.video;
+
+  // ✅ Get parsed colors
+  const productColors = parseProductColors(product);
 
   return (
     <div className="bg-black text-white min-h-screen relative">
@@ -314,53 +392,102 @@ const ProductDetailPage = () => {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {product.colors?.length > 0 && (
+                  {/* ✅ IMPROVED COLOR SELECTION */}
+                  {productColors.length > 0 && (
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-3">Available Colors</h3>
                       <div className="flex flex-wrap gap-2">
-                        {product.colors.map((color, idx) => (
+                        {productColors.map((colorObj, idx) => (
                           <button
                             key={idx}
-                            onClick={() => setSelectedColor(color)}
-                            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition ${
-                              selectedColor === color
-                                ? 'bg-gold text-black shadow-md'
-                                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                            onClick={() => setSelectedColorObj(colorObj)}
+                            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                              selectedColorObj?.name === colorObj.name
+                                ? 'bg-gold text-black shadow-md ring-2 ring-gold/50'
+                                : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
                             }`}
                           >
-                            {color}
+                            {colorObj.name}
                           </button>
                         ))}
                       </div>
+                      
+                      {/* ✅ SHOW AVAILABLE QUANTITY AFTER COLOR SELECTION */}
+                      {selectedColorObj && selectedColorObj.quantity !== null && (
+                        <div className="mt-3 flex items-center gap-2 text-sm">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="text-green-400 font-medium">
+                            {selectedColorObj.quantity} {selectedColorObj.quantity === 1 ? 'item' : 'items'} in stock
+                          </span>
+                        </div>
+                      )}
+                      
+                      {selectedColorObj && selectedColorObj.quantity === null && (
+                        <div className="mt-3 flex items-center gap-2 text-sm">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-blue-400 font-medium">
+                            Available
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
 
+                  {/* ✅ IMPROVED QUANTITY SELECTOR WITH VALIDATION */}
                   <div>
                     <h3 className="text-lg font-semibold text-white mb-3">Quantity</h3>
-                    <div className="flex items-center max-w-32">
-                      <button
-                        onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                        className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-l-lg text-white hover:bg-gray-700 transition flex items-center justify-center"
-                      >
-                        −
-                      </button>
-                      <span className="w-12 h-10 bg-black border-y border-gray-700 text-white flex items-center justify-center">
-                        {quantity}
-                      </span>
-                      <button
-                        onClick={() => setQuantity(prev => prev + 1)}
-                        className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-r-lg text-white hover:bg-gray-700 transition flex items-center justify-center"
-                      >
-                        +
-                      </button>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center">
+                        <button
+                          onClick={() => handleQuantityChange(quantity - 1)}
+                          disabled={quantity <= 1}
+                          className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-l-lg text-white hover:bg-gray-700 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          −
+                        </button>
+                        <span className="w-16 h-10 bg-black border-y border-gray-700 text-white flex items-center justify-center font-medium">
+                          {quantity}
+                        </span>
+                        <button
+                          onClick={() => handleQuantityChange(quantity + 1)}
+                          disabled={selectedColorObj && selectedColorObj.quantity !== null && quantity >= selectedColorObj.quantity}
+                          className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-r-lg text-white hover:bg-gray-700 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          +
+                        </button>
+                      </div>
+                      
+                      {/* ✅ Show max quantity info */}
+                      {selectedColorObj && selectedColorObj.quantity !== null && (
+                        <span className="text-gray-400 text-sm">
+                          Max: {selectedColorObj.quantity}
+                        </span>
+                      )}
                     </div>
                   </div>
 
+                  {/* ✅ Show error message if any */}
+                  {error && (
+                    <div className="bg-red-900/20 border border-red-700 rounded-lg p-3 flex items-start gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-red-300 text-sm">{error}</span>
+                    </div>
+                  )}
+
                   <button
                     onClick={addToCart}
-                    className="w-full bg-gold text-black py-4 rounded-xl font-bold text-lg hover:bg-gold/90 transition shadow-lg shadow-gold/20"
+                    disabled={!selectedColorObj || (selectedColorObj.quantity !== null && selectedColorObj.quantity === 0)}
+                    className="w-full bg-gold text-black py-4 rounded-xl font-bold text-lg hover:bg-gold/90 transition shadow-lg shadow-gold/20 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Add to Cart
+                    {selectedColorObj && selectedColorObj.quantity === 0 
+                      ? 'Out of Stock' 
+                      : 'Add to Cart'}
                   </button>
                 </div>
               )}
@@ -373,6 +500,7 @@ const ProductDetailPage = () => {
               </p>
             </div>
 
+            {/* ✅ IMPROVED SPECIFICATIONS WITH CUSTOM SPECS */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">Specifications</h2>
               <div className="space-y-3">
@@ -396,6 +524,26 @@ const ProductDetailPage = () => {
                   <span className="text-gray-400 text-sm">Shape</span>
                   <span className="text-white text-sm">{product.watchShape}</span>
                 </div>
+                
+                {/* ✅ DISPLAY CUSTOM SPECIFICATIONS */}
+                {product.specifications && Array.isArray(product.specifications) && product.specifications.length > 0 && (
+                  <>
+                    {product.specifications.map((spec, idx) => {
+                      // Handle both object format and old format
+                      const key = typeof spec === 'object' ? spec.key : spec;
+                      const value = typeof spec === 'object' ? spec.value : '';
+                      
+                      if (!key || !value) return null;
+                      
+                      return (
+                        <div key={idx} className="flex justify-between pb-2 border-b border-gray-800/50">
+                          <span className="text-gray-400 text-sm">{key}</span>
+                          <span className="text-white text-sm">{value}</span>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
               </div>
             </div>
 
@@ -447,7 +595,7 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        {/* ✅ REDESIGNED RELATED PRODUCTS */}
+        {/* ✅ RELATED PRODUCTS WITH PROPER COLOR HANDLING */}
         {relatedProducts.length > 0 && (
           <div className="mt-16 pt-8 border-t border-gray-800/50">
             <h2 className="text-2xl font-bold text-white mb-6 text-center">

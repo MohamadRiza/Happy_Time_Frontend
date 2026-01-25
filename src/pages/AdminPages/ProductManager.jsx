@@ -20,9 +20,11 @@ const ProductManager = () => {
     watchShape: 'Round',
     gender: 'men',
     productType: 'watch',
-    colors: '',
-    customColors: '',
+    // ✅ Colors array instead of single color
+    colors: [{ name: '', quantity: '' }],
     featured: false,
+    // ✅ Specifications array
+    specifications: [{ key: '', value: '' }]
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [videoFile, setVideoFile] = useState(null);
@@ -58,7 +60,7 @@ const ProductManager = () => {
     { value: 'men', label: 'Men' },
     { value: 'women', label: 'Women' },
     { value: 'unisex', label: 'Unisex' },
-    { value: 'kids', label: 'Kids' } // ✅ REPLACED BOY/GIRL WITH KIDS
+    { value: 'kids', label: 'Kids' }
   ];
   
   const productTypes = [
@@ -73,7 +75,7 @@ const ProductManager = () => {
     { value: 'men', label: 'Men' },
     { value: 'women', label: 'Women' },
     { value: 'unisex', label: 'Unisex' },
-    { value: 'kids', label: 'Kids' } // ✅ REPLACED BOY/GIRL WITH KIDS
+    { value: 'kids', label: 'Kids' }
   ];
   
   const featuredOptions = [
@@ -106,7 +108,6 @@ const ProductManager = () => {
         setProducts(data.products || []);
         setFilteredProducts(data.products || []);
         
-        // ✅ EXTRACT UNIQUE BRANDS FROM PRODUCTS
         const uniqueBrands = [...new Set((data.products || []).map(p => p.brand))];
         setAvailableBrands(uniqueBrands.sort());
       } else {
@@ -127,7 +128,6 @@ const ProductManager = () => {
   useEffect(() => {
     let result = [...products];
     
-    // Search filter
     if (searchFilters.search) {
       const query = searchFilters.search.toLowerCase();
       result = result.filter(product =>
@@ -138,17 +138,14 @@ const ProductManager = () => {
       );
     }
     
-    // Brand filter
     if (searchFilters.brand !== 'all') {
       result = result.filter(product => product.brand === searchFilters.brand);
     }
     
-    // Product type filter
     if (searchFilters.productType !== 'all') {
       result = result.filter(product => product.productType === searchFilters.productType);
     }
     
-    // Gender filter (only for watches)
     if (searchFilters.gender !== 'all') {
       result = result.filter(product => 
         product.productType === 'wall_clock' || 
@@ -156,7 +153,6 @@ const ProductManager = () => {
       );
     }
     
-    // Featured filter
     if (searchFilters.featured !== 'all') {
       const isFeatured = searchFilters.featured === 'true';
       result = result.filter(product => product.featured === isFeatured);
@@ -181,7 +177,6 @@ const ProductManager = () => {
     if (productType === 'wall_clock') {
       gender = '';
     } else {
-      // ✅ Handle kids in validation
       if (!['men', 'women', 'unisex', 'kids'].includes(gender)) {
         gender = 'men';
       }
@@ -205,14 +200,46 @@ const ProductManager = () => {
     setError('');
   };
 
-  const handleColorChange = (e) => {
-    const colors = e.target.value;
-    setFormData(prev => ({
-      ...prev,
-      colors,
-      customColors: colors === 'Other' ? '' : prev.customColors
-    }));
+  // ✅ Handle color changes
+  const handleColorChange = (index, field, value) => {
+    const newColors = [...formData.colors];
+    newColors[index][field] = value;
+    setFormData({ ...formData, colors: newColors });
     setError('');
+  };
+
+  // ✅ Add new color
+  const addColor = () => {
+    setFormData({ ...formData, colors: [...formData.colors, { name: '', quantity: '' }] });
+  };
+
+  // ✅ Remove color
+  const removeColor = (index) => {
+    if (formData.colors.length > 1) {
+      const newColors = formData.colors.filter((_, i) => i !== index);
+      setFormData({ ...formData, colors: newColors });
+    }
+  };
+
+  // ✅ Handle specification changes
+  const handleSpecChange = (index, field, value) => {
+    const newSpecs = [...formData.specifications];
+    newSpecs[index][field] = value;
+    setFormData({ ...formData, specifications: newSpecs });
+    setError('');
+  };
+
+  // ✅ Add new specification
+  const addSpecification = () => {
+    setFormData({ ...formData, specifications: [...formData.specifications, { key: '', value: '' }] });
+  };
+
+  // ✅ Remove specification
+  const removeSpecification = (index) => {
+    if (formData.specifications.length > 1) {
+      const newSpecs = formData.specifications.filter((_, i) => i !== index);
+      setFormData({ ...formData, specifications: newSpecs });
+    }
   };
 
   const handleImageChange = (e) => {
@@ -261,10 +288,14 @@ const ProductManager = () => {
     const finalBrand = formData.brand === 'Other' 
       ? formData.customBrand.trim() 
       : formData.brand;
-      
-    const finalColors = formData.colors === 'Other'
-      ? formData.customColors.trim()
-      : formData.colors;
+
+    // ✅ Validate at least one color
+    const validColors = formData.colors.filter(color => color.name.trim());
+    if (validColors.length === 0) {
+      setError('At least one color combination is required');
+      setUploading(false);
+      return;
+    }
 
     if (!formData.title.trim()) {
       setError('Title is required');
@@ -283,11 +314,6 @@ const ProductManager = () => {
     }
     if (formData.productType === 'watch' && !formData.gender) {
       setError('Gender is required for wrist watches');
-      setUploading(false);
-      return;
-    }
-    if (!finalColors) {
-      setError('Color combination is required');
       setUploading(false);
       return;
     }
@@ -311,7 +337,22 @@ const ProductManager = () => {
     }
     formDataToSend.append('modelNumber', formData.modelNumber.trim() || 'N/A');
     formDataToSend.append('watchShape', formData.watchShape);
-    formDataToSend.append('colors', JSON.stringify([finalColors]));
+    
+    // ✅ Add colors
+    validColors.forEach((color, index) => {
+      formDataToSend.append(`colors[${index}][name]`, color.name.trim());
+      if (color.quantity && !isNaN(color.quantity)) {
+        formDataToSend.append(`colors[${index}][quantity]`, color.quantity.toString());
+      }
+    });
+    
+    // ✅ Add specifications
+    formData.specifications.forEach((spec, index) => {
+      if (spec.key.trim() && spec.value.trim()) {
+        formDataToSend.append(`specifications[${index}][key]`, spec.key.trim());
+        formDataToSend.append(`specifications[${index}][value]`, spec.value.trim());
+      }
+    });
 
     imageFiles.forEach(file => {
       formDataToSend.append('images', file);
@@ -335,7 +376,7 @@ const ProductManager = () => {
 
       const data = await res.json();
       if (data.success) {
-        fetchProducts(); // ✅ This will refresh availableBrands too
+        fetchProducts();
         resetForm();
       } else {
         setError(data.message || 'Failed to save product');
@@ -358,9 +399,9 @@ const ProductManager = () => {
       watchShape: 'Round',
       gender: 'men',
       productType: 'watch',
-      colors: '',
-      customColors: '',
+      colors: [{ name: '', quantity: '' }], // ✅ Reset to single color
       featured: false,
+      specifications: [{ key: '', value: '' }] // ✅ Reset to single spec
     });
     setImageFiles([]);
     setVideoFile(null);
@@ -375,17 +416,27 @@ const ProductManager = () => {
     const brand = isCustomBrand ? 'Other' : product.brand;
     const customBrand = isCustomBrand ? product.brand : '';
 
-    const colorCombo = product.colors?.[0] || '';
-    const isCustomColor = !colorCombinations.includes(colorCombo) || colorCombo === 'Other';
-    const colors = isCustomColor ? 'Other' : colorCombo;
-    const customColors = isCustomColor ? colorCombo : '';
-
     // ✅ Handle kids gender
     let genderValue = product.gender || 'men';
-    // Convert old boy/girl values to kids if they exist
     if (genderValue === 'boy' || genderValue === 'girl') {
       genderValue = 'kids';
     }
+
+    // ✅ Prepare colors
+    const colors = product.colors && product.colors.length > 0 
+      ? product.colors.map(color => ({ 
+          name: color.name || '', 
+          quantity: color.quantity !== null && color.quantity !== undefined ? color.quantity.toString() : ''
+        }))
+      : [{ name: '', quantity: '' }];
+
+    // ✅ Prepare specifications
+    const specifications = product.specifications && product.specifications.length > 0
+      ? product.specifications.map(spec => ({ 
+          key: spec.key || '', 
+          value: spec.value || '' 
+        }))
+      : [{ key: '', value: '' }];
 
     setFormData({
       title: product.title,
@@ -395,11 +446,11 @@ const ProductManager = () => {
       price: product.price?.toString() || '',
       modelNumber: product.modelNumber || '',
       watchShape: product.watchShape,
-      gender: genderValue, // ✅ Now uses kids instead of boy/girl
+      gender: genderValue,
       productType: product.productType || 'watch',
       colors,
-      customColors,
       featured: product.featured || false,
+      specifications
     });
     setPreviewImages(product.images || []);
     setPreviewVideo(product.video || '');
@@ -416,7 +467,7 @@ const ProductManager = () => {
       });
       const data = await res.json();
       if (data.success) {
-        fetchProducts(); // ✅ Refresh availableBrands after delete
+        fetchProducts();
       } else {
         setError(data.message || 'Failed to delete product');
       }
@@ -435,7 +486,7 @@ const ProductManager = () => {
         case 'men': return 'Men';
         case 'women': return 'Women';
         case 'unisex': return 'Unisex';
-        case 'kids': return 'Kids'; // ✅ KIDS CATEGORY
+        case 'kids': return 'Kids';
         default: return 'N/A';
       }
     }
@@ -451,7 +502,7 @@ const ProductManager = () => {
       case 'men': return 'bg-blue-900/30 text-blue-300';
       case 'women': return 'bg-pink-900/30 text-pink-300';
       case 'unisex': return 'bg-gray-800 text-gray-300';
-      case 'kids': return 'bg-green-900/30 text-green-300'; // ✅ KIDS USES GREEN
+      case 'kids': return 'bg-green-900/30 text-green-300';
       default: return 'bg-gray-800 text-gray-300';
     }
   };
@@ -463,7 +514,6 @@ const ProductManager = () => {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // Filters are applied automatically via useEffect
   };
 
   const resetFilters = () => {
@@ -684,28 +734,46 @@ const ProductManager = () => {
               )}
             </div>
 
+            {/* ✅ COLORS SECTION */}
             <div className="mb-4">
-              <label className="block text-gray-400 mb-2 text-sm">Color Combination *</label>
-              <select
-                value={formData.colors}
-                onChange={handleColorChange}
-                className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-                style={{ backgroundImage: `url("image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
-              >
-                {colorCombinations.map(combo => (
-                  <option key={combo} value={combo} className="bg-gray-800 text-white">{combo}</option>
+              <label className="block text-gray-400 mb-2 text-sm">Color Combinations *</label>
+              <div className="space-y-3">
+                {formData.colors.map((color, index) => (
+                  <div key={index} className="flex gap-3">
+                    <input
+                      type="text"
+                      value={color.name}
+                      onChange={(e) => handleColorChange(index, 'name', e.target.value)}
+                      placeholder="e.g., Gold - Black"
+                      className="flex-1 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
+                    />
+                    <input
+                      type="number"
+                      value={color.quantity}
+                      onChange={(e) => handleColorChange(index, 'quantity', e.target.value)}
+                      placeholder="Qty (optional)"
+                      min="0"
+                      className="w-32 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
+                    />
+                    {formData.colors.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeColor(index)}
+                        className="bg-red-900/30 text-red-300 px-3 rounded-lg hover:bg-red-800 transition"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
                 ))}
-              </select>
-              {formData.colors === 'Other' && (
-                <input
-                  type="text"
-                  value={formData.customColors}
-                  onChange={(e) => setFormData({ ...formData, customColors: e.target.value })}
-                  placeholder="e.g., Titanium - Ceramic"
-                  className="w-full mt-2 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
-                  required
-                />
-              )}
+                <button
+                  type="button"
+                  onClick={addColor}
+                  className="text-gold hover:text-yellow-300 text-sm font-medium flex items-center gap-1"
+                >
+                  + Add Color
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
@@ -748,6 +816,47 @@ const ProductManager = () => {
                 className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
                 placeholder="Describe the watch features, materials, and specifications..."
               />
+            </div>
+
+            {/* ✅ SPECIFICATIONS SECTION */}
+            <div className="mb-4">
+              <label className="block text-gray-400 mb-2 text-sm">Specifications</label>
+              <div className="space-y-3">
+                {formData.specifications.map((spec, index) => (
+                  <div key={index} className="flex gap-3">
+                    <input
+                      type="text"
+                      value={spec.key}
+                      onChange={(e) => handleSpecChange(index, 'key', e.target.value)}
+                      placeholder="Key (e.g., Watch Glass)"
+                      className="flex-1 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
+                    />
+                    <input
+                      type="text"
+                      value={spec.value}
+                      onChange={(e) => handleSpecChange(index, 'value', e.target.value)}
+                      placeholder="Value (e.g., Gorilla Glass)"
+                      className="flex-1 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
+                    />
+                    {formData.specifications.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeSpecification(index)}
+                        className="bg-red-900/30 text-red-300 px-3 rounded-lg hover:bg-red-800 transition"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addSpecification}
+                  className="text-gold hover:text-yellow-300 text-sm font-medium flex items-center gap-1"
+                >
+                  + Add Specification
+                </button>
+              </div>
             </div>
 
             <div className="mb-4">
@@ -918,8 +1027,9 @@ const ProductManager = () => {
                 <p className="text-gray-400 text-sm mb-3 line-clamp-2">{product.description}</p>
                 
                 <div className="flex flex-wrap gap-1 mb-3">
+                  {/* ✅ Display first color */}
                   <span className="bg-gray-80 text-gray-300 text-xs px-2 py-1 rounded">
-                    {product.colors?.[0] || 'N/A'}
+                    {product.colors?.[0]?.name || 'N/A'}
                   </span>
                   <span className={`text-xs px-2 py-1 rounded ${getCategoryBadgeClass(product)}`}>
                     {getProductCategory(product)}
