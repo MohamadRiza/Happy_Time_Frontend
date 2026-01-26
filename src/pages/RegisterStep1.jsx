@@ -1,12 +1,14 @@
 // src/pages/RegisterStep1.jsx
 import React, { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { customerLogin } from '../utils/auth'; // ✅ ADD AUTH IMPORT
 
 const RegisterStep1 = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     dob: '',
     country: 'Sri Lanka',
+    countryCode: '+94',
     province: '',
     city: '',
     address: '',
@@ -14,7 +16,8 @@ const RegisterStep1 = () => {
     email: '',
     username: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    customerType: 'retail'
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,15 +25,38 @@ const RegisterStep1 = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
+  const countryCodes = [
+    { code: '+94', name: 'Sri Lanka' },
+    { code: '+1', name: 'United States' },
+    { code: '+44', name: 'United Kingdom' },
+    { code: '+91', name: 'India' },
+    { code: '+971', name: 'United Arab Emirates' },
+    { code: '+86', name: 'China' },
+    { code: '+81', name: 'Japan' },
+    { code: '+49', name: 'Germany' },
+    { code: '+33', name: 'France' },
+    { code: '+39', name: 'Italy' }
+  ].sort((a, b) => a.name.localeCompare(b.name));
+
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value, type, checked } = e.target;
+    
+    if (name === 'mobileNumber') {
+      const digitsOnly = value.replace(/\D/g, '');
+      const limitedDigits = digitsOnly.slice(0, 10);
+      setFormData(prev => ({ ...prev, mobileNumber: limitedDigits }));
+    } else if (name === 'fullName') {
+      const limitedName = value.slice(0, 40);
+      setFormData(prev => ({ ...prev, fullName: limitedName }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
     setError('');
   };
 
-  // Password strength logic
   const getPasswordStrength = (password) => {
     if (!password) return { score: 0, label: '', color: '' };
     
@@ -54,8 +80,26 @@ const RegisterStep1 = () => {
       setError('Full name is required');
       return false;
     }
+    if (formData.fullName.trim().length > 40) {
+      setError('Full name must be 40 characters or less');
+      return false;
+    }
+    if (!/^[a-zA-Z\s\-']+$/.test(formData.fullName.trim())) {
+      setError('Full name can only contain letters, spaces, hyphens, and apostrophes');
+      return false;
+    }
     if (!formData.dob) {
       setError('Date of birth is required');
+      return false;
+    }
+    const dob = new Date(formData.dob);
+    const today = new Date();
+    if (dob > today) {
+      setError('Date of birth cannot be in the future');
+      return false;
+    }
+    if (dob < new Date('1900-01-01')) {
+      setError('Please enter a valid date of birth');
       return false;
     }
     if (!formData.country.trim()) {
@@ -70,12 +114,24 @@ const RegisterStep1 = () => {
       setError('Mobile number is required');
       return false;
     }
+    if (formData.mobileNumber.length < 9 || formData.mobileNumber.length > 10) {
+      setError('Mobile number must be 9-10 digits');
+      return false;
+    }
+    if (!/^\d+$/.test(formData.mobileNumber)) {
+      setError('Mobile number can only contain digits');
+      return false;
+    }
     if (!formData.username.trim()) {
       setError('Username is required');
       return false;
     }
     if (formData.username.length < 3) {
       setError('Username must be at least 3 characters');
+      return false;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      setError('Username can only contain letters, numbers, and underscores');
       return false;
     }
     if (!formData.password) {
@@ -93,22 +149,74 @@ const RegisterStep1 = () => {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  // ✅ NEW: Handle retail registration
+  const handleRetailRegistration = async () => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      
+      // Prepare retail registration data
+      const registerData = {
+        fullName: formData.fullName,
+        dob: formData.dob,
+        country: formData.country,
+        province: formData.province,
+        city: formData.city,
+        address: formData.address,
+        mobileNumber: `${formData.countryCode}${formData.mobileNumber}`,
+        email: formData.email,
+        username: formData.username,
+        password: formData.password,
+        businessDetails: {
+          sellsWatches: false,
+          hasWatchShop: false,
+          shopName: '',
+          shopAddress: '',
+          businessType: 'retail'
+        }
+      };
+
+      const res = await fetch(`${API_URL}/api/customers/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(registerData)
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        customerLogin(data.data.token, data.data.customer);
+        navigate('/account');
+      } else {
+        setError(data.message || 'Registration failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Retail registration error:', err);
+      setError('Network error. Please try again.');
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep1()) return;
 
     setLoading(true);
-    // In real app, call API here
-    setTimeout(() => {
+    
+    if (formData.customerType === 'retail') {
+      // ✅ ACTUAL RETAIL REGISTRATION
+      await handleRetailRegistration();
+    } else {
+      // Wholesale customer - save to session and go to step 2
       sessionStorage.setItem('registerStep1', JSON.stringify(formData));
       navigate('/register/step2');
-      setLoading(false);
-    }, 600);
+    }
+    
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Subtle gold gradient accents */}
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white flex items-center justify-center p-4 py-8 md:py-12 relative overflow-hidden">
       <div 
         className="absolute inset-0 opacity-5"
         style={{
@@ -117,15 +225,68 @@ const RegisterStep1 = () => {
         }}
       ></div>
 
-      <div className="relative w-full max-w-2xl">
-        <div className="bg-black/40 backdrop-blur-xl border border-gray-800 rounded-2xl p-6 md:p-8 shadow-2xl shadow-gold/10">
-          <h2 className="text-2xl md:text-3xl font-bold text-gold mb-6 text-center tracking-wide">Create Account</h2>
+      <div className="relative w-full max-w-4xl">
+        <div className="bg-black/40 backdrop-blur-xl border border-gray-800 rounded-2xl p-6 md:p-10 shadow-2xl shadow-gold/10">
+          <h2 className="text-2xl md:text-3xl font-bold text-gold mb-2 text-center tracking-wide">Create Account</h2>
+          <p className="text-gray-400 text-center mb-6 text-sm">Join us to explore premium timepieces</p>
           
-          {error && <p className="text-red-400 mb-5 text-center text-sm">{error}</p>}
+          {error && <p className="text-red-400 mb-5 text-center text-sm bg-red-500/10 border border-red-500/20 rounded-lg py-2 px-4">{error}</p>}
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Customer Type Selection */}
+            <div className="bg-gray-800/30 p-4 md:p-5 rounded-xl">
+              <h3 className="text-base md:text-lg font-semibold text-white mb-4">Account Type</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                <label className="cursor-pointer">
+                  <div className={`p-4 rounded-lg border-2 transition-all ${
+                    formData.customerType === 'retail' 
+                      ? 'border-gold bg-gold/10' 
+                      : 'border-gray-700 hover:border-gray-600'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        name="customerType"
+                        value="retail"
+                        checked={formData.customerType === 'retail'}
+                        onChange={handleChange}
+                        className="w-4 h-4 text-gold"
+                      />
+                      <div>
+                        <div className="font-medium text-white">Retail Customer</div>
+                        <div className="text-gray-400 text-sm">Shop for personal use</div>
+                      </div>
+                    </div>
+                  </div>
+                </label>
+                
+                <label className="cursor-pointer">
+                  <div className={`p-4 rounded-lg border-2 transition-all ${
+                    formData.customerType === 'wholesale' 
+                      ? 'border-gold bg-gold/10' 
+                      : 'border-gray-700 hover:border-gray-600'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        name="customerType"
+                        value="wholesale"
+                        checked={formData.customerType === 'wholesale'}
+                        onChange={handleChange}
+                        className="w-4 h-4 text-gold"
+                      />
+                      <div>
+                        <div className="font-medium text-white">Wholesale Customer</div>
+                        <div className="text-gray-400 text-sm">Business/Reseller account</div>
+                      </div>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
             {/* Personal Info Group */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-400 mb-2 text-sm font-medium">Full Name *</label>
                 <input
@@ -133,10 +294,14 @@ const RegisterStep1 = () => {
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
                   placeholder="John Doe"
+                  maxLength="40"
                   required
                 />
+                <p className="text-gray-500 text-xs mt-1">
+                  Max 40 characters (letters, spaces, hyphens, apostrophes only)
+                </p>
               </div>
 
               <div>
@@ -146,14 +311,14 @@ const RegisterStep1 = () => {
                   name="dob"
                   value={formData.dob}
                   onChange={handleChange}
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
                   required
                 />
               </div>
             </div>
 
             {/* Location Group */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-400 mb-2 text-sm font-medium">Country *</label>
                 <div className="relative">
@@ -161,15 +326,15 @@ const RegisterStep1 = () => {
                     name="country"
                     value={formData.country}
                     onChange={handleChange}
-                    className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-3 text-white pr-10 appearance-none focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition cursor-pointer"
+                    className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 text-white pr-10 appearance-none focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition cursor-pointer"
                     required
                   >
-                    <option value="Sri Lanka" className="bg-gray-900 text-white">Sri Lanka</option>
-                    <option value="India" className="bg-gray-900 text-white">India</option>
-                    <option value="United Arab Emirates" className="bg-gray-900 text-white">United Arab Emirates</option>
-                    <option value="Other" className="bg-gray-900 text-white">Other</option>
+                    {countryCodes.map(country => (
+                      <option key={country.code} value={country.name} className="bg-gray-900 text-white">
+                        {country.name}
+                      </option>
+                    ))}
                   </select>
-                  {/* Custom dropdown arrow */}
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -185,7 +350,7 @@ const RegisterStep1 = () => {
                   name="province"
                   value={formData.province}
                   onChange={handleChange}
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
                   placeholder="Western Province"
                   required
                 />
@@ -193,7 +358,7 @@ const RegisterStep1 = () => {
             </div>
 
             {/* Optional Location */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-400 mb-2 text-sm font-medium">City (Optional)</label>
                 <input
@@ -201,37 +366,55 @@ const RegisterStep1 = () => {
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
                   placeholder="Colombo"
                 />
               </div>
 
               <div>
                 <label className="block text-gray-400 mb-2 text-sm font-medium">Address (Optional)</label>
-                <textarea
+                <input
+                  type="text"
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  rows="2"
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
                   placeholder="123 Main Street"
                 />
               </div>
             </div>
 
-            {/* Contact Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Contact Info with Country Code */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-400 mb-2 text-sm font-medium">Mobile Number *</label>
-                <input
-                  type="tel"
-                  name="mobileNumber"
-                  value={formData.mobileNumber}
-                  onChange={handleChange}
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
-                  placeholder="+94 77 123 4567"
-                  required
-                />
+                <div className="flex gap-2">
+                  <select
+                    name="countryCode"
+                    value={formData.countryCode}
+                    onChange={handleChange}
+                    className="w-1/3 bg-black/30 border border-gray-700 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent appearance-none"
+                  >
+                    {countryCodes.map(country => (
+                      <option key={country.code} value={country.code} className="bg-gray-900 text-white">
+                        {country.code}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="tel"
+                    name="mobileNumber"
+                    value={formData.mobileNumber}
+                    onChange={handleChange}
+                    className="flex-1 bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
+                    placeholder="771234567"
+                    maxLength="10"
+                    required
+                  />
+                </div>
+                <p className="text-gray-500 text-xs mt-1">
+                  Enter 9-10 digits (no spaces or special characters)
+                </p>
               </div>
 
               <div>
@@ -241,14 +424,14 @@ const RegisterStep1 = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
                   placeholder="john@example.com"
                 />
               </div>
             </div>
 
             {/* Credentials */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-400 mb-2 text-sm font-medium">Username *</label>
                 <input
@@ -256,10 +439,13 @@ const RegisterStep1 = () => {
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
                   placeholder="johndoe123"
                   required
                 />
+                <p className="text-gray-500 text-xs mt-1">
+                  Letters, numbers, and underscores only (min 3 characters)
+                </p>
               </div>
 
               <div>
@@ -270,7 +456,7 @@ const RegisterStep1 = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-3 pr-12 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
+                    className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 pr-12 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
                     placeholder="••••••••"
                     required
                   />
@@ -294,7 +480,6 @@ const RegisterStep1 = () => {
                   </button>
                 </div>
 
-                {/* Password Strength Indicator */}
                 {formData.password && (
                   <div className="mt-2">
                     <div className="flex justify-between text-xs mb-1">
@@ -324,7 +509,7 @@ const RegisterStep1 = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-3 pr-12 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 pr-12 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
                   placeholder="••••••••"
                   required
                 />
@@ -353,9 +538,10 @@ const RegisterStep1 = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gold text-black py-3.5 rounded-lg font-bold tracking-wide hover:bg-gold/90 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-gold/20 disabled:opacity-70"
+              className="w-full bg-gold text-black py-3 rounded-lg font-bold tracking-wide hover:bg-gold/90 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-gold/20 disabled:opacity-70"
             >
-              {loading ? 'Creating Account...' : 'Continue to Business Details'}
+              {loading ? 'Creating Account...' : 
+               formData.customerType === 'retail' ? 'Create Account' : 'Continue to Business Details'}
             </button>
           </form>
 

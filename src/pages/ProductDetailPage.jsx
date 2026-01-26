@@ -333,18 +333,29 @@ const ProductDetailPage = () => {
                     <button
                       key={index}
                       onClick={() => setMainImageIndex(index)}
-                      className={`bg-gray-900/40 backdrop-blur border rounded-lg overflow-hidden aspect-square flex items-center justify-center transition-all ${
+                      className={`bg-gray-900/40 backdrop-blur border rounded-lg overflow-hidden aspect-square flex items-center justify-center transition-all relative ${
                         mainImageIndex === index 
                           ? 'border-gold shadow-lg shadow-gold/20' 
                           : 'border-gray-800 hover:border-gray-600'
                       }`}
                     >
                       {isThumbVideo ? (
-                        <div className="flex items-center justify-center w-full h-full text-gray-400">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
+                        <div className="relative w-full h-full">
+                          {/* Video thumbnail */}
+                          <video
+                            src={media}
+                            className="w-full h-full object-cover"
+                            muted
+                            playsInline
+                          />
+                          {/* Play icon overlay */}
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none">
+                            <div className="bg-gold/90 rounded-full p-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-black" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </div>
+                          </div>
                         </div>
                       ) : (
                         <img
