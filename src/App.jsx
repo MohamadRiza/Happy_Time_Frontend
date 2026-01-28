@@ -44,6 +44,7 @@ import OrdersList from "./pages/AdminPages/OrdersList";
 import ApplicationStatusCheck from "./pages/ApplicationStatusCheck";
 import ApplicationSuccess from "./pages/ApplicationSuccess";
 import TawkToChat from "./components/TawkToChat";
+import MobileChatButton from "./components/MobileChatButton";
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
         <TopInfoBar />
         <Navbar />
         <TawkToChat />
+        <MobileChatButton />
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
