@@ -13,7 +13,7 @@ const branches = [
     address: '49A Keyzer Street, Pettah, Colombo, Sri Lanka',
     phone: '+94 77 123 4567',
     email: 'info@happytime.lk',
-    mapLink: 'https://www.google.com/maps?q=Happy+Time+(Pvt)+Ltd,+Pettah,+Colombo&output=embed',
+    mapLink: 'https://www.google.com/maps?q=Happy+Time+Pvt+Ltd,+Pettah,+Colombo&output=embed',
     image: 'https://lh3.googleusercontent.com/gps-cs-s/AG0ilSy6UDynoIaGrBBe5auk2SVB2B-uXWf0Y6lYYBYbYHgfGw37o3DkPW7PCwCblIwyoydTk3UOal3RS-EreuI8ISWdVUbUc7Fh5zKqa47Y79BDckNRGkBCocD3PYtInikpi63J3c6NJVyw5Ik=s680-w680-h510',
   },
   {
@@ -22,7 +22,7 @@ const branches = [
     address: 'No 143, 2nd Cross Street, Pettah, Colombo, Sri Lanka',
     phone: '+94 71 987 6543',
     email: 'online@happytime.lk',
-    mapLink: 'https://www.google.com/maps?q=No+143,+2nd+Cross+Street,+Pettah,+Colombo,+Sri+Lanka&output=embed',
+    mapLink: 'https://www.google.com/maps?q=No+143,+2nd+Cross+Street,+Pettah,+Colombo&output=embed',
     image: 'https://lh3.googleusercontent.com/p/AF1QipPCaSrRY-KInMSCHCAVmckf46xC4ASBekS6FeGR=s680-w680-h510',
   },
   {
@@ -31,7 +31,7 @@ const branches = [
     address: 'No 84, 2nd Cross Street, Pettah, Colombo, Sri Lanka',
     phone: '+94 75 456 7890',
     email: 'retail@happytime.lk',
-    mapLink: 'https://www.google.com/maps?q=No+84,+2nd+Cross+Street,+Pettah,+Colombo,+Sri+Lanka&output=embed',
+    mapLink: 'https://www.google.com/maps?q=No+84,+2nd+Cross+Street,+Pettah,+Colombo&output=embed',
     image: 'https://lh3.googleusercontent.com/gps-cs-s/AG0ilSx3VTjZPG1WzVFKWAOlfELllTrBAZF3xGC2lwWQWwMQOWMCbiDIRpd77aLZQuHBkiCvsuDz95jyfDUnuGFrEmJ4jjY__wBEXzoAUd_NxRZ18ILihq23rALg_rrFVtUdhIoK7EtA6A=s680-w680-h510',
   },
   {
@@ -40,7 +40,7 @@ const branches = [
     address: 'No 57, Yatinuwara Lane (Alimudukkuwa), Kandy, Sri Lanka',
     phone: '+94 77 654 3210',
     email: 'kandy@happytime.lk',
-    mapLink: 'https://www.google.com/maps?q=No+57,+Yatinuwara+Lane,+Kandy,+Sri+Lanka&output=embed',
+    mapLink: 'https://www.google.com/maps?q=No+57,+Yatinuwara+Lane,+Kandy&output=embed',
     image: 'https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg',
   },
   {
@@ -49,7 +49,7 @@ const branches = [
     address: 'No. 102–104, Behind Masjid Bin Dafoos, Murshid Bazar, Deira, Dubai, UAE',
     phone: '+971 55 123 4567',
     email: 'dubai@happytime.lk',
-    mapLink: 'https://www.google.com/maps?q=No.102-104,+Murshid+Bazar,+Deira,+Dubai,+UAE&output=embed',
+    mapLink: 'https://www.google.com/maps?q=No.102-104,+Murshid+Bazar,+Deira,+Dubai&output=embed',
     image: 'https://images.pexels.com/photos/4388167/pexels-photo-4388167.jpeg',
   },
 ];
@@ -88,7 +88,7 @@ const countryCodes = [
   { code: '+421', name: 'Slovakia' }
 ].sort((a, b) => a.name.localeCompare(b.name));
 
-// ✅ Contact Form Component (needs to be separate to use reCAPTCHA hook)
+// ✅ Contact Form Component
 const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
   const [formData, setFormData] = useState({ 
     name: '', 
@@ -99,21 +99,18 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // ✅ Get reCAPTCHA v3 hook
   const { executeRecaptcha } = useGoogleReCaptcha();
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  // ✅ Get selected branch
   const getSelectedBranch = () => {
-    return branches.find(b => b.id === selectedBranchId) || branches[0];
+    return branches.find(b => b.id === selectedBranchId) || null;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     
     if (name === 'phone') {
-      // ✅ Only allow digits and limit to 10 characters
       const digitsOnly = value.replace(/\D/g, '');
       const limitedDigits = digitsOnly.slice(0, 10);
       setFormData({ ...formData, phone: limitedDigits });
@@ -123,13 +120,11 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
   };
 
   const validateForm = () => {
-    // Trim all values
     const nameTrimmed = formData.name.trim();
     const emailTrimmed = formData.email.trim();
     const phoneTrimmed = formData.phone.trim();
     const messageTrimmed = formData.message.trim();
 
-    // Required fields validation
     if (!nameTrimmed) {
       toast.error('Please enter your name.');
       return false;
@@ -143,19 +138,21 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
       return false;
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailTrimmed)) {
       toast.error('Please enter a valid email address.');
       return false;
     }
 
-    // Phone validation (optional but if provided, must be 9-10 digits)
-    if (phoneTrimmed) {
-      if (phoneTrimmed.length < 9 || phoneTrimmed.length > 10) {
-        toast.error('Phone number must contain 9-10 digits.');
-        return false;
-      }
+    if (phoneTrimmed && (phoneTrimmed.length < 9 || phoneTrimmed.length > 10)) {
+      toast.error('Phone number must contain 9-10 digits.');
+      return false;
+    }
+
+    // ✅ Enforce branch selection
+    if (!selectedBranchId) {
+      toast.error('Please select a branch to contact.');
+      return false;
     }
 
     return true;
@@ -168,36 +165,29 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
       return;
     }
 
-    // ✅ Check if reCAPTCHA is ready
     if (!executeRecaptcha) {
       toast.error('reCAPTCHA not ready. Please wait a moment and try again.');
       return;
     }
 
-    // ✅ Get branch
-    const selectedBranch = getSelectedBranch();
-    const branchName = selectedBranch.name.trim();
-
     setSubmitting(true);
 
     try {
-      // ✅ Execute reCAPTCHA v3 invisibly - Get token
-      console.log('🔄 Generating reCAPTCHA token...');
       const recaptchaToken = await executeRecaptcha('contact_form_submit');
-      console.log('✅ Token generated:', recaptchaToken ? 'YES' : 'NO');
+
+      const selectedBranch = getSelectedBranch();
+      const branchName = selectedBranch?.name || 'Unknown Branch';
 
       const response = await fetch(`${API_URL}/api/messages`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name.trim(),
           email: formData.email.trim(),
           phone: formData.phone.trim() ? `${formData.countryCode}${formData.phone.trim()}` : '',
           message: formData.message.trim(),
           branch: branchName,
-          recaptchaToken: recaptchaToken, // ✅ Send reCAPTCHA v3 token
+          recaptchaToken
         }),
       });
 
@@ -207,9 +197,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
         toast.success('Thank you! Your message has been sent successfully.');
         setFormData({ name: '', email: '', phone: '', countryCode: '+94', message: '' });
       } else {
-        // ✅ Show EXACT error from backend
-        const errorMsg = 
-          data.message || 
+        const errorMsg = data.message || 
           (Array.isArray(data.errors) ? data.errors.join(', ') : 'Failed to send your message.');
         toast.error(errorMsg);
       }
@@ -243,7 +231,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
           className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
         />
         
-        {/* ✅ PHONE WITH COUNTRY CODE AND STRICT VALIDATION */}
+        {/* PHONE WITH COUNTRY CODE */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="md:col-span-1">
             <label className="sr-only">Country Code</label>
@@ -283,7 +271,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
           className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
         ></textarea>
         
-        {/* ✅ reCAPTCHA v3 Notice */}
+        {/* reCAPTCHA Notice */}
         <div className="text-xs text-gray-500 text-center">
           This site is protected by reCAPTCHA and the Google{' '}
           <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">
@@ -310,15 +298,13 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
 
 // ✅ Main Contact Page Component
 const ContactPage = () => {
-  const [selectedBranchId, setSelectedBranchId] = useState(1);
+  const [selectedBranchId, setSelectedBranchId] = useState(null); // ✅ Initially null
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  // ✅ Get reCAPTCHA site key from environment variable
   const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
-  // ✅ Guaranteed to always have a valid branch
   const getSelectedBranch = () => {
-    return branches.find(b => b.id === selectedBranchId) || branches[0];
+    return branches.find(b => b.id === selectedBranchId) || null;
   };
 
   const selectedBranch = getSelectedBranch();
@@ -328,7 +314,6 @@ const ContactPage = () => {
       <div className="bg-black text-white min-h-screen font-sans">
         <ScrollToTop />
         
-        {/* TOAST CONTAINER */}
         <ToastContainer 
           position="top-right"
           autoClose={5000}
@@ -366,15 +351,18 @@ const ContactPage = () => {
             {/* LEFT: Branch Info */}
             <div>
               <div className="mb-6">
-                <label className="text-gold font-semibold mb-2 block">Select Branch</label>
+                {/* ✅ NEW: Clear, user-focused label */}
+                <h3 className="text-gold font-semibold text-lg mb-2">Which branch would you like to contact?</h3>
                 <select
-                  value={selectedBranchId}
+                  value={selectedBranchId || ''}
                   onChange={(e) => {
-                    setSelectedBranchId(Number(e.target.value));
+                    const val = e.target.value;
+                    setSelectedBranchId(val ? Number(val) : null);
                     setMapLoaded(false);
                   }}
                   className="w-full bg-black border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gold shadow-sm"
                 >
+                  <option value="">— Select a branch —</option>
                   {branches.map((branch) => (
                     <option key={branch.id} value={branch.id}>
                       {branch.name}
@@ -383,20 +371,29 @@ const ContactPage = () => {
                 </select>
               </div>
 
-              <div className="space-y-4 mt-4 p-6 bg-gray-900 rounded-2xl border border-gray-800 shadow-md">
-                <div>
-                  <h3 className="text-gold font-semibold text-lg mb-1">Address</h3>
-                  <p className="text-gray-300">{selectedBranch.address}</p>
+              {selectedBranch ? (
+                <div className="space-y-4 mt-4 p-6 bg-gray-900 rounded-2xl border border-gray-800 shadow-md">
+                  <div>
+                    <h3 className="text-gold font-semibold text-lg mb-1">Address</h3>
+                    <p className="text-gray-300">{selectedBranch.address}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-gold font-semibold text-lg mb-1">Contact</h3>
+                    <p className="text-gray-300 flex items-center gap-2">📞 {selectedBranch.phone}</p>
+                    <p className="text-gray-300 flex items-center gap-2">✉️ {selectedBranch.email}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-gold font-semibold text-lg mb-1">Contact</h3>
-                  <p className="text-gray-300 flex items-center gap-2">📞 {selectedBranch.phone}</p>
-                  <p className="text-gray-300 flex items-center gap-2">✉️ {selectedBranch.email}</p>
+              ) : (
+                <div className="p-6 bg-gray-900/50 rounded-2xl border border-gray-800 text-gray-500 text-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto mb-3 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p>Select a branch above to view its details and send a message.</p>
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* RIGHT: Contact Form with reCAPTCHA v3 */}
+            {/* RIGHT: Contact Form */}
             <ContactFormWithRecaptcha 
               selectedBranchId={selectedBranchId} 
               branches={branches}
@@ -407,22 +404,33 @@ const ContactPage = () => {
           <div className="mt-20">
             <h3 className="text-2xl font-bold text-white text-center mb-6">Location</h3>
             <div className="rounded-2xl overflow-hidden border border-gray-800 h-96 md:h-[500px] relative shadow-lg">
-              {!mapLoaded && (
+              {!mapLoaded && selectedBranch && (
                 <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/50">
                   <span className="text-white">Loading map...</span>
                 </div>
               )}
-              <iframe
-                src={selectedBranch.mapLink}
-                width="100%"
-                height="100%"
-                className="rounded-xl relative z-10"
-                allowFullScreen
-                loading="lazy"
-                onLoad={() => setMapLoaded(true)}
-                title={selectedBranch.name}
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
+              {selectedBranch ? (
+                <iframe
+                  src={selectedBranch.mapLink}
+                  width="100%"
+                  height="100%"
+                  className="rounded-xl relative z-10"
+                  allowFullScreen
+                  loading="lazy"
+                  onLoad={() => setMapLoaded(true)}
+                  title={selectedBranch.name}
+                  referrerPolicy="no-referrer-when-downgrade"
+                ></iframe>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-900/50">
+                  <div className="text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                    <p className="text-gray-500">Select a branch to see its location on the map.</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
