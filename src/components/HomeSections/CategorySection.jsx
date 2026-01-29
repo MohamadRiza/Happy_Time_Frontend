@@ -39,28 +39,33 @@ const CategorySection = () => {
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Header */}
+        {/* ✅ Header matching reference image */}
         <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Shop by <span className="text-gold">Category</span>
+          <div className="inline-block mb-4">
+            <span className="text-xs md:text-sm tracking-[0.3em] text-gold/80 uppercase font-light">
+              Explore Collections
+            </span>
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-white mb-6 leading-tight">
+            Shop by {' '}
+            <span className="text-gold font-normal">Category</span>
           </h2>
-          <div className="w-32 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto my-6 rounded-full" />
-          <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
-            Discover meticulously crafted timepieces designed for distinction and style.
-          </p>
+          
+          {/* Thin centered gold underline */}
+          <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-gold to-transparent mx-auto" />
         </div>
 
-        {/* 3D Watch Display Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-20 gap-x-6 justify-items-center">
+        {/* ✅ Grid: 2 on mobile, 2 on small tablet, 4 on desktop */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-20 justify-items-center">
           {categories.map((category) => {
-            // ✅ Build query params correctly
             const queryParams = new URLSearchParams();
             
             if (category.id === 'wall_clock') {
               queryParams.set('productType', 'wall_clock');
             } else {
               queryParams.set('productType', 'watch');
-              queryParams.set('gender', category.id); // ✅ Now includes 'kids'
+              queryParams.set('gender', category.id);
             }
 
             const linkUrl = `/shop?${queryParams.toString()}`;
@@ -68,7 +73,7 @@ const CategorySection = () => {
             return (
               <div
                 key={category.id}
-                className="group flex flex-col items-center text-center max-w-[220px]"
+                className="group flex flex-col items-center text-center max-w-[220px] w-full"
               >
                 <Link to={linkUrl} className="block mb-8">
                   {/* 3D Floating Watch Stand */}
@@ -94,7 +99,7 @@ const CategorySection = () => {
                 <h3 className="text-white text-2xl font-semibold mb-3 group-hover:text-gold transition-colors">
                   {category.name}
                 </h3>
-                <p className="text-gray-400 text-sm leading-relaxed mb-5">
+                <p className="text-gray-400 text-sm leading-relaxed mb-5 px-2">
                   {category.description}
                 </p>
 

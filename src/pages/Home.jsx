@@ -11,11 +11,13 @@ const Home = () => {
   return (
     <>
     <ScrollToTop />
+    <div className="relative">
       <HeroSection />
       <FeaturedWatches />
       <CategorySection/>
       <AboutSection />
       <TrustSection/>
+      </div>
       {/* You can add other sections below: product highlights, about snippet, etc. */}
     </>
   );

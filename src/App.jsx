@@ -75,7 +75,14 @@ function App() {
                 </CustomerProtectedRoute>
               }
             />
-            <Route path="/orders" element={<CustomerProtectedRoute><CustomerOrders /></CustomerProtectedRoute>} />
+            <Route
+              path="/orders"
+              element={
+                <CustomerProtectedRoute>
+                  <CustomerOrders />
+                </CustomerProtectedRoute>
+              }
+            />
             // In your App.jsx routes
             <Route
               path="/cart"
@@ -137,24 +144,38 @@ function App() {
                 </AdminProtectedRoute>
               }
             />
-
-            <Route 
-  path="/admin/settings" 
-  element={
-    <AdminProtectedRoute>
-      <AdminSettings />
-    </AdminProtectedRoute>
-  } 
-/>
-
-
-<Route path="/application-success" element={<ApplicationSuccess />} />
-<Route path="/application-status" element={<ApplicationStatusCheck />} />
-
-
-<Route path="/admin/orders" element={<AdminProtectedRoute><OrdersList /></AdminProtectedRoute>} />
-
-            <Route path="/admin/applications" element={<AdminProtectedRoute><ApplicantsList /></AdminProtectedRoute>}></Route>
+            <Route
+              path="/admin/settings"
+              element={
+                <AdminProtectedRoute>
+                  <AdminSettings />
+                </AdminProtectedRoute>
+              }
+            />
+            <Route
+              path="/application-success"
+              element={<ApplicationSuccess />}
+            />
+            <Route
+              path="/application-status"
+              element={<ApplicationStatusCheck />}
+            />
+            <Route
+              path="/admin/orders"
+              element={
+                <AdminProtectedRoute>
+                  <OrdersList />
+                </AdminProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/applications"
+              element={
+                <AdminProtectedRoute>
+                  <ApplicantsList />
+                </AdminProtectedRoute>
+              }
+            ></Route>
             {/* ✅ CATCH ALL - REDIRECT TO HOME */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
