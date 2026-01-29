@@ -1,15 +1,10 @@
-// src/components/HomeSections/HeroSection.jsx
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+// src/components/HeroSection.jsx
+import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  const heroRef = useRef(null);
-  const autoAdvanceTimeout = useRef(null);
 
   const videoSources = [
     '/generated_video.mp4',
@@ -19,182 +14,94 @@ const HeroSection = () => {
 
   const totalVideos = videoSources.length;
 
-  /* Entrance animation */
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
-  /* Scroll progress via IntersectionObserver */
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const progress = 1 - entry.intersectionRatio;
-        heroRef.current?.setAttribute(
-          'data-scroll-progress',
-          progress.toString()
-        );
-      },
-      { threshold: [0, 0.25, 0.5, 0.75, 1] }
-    );
-
-    if (heroRef.current) observer.observe(heroRef.current);
-
-    return () => observer.disconnect();
-  }, []);
-
-  /* Auto-advance with hover pause */
-  useEffect(() => {
-    autoAdvanceTimeout.current = setTimeout(() => {
-      if (!isHovered) {
-        setCurrentVideoIndex((prev) => (prev + 1) % totalVideos);
-      }
-    }, 12000);
-
-    return () => clearTimeout(autoAdvanceTimeout.current);
-  }, [currentVideoIndex, isHovered, totalVideos]);
-
-  const nextVideo = useCallback(() => {
-    clearTimeout(autoAdvanceTimeout.current);
+  // Go to next video
+  const nextVideo = () => {
     setCurrentVideoIndex((prev) => (prev + 1) % totalVideos);
-  }, [totalVideos]);
+  };
 
-  const prevVideo = useCallback(() => {
-    clearTimeout(autoAdvanceTimeout.current);
+  // Go to previous video
+  const prevVideo = () => {
     setCurrentVideoIndex((prev) => (prev - 1 + totalVideos) % totalVideos);
-  }, [totalVideos]);
+  };
 
-  const scrollProgress = parseFloat(
-    heroRef.current?.dataset.scrollProgress || '0'
-  );
+  // Auto-advance after video duration
+  useEffect(() => {
+    const videoDuration = 10000; // approximate duration in ms if videos are similar length
+    const timer = setTimeout(nextVideo, videoDuration);
+    return () => clearTimeout(timer);
+  }, [currentVideoIndex]);
 
   return (
-    <div
-      ref={heroRef}
-      className="sticky top-0 w-full h-screen overflow-hidden bg-black z-0"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Video */}
-      <video
-        key={currentVideoIndex}
-        src={videoSources[currentVideoIndex]}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        className="absolute inset-0 w-full h-full object-cover"
-        onError={(e) =>
-          console.warn('Hero video failed:', e.currentTarget.src)
-        }
-      />
+    <div className="relative w-full h-screen overflow-hidden">
+      {/* Video Backgrounds */}
+      {videoSources.map((src, index) => (
+        <video
+          key={index}
+          src={src}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            index === currentVideoIndex ? 'opacity-100 z-0' : 'opacity-0 z-[-1]'
+          }`}
+        />
+      ))}
 
-      {/* Scroll fade overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `linear-gradient(to bottom, transparent 0%, rgba(0,0,0,${
-            scrollProgress * 0.7
-          }) 100%)`,
-        }}
-      />
-
-      {/* Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/80 z-[1]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] z-[2]" />
-
-      {/* Content */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center">
-        <div
-          className="text-center px-4 max-w-5xl"
-          style={{
-            opacity: 1 - scrollProgress * 0.8,
-            transform: `translateY(${scrollProgress * 30}px) scale(${
-              1 - scrollProgress * 0.1
-            })`,
-            transition: 'opacity 0.4s ease, transform 0.4s ease',
-          }}
-        >
-          <span className="inline-block mb-6 px-6 py-2 text-sm tracking-[0.3em] text-gold/90 border border-gold/30 rounded-full backdrop-blur-sm bg-black/20 uppercase">
-            Since 1996
-          </span>
-
-          <h1 className="text-6xl md:text-8xl font-light text-white mb-8">
-            <span className="block">Timeless</span>
-            <span className="block text-gold font-normal">Elegance</span>
+      {/* Overlay for readability */}
+      <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+        <div className="text-center px-4 max-w-3xl">
+          <h1 className="text-4xl md:text-6xl font-bold text-gold mb-4 tracking-wide">
+            Timeless Elegance
           </h1>
-
-          <p className="text-lg text-gray-200 mb-12 max-w-2xl mx-auto">
-            Curating the world's finest luxury timepieces across Sri Lanka
+          <p className="text-lg md:text-xl text-white mb-8">
+            Discover the world’s most exquisite luxury timepieces at Happy Time, Sri Lanka’s trusted watch connoisseur since 1996.
           </p>
-
-          <div className="flex gap-5 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/shop">
-              <button className="px-10 py-4 bg-gold text-black rounded-lg uppercase tracking-wider hover:scale-105 transition">
-                Explore Collection
-              </button>
+            <button className="bg-gold text-black font-semibold px-6 py-3 rounded-full hover:bg-gold/90 transition-all shadow-lg">
+              Explore Collection
+            </button>
             </Link>
             <Link to="/contact">
-              <button className="px-10 py-4 border border-gold text-gold rounded-lg uppercase tracking-wider hover:bg-gold hover:text-black transition">
-                Contact Us
-              </button>
+            <button className="border-2 border-gold text-gold font-semibold px-6 py-3 rounded-full hover:bg-gold hover:text-black transition-all">
+              Contact Us  
+            </button>
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation Arrows */}
       <button
         onClick={prevVideo}
-        className="absolute left-6 top-1/2 -translate-y-1/2 z-20 p-4 bg-black/30 rounded-full"
-        style={{ opacity: 1 - scrollProgress }}
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white bg-black/30 hover:bg-black/50 p-3 rounded-full z-10 transition-all"
+        aria-label="Previous video"
       >
-        <FaChevronLeft />
+        <FaChevronLeft size={20} />
       </button>
-
       <button
         onClick={nextVideo}
-        className="absolute right-6 top-1/2 -translate-y-1/2 z-20 p-4 bg-black/30 rounded-full"
-        style={{ opacity: 1 - scrollProgress }}
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white bg-black/30 hover:bg-black/50 p-3 rounded-full z-10 transition-all"
+        aria-label="Next video"
       >
-        <FaChevronRight />
+        <FaChevronRight size={20} />
       </button>
 
-      {/* Progress Indicators */}
-      <div
-        className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex gap-3"
-        style={{ opacity: 1 - scrollProgress }}
-      >
+      {/* Indicator Dots */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
         {videoSources.map((_, index) => (
           <button
             key={index}
-            onClick={() => {
-              clearTimeout(autoAdvanceTimeout.current);
-              setCurrentVideoIndex(index);
-            }}
+            onClick={() => setCurrentVideoIndex(index)}
+            className={`w-3 h-3 rounded-full transition-all ${
+              index === currentVideoIndex ? 'bg-gold' : 'bg-white/50'
+            }`}
             aria-label={`Go to video ${index + 1}`}
-          >
-            {index === currentVideoIndex ? (
-              <div className="w-12 h-[2px] bg-gold overflow-hidden">
-                <div className="h-full bg-white/60 animate-progress-fill" />
-              </div>
-            ) : (
-              <div className="w-8 h-[2px] bg-white/30 hover:bg-white/50 transition" />
-            )}
-          </button>
+          />
         ))}
       </div>
-
-      {/* CSS (Vite / CRA safe) */}
-      <style>{`
-        @keyframes progress-fill {
-          from { transform: translateX(-100%); }
-          to { transform: translateX(0); }
-        }
-        .animate-progress-fill {
-          animation: progress-fill 12s linear;
-        }
-      `}</style>
     </div>
   );
 };
