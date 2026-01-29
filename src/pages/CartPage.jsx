@@ -1,6 +1,8 @@
 // src/pages/CartPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import ScrollToTop from '../components/ScrollToTop';
 import {
   isCustomerAuthenticated,
@@ -33,7 +35,9 @@ const CartPage = () => {
   const bankInfo = {
     accountNumber: '1234567890',
     accountName: 'Happy Time PVT LTD',
-    bankName: 'Commercial Bank'
+    bankName: 'Commercial Bank',
+    branch: 'Colombo 01'
+
   };
   
   const navigate = useNavigate();
@@ -82,8 +86,39 @@ const CartPage = () => {
     fetchCart();
   }, []);
 
+  // ✅ NEW: Get maximum available quantity for a product/color
+  const getMaxAvailableQuantity = (productId, selectedColor) => {
+    const item = cartItems.find(item => 
+      item.productId._id === productId && item.selectedColor === selectedColor
+    );
+    
+    if (!item || !item.productId) return 0;
+    
+    // Find the color in product's colors array
+    const colorEntry = item.productId.colors?.find(color => 
+      color.name === selectedColor
+    );
+    
+    // If quantity is null or undefined, assume unlimited stock
+    if (colorEntry?.quantity == null) return Infinity;
+    
+    // Return available quantity
+    return colorEntry.quantity;
+  };
+
   const updateQuantity = async (itemId, qty) => {
     if (qty < 1) return;
+
+    // ✅ VALIDATE QUANTITY AGAINST AVAILABLE STOCK
+    const item = cartItems.find(i => i._id === itemId);
+    if (!item) return;
+
+    const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
+    
+    if (maxAvailable !== Infinity && qty > maxAvailable) {
+      toast.error(`Only ${maxAvailable} units available for this color`);
+      return;
+    }
 
     try {
       const token = getCustomerToken();
@@ -100,9 +135,13 @@ const CartPage = () => {
       if (data.success) {
         setCartItems(data.cart);
         window.dispatchEvent(new CustomEvent('cartUpdated'));
+        // ✅ Success toast
+        toast.success('Quantity updated successfully!');
+      } else {
+        toast.error(data.message || 'Failed to update quantity');
       }
     } catch {
-      setError('Failed to update quantity');
+      toast.error('Failed to update quantity');
     }
   };
 
@@ -118,8 +157,10 @@ const CartPage = () => {
 
       setCartItems(items => items.filter(i => i._id !== id));
       window.dispatchEvent(new CustomEvent('cartUpdated'));
+      // ✅ Success toast
+      toast.success('Item removed from cart');
     } catch {
-      setError('Failed to remove item');
+      toast.error('Failed to remove item');
     }
   };
 
@@ -135,8 +176,10 @@ const CartPage = () => {
 
       setCartItems([]);
       window.dispatchEvent(new CustomEvent('cartUpdated'));
+      // ✅ Success toast
+      toast.success('Cart cleared successfully');
     } catch {
-      setError('Failed to clear cart');
+      toast.error('Failed to clear cart');
     }
   };
 
@@ -145,32 +188,31 @@ const CartPage = () => {
     if (file) {
       const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
       if (!validTypes.includes(file.type)) {
-        setError('Please upload JPG, PNG, or PDF files only');
+        toast.error('Please upload JPG, PNG, or PDF files only');
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        setError('File size must be less than 5MB');
+        toast.error('File size must be less than 5MB');
         return;
       }
       
       setReceiptFile(file);
       setReceiptPreview(URL.createObjectURL(file));
-      setError('');
       setReceiptConfirmed(false); // Reset confirmation when new file uploaded
     }
   };
 
   const validateConfirmation = () => {
     if (!addressConfirmed) {
-      setError('Please confirm your delivery address is correct');
+      toast.error('Please confirm your delivery address is correct');
       return false;
     }
     if (!receiptConfirmed) {
-      setError('Please confirm your payment receipt is correct');
+      toast.error('Please confirm your payment receipt is correct');
       return false;
     }
     if (!termsAccepted) {
-      setError('Please accept our Terms and Conditions');
+      toast.error('Please accept our Terms and Conditions');
       return false;
     }
     return true;
@@ -178,12 +220,21 @@ const CartPage = () => {
 
   const placeOrder = async () => {
     if (cartItems.length === 0) {
-      setError('Your cart is empty');
+      toast.error('Your cart is empty');
       return;
     }
 
+    // ✅ FINAL STOCK VALIDATION BEFORE ORDERING
+    for (const item of cartItems) {
+      const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
+      if (maxAvailable !== Infinity && item.quantity > maxAvailable) {
+        toast.error(`Insufficient stock for ${item.productId.title} - ${item.selectedColor}. Only ${maxAvailable} available.`);
+        return;
+      }
+    }
+
     if (!receiptFile) {
-      setError('Please upload a bank transfer receipt');
+      toast.error('Please upload a bank transfer receipt');
       return;
     }
 
@@ -231,15 +282,20 @@ const CartPage = () => {
         setCartItems([]);
         window.dispatchEvent(new CustomEvent('cartUpdated'));
         
+        // ✅ Success toast
+        toast.success('Order placed successfully!', {
+          autoClose: 3000
+        });
+        
         setTimeout(() => {
           navigate('/orders');
         }, 3000);
       } else {
-        setError(data.message || 'Failed to place order');
+        toast.error(data.message || 'Failed to place order');
       }
     } catch (err) {
       console.error('Place order error:', err);
-      setError('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -264,6 +320,14 @@ const CartPage = () => {
     return parts.join(', ') || 'Address not provided';
   };
 
+  // ✅ NEW: Format available quantity display
+  const formatAvailableQuantity = (productId, selectedColor) => {
+    const maxQty = getMaxAvailableQuantity(productId, selectedColor);
+    if (maxQty === Infinity) return 'In Stock';
+    if (maxQty === 0) return 'Out of Stock';
+    return `${maxQty} in stock`;
+  };
+
   if (loading) {
     return (
       <div className="bg-black min-h-screen flex items-center justify-center">
@@ -275,9 +339,26 @@ const CartPage = () => {
   return (
     <div className="bg-black text-white min-h-screen">
       <ScrollToTop />
-
+      <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+      
       <div className="max-w-7xl mx-auto px-4 py-6 sm:py-10">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6">Your Cart</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold">Your Cart</h1>
+          <div className="text-gray-400">
+            {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
+          </div>
+        </div>
 
         {error && <p className="text-red-400 mb-4">{error}</p>}
         {success && <p className="text-green-400 mb-4">{success}</p>}
@@ -291,7 +372,7 @@ const CartPage = () => {
             </p>
             <button
               onClick={() => navigate('/shop')}
-              className="bg-gold text-black px-8 py-3 rounded-xl font-semibold"
+              className="bg-gold text-black px-8 py-3 rounded-xl font-semibold hover:bg-gold/90 transition"
             >
               Browse Collection
             </button>
@@ -299,75 +380,113 @@ const CartPage = () => {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* CART ITEMS */}
-            <div className="lg:col-span-2 space-y-4">
-              {cartItems.map(item => (
-                <div
-                  key={item._id}
-                  className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 sm:p-6"
-                >
-                  <div className="flex gap-4">
-                    <img
-                      src={item.productId?.images?.[0]}
-                      alt={item.productId?.title}
-                      className="w-24 h-24 rounded-lg object-cover"
-                    />
+            <div className="lg:col-span-2 space-y-6">
+              {cartItems.map(item => {
+                const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
+                const isOutOfStock = maxAvailable === 0;
+                const canIncrease = maxAvailable === Infinity || item.quantity < maxAvailable;
+                
+                return (
+                  <div
+                    key={item._id}
+                    className={`bg-gray-900/60 border ${
+                      isOutOfStock ? 'border-red-500/50' : 'border-gray-800'
+                    } rounded-2xl p-5 transition-all hover:border-gold/50`}
+                  >
+                    <div className="flex gap-5">
+                      <img
+                        src={item.productId?.images?.[0]}
+                        alt={item.productId?.title}
+                        className="w-28 h-28 rounded-xl object-cover flex-shrink-0"
+                      />
 
-                    <div className="flex-1">
-                      <h3 className="font-bold">{item.productId?.title}</h3>
-                      <p className="text-gold text-sm">{item.productId?.brand}</p>
-                      <p className="text-gray-400 text-sm">
-                        {item.selectedColor}
-                      </p>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-lg mb-1">{item.productId?.title}</h3>
+                        <p className="text-gold text-sm mb-1">{item.productId?.brand}</p>
+                        <p className="text-gray-400 text-sm mb-2">
+                          Color: {item.selectedColor}
+                        </p>
+                        
+                        {/* ✅ SHOW AVAILABLE QUANTITY */}
+                        <p className={`text-xs mb-3 ${
+                          isOutOfStock ? 'text-red-400 font-medium' : 'text-gray-500'
+                        }`}>
+                          {formatAvailableQuantity(item.productId._id, item.selectedColor)}
+                        </p>
 
-                      <div className="flex flex-wrap items-center gap-4 mt-4">
-                        <div className="flex items-center">
-                          <button
-                            onClick={() =>
-                              updateQuantity(item._id, item.quantity - 1)
-                            }
-                            className="w-9 h-9 bg-gray-800 rounded-l-lg"
-                          >
-                            −
-                          </button>
-                          <span className="w-12 h-9 flex items-center justify-center border-y border-gray-700">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() =>
-                              updateQuantity(item._id, item.quantity + 1)
-                            }
-                            className="w-9 h-9 bg-gray-800 rounded-r-lg"
-                          >
-                            +
-                          </button>
+                        <div className="flex flex-wrap items-center justify-between gap-4">
+                          <div className="flex items-center bg-black/30 rounded-xl p-1">
+                            <button
+                              onClick={() =>
+                                updateQuantity(item._id, item.quantity - 1)
+                              }
+                              disabled={item.quantity <= 1}
+                              className={`w-10 h-10 flex items-center justify-center ${
+                                item.quantity <= 1 
+                                  ? 'text-gray-600 cursor-not-allowed' 
+                                  : 'text-white hover:bg-gray-800'
+                              } rounded-l-xl transition`}
+                            >
+                              −
+                            </button>
+                            <span className="w-12 h-10 flex items-center justify-center font-medium">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() =>
+                                updateQuantity(item._id, item.quantity + 1)
+                              }
+                              disabled={!canIncrease || isOutOfStock}
+                              className={`w-10 h-10 flex items-center justify-center ${
+                                !canIncrease || isOutOfStock
+                                  ? 'text-gray-600 cursor-not-allowed' 
+                                  : 'text-white hover:bg-gray-800'
+                              } rounded-r-xl transition`}
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <span className="font-semibold text-lg">
+                              {formatPrice(item.productId?.price)}
+                            </span>
+                            <button
+                              onClick={() => removeItem(item._id)}
+                              className="text-red-400 hover:text-red-300 text-sm font-medium transition"
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </div>
-
-                        <span className="font-semibold">
-                          {formatPrice(item.productId?.price)}
-                        </span>
-
-                        <button
-                          onClick={() => removeItem(item._id)}
-                          className="ml-auto text-red-400 text-sm"
-                        >
-                          Remove
-                        </button>
+                        
+                        {/* ✅ OUT OF STOCK WARNING */}
+                        {isOutOfStock && (
+                          <div className="mt-3 p-3 bg-red-900/20 border border-red-800 rounded-lg">
+                            <p className="text-red-400 text-sm flex items-center gap-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                              </svg>
+                              This item is out of stock. Please remove it to proceed.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-800/50">
                 <button
                   onClick={clearCart}
-                  className="px-6 py-3 bg-gray-800 rounded-lg"
+                  className="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-medium transition"
                 >
                   Clear Cart
                 </button>
                 <button
                   onClick={() => navigate('/shop')}
-                  className="px-6 py-3 bg-gray-800 rounded-lg"
+                  className="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-medium transition"
                 >
                   Continue Shopping
                 </button>
@@ -375,28 +494,34 @@ const CartPage = () => {
             </div>
 
             {/* SUMMARY & PAYMENT */}
-            <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-6 h-fit lg:sticky lg:top-24">
-              <h2 className="text-lg font-bold mb-4">Order Summary</h2>
+            <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6 h-fit lg:sticky lg:top-24">
+              <h2 className="text-xl font-bold mb-6 text-center">Order Summary</h2>
 
-              <div className="space-y-3 text-sm mb-6">
+              <div className="space-y-4 text-sm mb-8">
                 <div className="flex justify-between">
                   <span className="text-gray-400">Subtotal</span>
-                  <span>{formatPrice(total)}</span>
+                  <span className="font-medium">{formatPrice(total)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Shipping</span>
-                  <span>Free</span>
+                  <span className="font-medium">Free</span>
                 </div>
-                <div className="flex justify-between border-t border-gray-800 pt-3 font-bold">
+                <div className="flex justify-between pt-4 border-t border-gray-800 font-bold text-lg">
                   <span>Total</span>
                   <span>{formatPrice(total)}</span>
                 </div>
               </div>
 
               {/* DELIVERY ADDRESS */}
-              <div className="mb-6 p-4 bg-purple-900/20 border border-purple-800 rounded-lg">
-                <h4 className="font-medium text-purple-300 mb-2">Delivery Address</h4>
-                <div className="text-sm text-gray-300 mb-3">
+              <div className="mb-6 p-4 bg-purple-900/20 border border-purple-800 rounded-xl">
+                <h4 className="font-medium text-purple-300 mb-3 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Delivery Address
+                </h4>
+                <div className="text-sm text-gray-300 mb-3 bg-black/20 p-3 rounded-lg">
                   {customerInfo ? formatAddress(customerInfo) : 'Loading address...'}
                 </div>
                 {!showConfirmation && (
@@ -407,32 +532,44 @@ const CartPage = () => {
               </div>
 
               {/* BANK TRANSFER DETAILS */}
-              <div className="mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
-                <h4 className="font-medium text-blue-300 mb-2">Bank Transfer Instructions</h4>
-                <p className="text-sm text-gray-300 mb-3">
-                  Please transfer LKR {total.toLocaleString()} to our bank account:
+              <div className="mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-xl">
+                <h4 className="font-medium text-blue-300 mb-3 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Bank Transfer Instructions
+                </h4>
+                <p className="text-sm text-gray-300 mb-4">
+                  Please transfer <span className="font-bold text-gold">LKR {total.toLocaleString()}</span> to our bank account:
                 </p>
-                <div className="text-xs bg-black/30 p-2 rounded mb-3">
-                  <div className="font-medium">Account Details:</div>
-                  <div>Account Number: {bankInfo.accountNumber}</div>
-                  <div>Account Name: {bankInfo.accountName}</div>
-                  <div>Bank: {bankInfo.bankName}</div>
+                <div className="text-xs bg-black/30 p-3 rounded-lg mb-4">
+                  <div className="font-medium mb-1">Account Details:</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div><span className="text-gray-400">Account Number:</span></div>
+                    <div>{bankInfo.accountNumber}</div>
+                    <div><span className="text-gray-400">Account Name:</span></div>
+                    <div>{bankInfo.accountName}</div>
+                    <div><span className="text-gray-400">Bank:</span></div>
+                    <div>{bankInfo.bankName}</div>
+                    <div><span className="text-gray-400">Branch:</span></div>
+                    <div>{bankInfo.branch}</div>
+                  </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm mb-2">Upload Receipt *</label>
+                  <label className="block text-sm mb-2 font-medium">Upload Receipt *</label>
                   <input
                     type="file"
                     accept="image/*,.pdf"
                     onChange={handleReceiptChange}
-                    className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-800 file:text-white hover:file:bg-gray-700"
+                    className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gray-800 file:text-white hover:file:bg-gray-700 file:transition"
                   />
                   {receiptPreview && (
-                    <div className="mt-2">
+                    <div className="mt-3">
                       <img
                         src={receiptPreview}
                         alt="Receipt preview"
-                        className="max-h-32 object-contain rounded"
+                        className="max-h-40 object-contain rounded-lg w-full"
                       />
                       <button
                         type="button"
@@ -440,7 +577,7 @@ const CartPage = () => {
                           setReceiptFile(null);
                           setReceiptPreview('');
                         }}
-                        className="text-red-400 text-xs mt-1"
+                        className="text-red-400 text-sm mt-2 hover:text-red-300 transition"
                       >
                         Remove Receipt
                       </button>
@@ -451,16 +588,21 @@ const CartPage = () => {
 
               {/* CONFIRMATION CHECKBOXES (Only shown when placing order) */}
               {showConfirmation && (
-                <div className="mb-6 p-4 bg-gray-800/50 border border-gray-700 rounded-lg">
-                  <h4 className="font-medium text-white mb-4">Order Confirmation</h4>
+                <div className="mb-6 p-4 bg-gray-800/50 border border-gray-700 rounded-xl">
+                  <h4 className="font-medium text-white mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Order Confirmation
+                  </h4>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <label className="flex items-start cursor-pointer">
                       <input
                         type="checkbox"
                         checked={addressConfirmed}
                         onChange={(e) => setAddressConfirmed(e.target.checked)}
-                        className="mt-1 mr-3 w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold"
+                        className="mt-1 mr-3 w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold focus:ring-2"
                       />
                       <span className="text-sm">
                         I confirm that my delivery address is correct and complete.
@@ -472,7 +614,7 @@ const CartPage = () => {
                         type="checkbox"
                         checked={receiptConfirmed}
                         onChange={(e) => setReceiptConfirmed(e.target.checked)}
-                        className="mt-1 mr-3 w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold"
+                        className="mt-1 mr-3 w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold focus:ring-2"
                       />
                       <span className="text-sm">
                         I confirm that the payment receipt shows the correct amount and transaction details.
@@ -484,10 +626,10 @@ const CartPage = () => {
                         type="checkbox"
                         checked={termsAccepted}
                         onChange={(e) => setTermsAccepted(e.target.checked)}
-                        className="mt-1 mr-3 w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold"
+                        className="mt-1 mr-3 w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold focus:ring-2"
                       />
                       <span className="text-sm">
-                        I agree to the <a href="/terms" target="_blank" className="text-gold hover:underline">Terms of Service</a> and <a href="/privacy" target="_blank" className="text-gold hover:underline">Privacy Policy</a>.
+                        I agree to the <a href="/terms" target="_blank" className="text-gold hover:underline font-medium">Terms of Service</a> and <a href="/privacy" target="_blank" className="text-gold hover:underline font-medium">Privacy Policy</a>.
                       </span>
                     </label>
                   </div>
@@ -497,10 +639,10 @@ const CartPage = () => {
               <button
                 onClick={placeOrder}
                 disabled={isProcessing}
-                className={`w-full py-3 rounded-xl font-bold transition ${
+                className={`w-full py-4 rounded-xl font-bold text-lg transition ${
                   isProcessing
                     ? 'bg-gray-700 cursor-not-allowed'
-                    : 'bg-gold text-black hover:bg-gold/90'
+                    : 'bg-gold text-black hover:bg-gold/90 shadow-lg hover:shadow-gold/20'
                 }`}
               >
                 {showConfirmation 
@@ -508,7 +650,7 @@ const CartPage = () => {
                   : 'Place Order'}
               </button>
               
-              <p className="text-gray-500 text-xs mt-3 text-center">
+              <p className="text-gray-500 text-xs mt-4 text-center">
                 By placing your order, you agree to our Terms of Service and Privacy Policy
               </p>
             </div>

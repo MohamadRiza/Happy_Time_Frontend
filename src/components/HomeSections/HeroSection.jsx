@@ -50,7 +50,7 @@ const HeroSection = () => {
       ))}
 
       {/* Overlay for readability */}
-      <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80 flex items-center justify-center">
         <div className="text-center px-4 max-w-3xl">
           <h1 className="text-4xl md:text-6xl font-bold text-gold mb-4 tracking-wide">
             Timeless Elegance
@@ -74,7 +74,7 @@ const HeroSection = () => {
       </div>
 
       {/* Navigation Arrows */}
-      <button
+      {/* <button
         onClick={prevVideo}
         className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white bg-black/30 hover:bg-black/50 p-3 rounded-full z-10 transition-all"
         aria-label="Previous video"
@@ -87,7 +87,7 @@ const HeroSection = () => {
         aria-label="Next video"
       >
         <FaChevronRight size={20} />
-      </button>
+      </button> */}
 
       {/* Indicator Dots */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">

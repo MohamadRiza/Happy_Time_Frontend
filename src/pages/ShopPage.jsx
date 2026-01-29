@@ -32,7 +32,21 @@ const ShopPage = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   /* -------------------- HELPERS -------------------- */
-  const getUniqueBrands = () => [...new Set(products.map(p => p.brand))];
+  // ✅ Enhanced brand extraction with custom brands
+  const getUniqueBrands = () => {
+    const allBrands = [...new Set(products.map(p => p.brand))];
+    
+    // Your custom brands that should always appear at the top
+    const customBrands = ['Winsor', 'Orix', 'Arial'];
+    
+    // Separate custom brands from other brands
+    const customBrandSet = new Set(customBrands);
+    const otherBrands = allBrands.filter(brand => !customBrandSet.has(brand));
+    
+    // Return custom brands first, then sorted other brands
+    return [...customBrands.filter(brand => allBrands.includes(brand)), ...otherBrands.sort()];
+  };
+  
   const getUniqueShapes = () => [...new Set(products.map(p => p.watchShape))];
   
   // ✅ FIXED: Handle colors as array of objects
@@ -264,6 +278,13 @@ const ShopPage = () => {
     }
   };
 
+  // ✅ Brand logo mapping
+  const brandLogos = {
+    'Winsor': '/winsor.png',
+    'Orix': '/orix.png', 
+    // 'Arial': '/logo1.png'
+  };
+
   return (
     <div className="bg-black text-white min-h-screen">
       <ScrollToTop />
@@ -355,6 +376,34 @@ const ShopPage = () => {
                 >
                   ✕
                 </button>
+              </div>
+
+              {/* ✅ BRAND LOGOS SECTION */}
+              <div className="mb-6 pb-4 border-b border-gray-800/50">
+                <h4 className="text-gray-400 text-xs uppercase mb-3 tracking-wider">Our Premium Brands</h4>
+                <div className="flex flex-wrap gap-3">
+                  {Object.entries(brandLogos).map(([brand, logo]) => (
+                    <div key={brand} className="flex flex-col items-center">
+                      <img
+                        src={logo}
+                        onClick={() => {
+                          window.location.href = `/shop?brand=${encodeURIComponent(brand)}`;
+                        }}
+                        alt={`${brand} Logo`}
+                        className="h-12 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          // Show brand name as fallback
+                          const span = document.createElement('span');
+                          span.textContent = brand;
+                          span.className = 'text-gold text-xs font-medium';
+                          e.target.parentNode.appendChild(span);
+                        }}
+                      />
+                      <span className="text-[10px] text-gray-400 mt-1">{brand}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-4">
