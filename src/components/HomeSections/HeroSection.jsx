@@ -169,7 +169,7 @@ const HeroSection = () => {
             <Link to="/shop">
               <button 
                 className="group relative px-10 py-4 bg-gold text-black font-medium text-sm 
-                         tracking-wider uppercase rounded-sm overflow-hidden
+                         tracking-wider uppercase rounded-lg overflow-hidden
                          transition-all duration-500 hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]
                          hover:scale-[1.02] active:scale-[0.98]"
               >
@@ -182,7 +182,7 @@ const HeroSection = () => {
             <Link to="/contact">
               <button 
                 className="group relative px-10 py-4 border-2 border-gold/60 text-gold font-medium 
-                         text-sm tracking-wider uppercase rounded-sm backdrop-blur-sm bg-black/10
+                         text-sm tracking-wider uppercase rounded-lg backdrop-blur-sm bg-black/10
                          transition-all duration-500 hover:bg-gold hover:text-black hover:border-gold
                          hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:scale-[1.02] active:scale-[0.98]"
               >

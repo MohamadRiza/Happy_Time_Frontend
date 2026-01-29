@@ -103,15 +103,15 @@ const FeaturedWatches = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((id) => (
               <div key={id} className="group">
                 <div className="bg-gray-900/30 backdrop-blur border border-gray-800/50 rounded-lg overflow-hidden">
-                  <div className="h-80 bg-gradient-to-br from-gray-900/50 to-gray-800/30 animate-pulse-slow" />
-                  <div className="p-6 space-y-4">
-                    <div className="h-3 bg-gray-800/50 rounded w-1/2 animate-pulse-slow" />
-                    <div className="h-5 bg-gray-800/50 rounded animate-pulse-slow" />
-                    <div className="h-10 bg-gray-800/50 rounded w-2/3 animate-pulse-slow" />
+                  <div className="h-[180px] bg-gradient-to-br from-gray-900/50 to-gray-800/30 animate-pulse-slow" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-2.5 bg-gray-800/50 rounded w-1/2 animate-pulse-slow" />
+                    <div className="h-4 bg-gray-800/50 rounded animate-pulse-slow" />
+                    <div className="h-8 bg-gray-800/50 rounded w-2/3 animate-pulse-slow" />
                   </div>
                 </div>
               </div>
@@ -127,9 +127,9 @@ const FeaturedWatches = () => {
           </div>
         )}
 
-        {/* Featured Watches Grid — ✅ MOBILE: 2 per row, DESKTOP: 4 per row (unchanged) */}
+        {/* Featured Watches Grid — ✅ MOBILE: 2 per row, DESKTOP: 4 per row */}
         {!loading && !error && featuredWatches.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredWatches.map((watch, index) => (
               <div
                 key={watch._id}
@@ -144,16 +144,16 @@ const FeaturedWatches = () => {
                               border border-gray-800/50 rounded-lg overflow-hidden 
                               hover:border-gold/50 transition-all duration-500 
                               hover:shadow-[0_8px_30px_rgba(212,175,55,0.15)]
-                              flex flex-col h-full">
+                              flex flex-col">
                   
-                  {/* Image Container */}
-                  <div className="relative h-80 overflow-hidden bg-gradient-to-br from-black/40 to-gray-900/40">
+                  {/* Image Container — reduced height for mobile */}
+                  <div className="relative h-[180px] sm:h-[200px] overflow-hidden bg-gradient-to-br from-black/40 to-gray-900/40">
                     {watch.images?.[0] ? (
                       <>
                         <img
                           src={watch.images[0]}
                           alt={`${watch.brand} ${watch.title}`}
-                          className="w-full h-full object-contain p-6 transition-all duration-700 
+                          className="w-full h-full object-contain p-4 transition-all duration-700 
                                    group-hover:scale-110 group-hover:rotate-2"
                           onError={(e) => e.target.style.display = 'none'}
                         />
@@ -162,13 +162,13 @@ const FeaturedWatches = () => {
                       </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-gray-600 text-sm">No Image</span>
+                        <span className="text-gray-600 text-xs">No Image</span>
                       </div>
                     )}
                     
                     {/* Featured Badge */}
-                    <div className="absolute top-4 right-4">
-                      <span className="inline-block px-3 py-1.5 text-xs font-medium tracking-wider 
+                    <div className="absolute top-3 right-3">
+                      <span className="inline-block px-2 py-1 text-[10px] font-medium tracking-wider 
                                    bg-black/60 backdrop-blur-md text-gold border border-gold/30 
                                    rounded-full uppercase">
                         Featured
@@ -176,27 +176,27 @@ const FeaturedWatches = () => {
                     </div>
                   </div>
 
-                  {/* Content */}
-                  <div className="p-6 flex flex-col flex-1">
-                    <div className="text-gold/90 font-medium text-sm tracking-wider mb-2 uppercase">
+                  {/* Content — tighter spacing, responsive text */}
+                  <div className="p-4 flex flex-col flex-1">
+                    <div className="text-gold/90 font-medium text-[11px] tracking-wider mb-1.5 uppercase">
                       {watch.brand}
                     </div>
                     
-                    <h3 className="text-white font-light text-lg mb-4 line-clamp-2 
-                                 group-hover:text-gold/90 transition-colors duration-300 leading-snug">
+                    <h3 className="text-white font-light text-sm mb-2 line-clamp-2 
+                                 group-hover:text-gold/90 transition-colors duration-300 leading-tight">
                       {watch.title}
                     </h3>
                     
-                    <div className="mt-auto space-y-4">
-                      <p className="text-white text-2xl font-light tracking-wide">
+                    <div className="mt-auto space-y-2">
+                      <p className="text-white text-lg font-light tracking-wide">
                         {formatPrice(watch.price)}
                       </p>
                       
                       <Link
                         to={`/shop/${watch._id}`}
-                        className="block w-full text-center py-3 border border-gold/40 text-gold 
-                                 rounded-sm hover:bg-gold hover:text-black transition-all duration-300 
-                                 font-medium text-sm tracking-wider uppercase
+                        className="block w-full text-center py-2.5 border border-gold/40 text-gold 
+                                 rounded-lg hover:bg-gold hover:text-black transition-all duration-300 
+                                 font-medium text-[12px] tracking-wider uppercase
                                  hover:shadow-[0_4px_20px_rgba(212,175,55,0.3)]"
                       >
                         View Details
@@ -217,7 +217,7 @@ const FeaturedWatches = () => {
             <Link
               to="/shop"
               className="inline-flex items-center gap-3 bg-gold text-black px-10 py-4 
-                       rounded-sm font-medium tracking-wider uppercase text-sm
+                       rounded-xl font-medium tracking-wider uppercase text-sm
                        hover:bg-gold/90 transition-all duration-300 group 
                        shadow-[0_4px_20px_rgba(212,175,55,0.25)]
                        hover:shadow-[0_8px_30px_rgba(212,175,55,0.4)]
