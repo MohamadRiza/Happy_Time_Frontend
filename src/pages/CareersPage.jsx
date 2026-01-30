@@ -20,6 +20,7 @@ const CareersPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedBranch, setSelectedBranch] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const getLocationId = (location) => {
     if (location.includes('No 143, 2nd Cross Street, Pettah, Colombo')) return 'colombo-head';
@@ -53,16 +54,32 @@ const CareersPage = () => {
     fetchVacancies();
   }, []);
 
+  // ✅ Enhanced filtering with search
   useEffect(() => {
-    if (selectedBranch === 'all') {
-      setFilteredVacancies(vacancies);
-    } else {
-      const filtered = vacancies.filter(vacancy => 
+    let result = [...vacancies];
+    
+    // Branch filter
+    if (selectedBranch !== 'all') {
+      result = result.filter(vacancy => 
         getLocationId(vacancy.location) === selectedBranch
       );
-      setFilteredVacancies(filtered);
     }
-  }, [selectedBranch, vacancies]);
+    
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter(vacancy =>
+        vacancy.title.toLowerCase().includes(query) ||
+        vacancy.location.toLowerCase().includes(query) ||
+        vacancy.description.toLowerCase().includes(query) ||
+        (vacancy.keywords && vacancy.keywords.some(keyword => 
+          keyword.toLowerCase().includes(query)
+        ))
+      );
+    }
+    
+    setFilteredVacancies(result);
+  }, [selectedBranch, searchQuery, vacancies]);
 
   const formatSalary = (salary) => {
     if (!salary) return 'Competitive Salary';
@@ -71,19 +88,19 @@ const CareersPage = () => {
 
   return (
     <div className="bg-black text-white min-h-screen">
-      {/* Hero Banner */}
-      <div className="relative h-[500px] md:h-[600px]">
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/40 z-10"></div>
+      {/* Hero Banner - Updated to match About page */}
+      <div className="relative h-[60vh] md:h-[70vh]">
         <img
-          src="https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg"
+          src="https://images.pexels.com/photos/11489971/pexels-photo-11489971.jpeg"
           alt="Happy Time Careers"
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover"
         />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black" />
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gold mb-6">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gold mb-4 tracking-wide">
             Join Our Team
           </h1>
-          <p className="text-gray-300 max-w-2xl text-lg leading-relaxed mb-8">
+          <p className="max-w-2xl text-gray-300 text-lg md:text-xl mb-8">
             Shape the future of luxury timekeeping with Sri Lanka’s most trusted watch connoisseur since 1996.
           </p>
           
@@ -115,6 +132,28 @@ const CareersPage = () => {
           <p className="text-gray-400 text-lg leading-relaxed">
             Explore open positions across our prestigious locations worldwide.
           </p>
+        </div>
+
+        {/* ✅ SEARCH BAR */}
+        <div className="mb-8 max-w-2xl mx-auto">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by title, location, or keywords..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-gray-900/60 border border-gray-700 rounded-full pl-12 pr-4 py-3 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
+            />
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
         </div>
 
         {/* Branch Filter */}
@@ -149,15 +188,26 @@ const CareersPage = () => {
             <div className="text-6xl mb-6">💼</div>
             <h3 className="text-2xl font-bold text-white mb-4">No Current Opportunities</h3>
             <p className="text-gray-400 max-w-md mx-auto mb-6">
-              We currently have no open positions at this location. 
-              Check back soon or explore opportunities at other branches.
+              We currently have no open positions matching your search criteria. 
+              Try adjusting your search or explore opportunities at other branches.
             </p>
-            <button
-              onClick={() => setSelectedBranch('all')}
-              className="bg-gold text-black px-6 py-3 rounded-xl font-medium hover:bg-yellow-400 transition shadow-lg"
-            >
-              View All Locations
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedBranch('all');
+                }}
+                className="bg-gold text-black px-6 py-3 rounded-xl font-medium hover:bg-yellow-400 transition shadow-lg"
+              >
+                Clear Search & View All
+              </button>
+              <Link
+                to="/apply-job"
+                className="bg-gray-800 text-gold px-6 py-3 rounded-xl font-medium hover:bg-gray-700 transition border border-gray-700"
+              >
+                Submit General Application
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

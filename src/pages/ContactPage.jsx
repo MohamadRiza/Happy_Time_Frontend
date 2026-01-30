@@ -328,22 +328,22 @@ const ContactPage = () => {
         />
         
         {/* HERO */}
-        <div className="relative h-[70vh] md:h-[80vh]">
-          <img
-            src="https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg"
-            alt="Get In Touch"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black" />
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-            <h1 className="text-4xl md:text-5xl font-bold text-gold mb-4">
-              Get In Touch
-            </h1>
-            <p className="max-w-2xl text-gray-300 text-lg">
-              Have a question, request, or consultation? We're here to help.
-            </p>
-          </div>
+        <div className="relative h-[60vh] md:h-[70vh]">
+        <img
+          src="/MainBranchPettah.jpeg"
+          alt="Happy Time Careers"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black" />
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-4 text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gold mb-4 tracking-wide">
+            Join Our Team
+          </h1>
+          <p className="max-w-2xl text-gray-300 text-lg md:text-xl mb-8">
+            Shape the future of luxury timekeeping with Sri Lanka’s most trusted watch connoisseur since 1996.
+          </p>
         </div>
+      </div>
 
         {/* MAIN CONTENT */}
         <div className="max-w-7xl mx-auto py-20 px-4">
