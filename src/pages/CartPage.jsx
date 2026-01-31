@@ -24,6 +24,13 @@ const CartPage = () => {
   
   // Customer info
   const [customerInfo, setCustomerInfo] = useState(null);
+  const [deliveryAddress, setDeliveryAddress] = useState({
+    address: '',
+    city: '',
+    province: '',
+    country: ''
+  });
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
   
   // Confirmation state
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -37,7 +44,6 @@ const CartPage = () => {
     accountName: 'Happy Time PVT LTD',
     bankName: 'Commercial Bank',
     branch: 'Colombo 01'
-
   };
   
   const navigate = useNavigate();
@@ -72,6 +78,13 @@ const CartPage = () => {
 
       if (customerData.success) {
         setCustomerInfo(customerData.data);
+        // Initialize delivery address with customer's saved address
+        setDeliveryAddress({
+          address: customerData.data.address || '',
+          city: customerData.data.city || '',
+          province: customerData.data.province || '',
+          country: customerData.data.country || 'Sri Lanka'
+        });
       }
     } catch (err) {
       console.error(err);
@@ -268,6 +281,9 @@ const CartPage = () => {
       formData.append('items', JSON.stringify(items));
       formData.append('totalAmount', total.toString());
       formData.append('receipt', receiptFile);
+      
+      // ✅ Add delivery address to order
+      formData.append('deliveryAddress', JSON.stringify(deliveryAddress));
 
       const res = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
@@ -318,6 +334,40 @@ const CartPage = () => {
     if (province) parts.push(province);
     if (country) parts.push(country);
     return parts.join(', ') || 'Address not provided';
+  };
+
+  // ✅ Handle address field changes
+  const handleAddressChange = (field, value) => {
+    setDeliveryAddress(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // ✅ Save edited address
+  const saveAddress = () => {
+    // Basic validation
+    if (!deliveryAddress.address.trim() || !deliveryAddress.city.trim() || !deliveryAddress.province.trim()) {
+      toast.error('Please fill in all address fields');
+      return;
+    }
+    
+    setIsEditingAddress(false);
+    toast.success('Delivery address updated successfully!');
+  };
+
+  // ✅ Cancel address editing
+  const cancelAddressEdit = () => {
+    // Restore original customer address
+    if (customerInfo) {
+      setDeliveryAddress({
+        address: customerInfo.address || '',
+        city: customerInfo.city || '',
+        province: customerInfo.province || '',
+        country: customerInfo.country || 'Sri Lanka'
+      });
+    }
+    setIsEditingAddress(false);
   };
 
   // ✅ NEW: Format available quantity display
@@ -514,17 +564,76 @@ const CartPage = () => {
 
               {/* DELIVERY ADDRESS */}
               <div className="mb-6 p-4 bg-purple-900/20 border border-purple-800 rounded-xl">
-                <h4 className="font-medium text-purple-300 mb-3 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Delivery Address
-                </h4>
-                <div className="text-sm text-gray-300 mb-3 bg-black/20 p-3 rounded-lg">
-                  {customerInfo ? formatAddress(customerInfo) : 'Loading address...'}
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="font-medium text-purple-300 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Delivery Address
+                  </h4>
+                  {!showConfirmation && (
+                    <button
+                      onClick={() => setIsEditingAddress(true)}
+                      className="text-purple-400 hover:text-purple-300 text-xs font-medium"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
-                {!showConfirmation && (
+                
+                {!isEditingAddress ? (
+                  <div className="text-sm text-gray-300 mb-3 bg-black/20 p-3 rounded-lg">
+                    {formatAddress(deliveryAddress)}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      placeholder="Street Address"
+                      value={deliveryAddress.address}
+                      onChange={(e) => handleAddressChange('address', e.target.value)}
+                      className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gold"
+                    />
+                    <input
+                      type="text"
+                      placeholder="City"
+                      value={deliveryAddress.city}
+                      onChange={(e) => handleAddressChange('city', e.target.value)}
+                      className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gold"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Province/State"
+                      value={deliveryAddress.province}
+                      onChange={(e) => handleAddressChange('province', e.target.value)}
+                      className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gold"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Country"
+                      value={deliveryAddress.country}
+                      onChange={(e) => handleAddressChange('country', e.target.value)}
+                      className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gold"
+                    />
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        onClick={saveAddress}
+                        className="flex-1 bg-gold text-black py-2 rounded-lg text-sm font-medium hover:bg-gold/90 transition"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={cancelAddressEdit}
+                        className="flex-1 bg-gray-800 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {!showConfirmation && !isEditingAddress && (
                   <p className="text-xs text-gray-500">
                     Please ensure your delivery address is correct before placing the order.
                   </p>

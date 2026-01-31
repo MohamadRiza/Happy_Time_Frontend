@@ -318,11 +318,48 @@ const OrdersList = () => {
                     <span className="text-gray-400">Mobile</span>
                     <span className="text-white">{selectedOrder.customer?.mobileNumber}</span>
                   </div>
+                  {/* ✅ CUSTOMER'S SAVED ADDRESS */}
                   <div className="flex justify-between pb-2 border-b border-gray-700">
-                    <span className="text-gray-400">Address</span>
-                    <span className="text-white">{selectedOrder.customer?.address || 'Not provided'}</span>
+                    <span className="text-gray-400">Profile Address</span>
+                    <span className="text-white">
+                      {selectedOrder.customer?.address || 'Not provided'}
+                    </span>
                   </div>
                 </div>
+              </div>
+
+              {/* ✅ DELIVERY ADDRESS SECTION */}
+              <div className="bg-gray-800/30 p-4 rounded-xl">
+                <h4 className="text-lg font-semibold text-white mb-4">Delivery Address</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex justify-between pb-2 border-b border-gray-700">
+                    <span className="text-gray-400">Street Address</span>
+                    <span className="text-white">
+                      {selectedOrder.deliveryAddress?.address || 'Not provided'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between pb-2 border-b border-gray-700">
+                    <span className="text-gray-400">City</span>
+                    <span className="text-white">
+                      {selectedOrder.deliveryAddress?.city || 'Not provided'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between pb-2 border-b border-gray-700">
+                    <span className="text-gray-400">Province/State</span>
+                    <span className="text-white">
+                      {selectedOrder.deliveryAddress?.province || 'Not provided'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between pb-2 border-b border-gray-700">
+                    <span className="text-gray-400">Country</span>
+                    <span className="text-white">
+                      {selectedOrder.deliveryAddress?.country || 'Sri Lanka'}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-gray-500 text-xs mt-2">
+                  This is the delivery address provided during checkout
+                </p>
               </div>
 
               {/* Order Items */}
