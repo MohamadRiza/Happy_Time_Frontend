@@ -7,6 +7,7 @@ import {
   customerLogout,
   customerLogin,
 } from "../utils/auth";
+import Loading from "../components/Loading";
 
 const CustomerAccount = () => {
   const [customer, setCustomer] = useState(null);
@@ -162,15 +163,7 @@ const CustomerAccount = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative w-20 h-20 mx-auto mb-6">
-            <div className="absolute inset-0 border-4 border-gold/30 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-transparent border-t-gold rounded-full animate-spin"></div>
-          </div>
-          <p className="text-gray-400 text-lg">Loading your account...</p>
-        </div>
-      </div>
+      <Loading message="Loading your account..." size="large" />
     );
   }
 

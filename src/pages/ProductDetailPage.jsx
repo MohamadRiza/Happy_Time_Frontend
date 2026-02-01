@@ -6,6 +6,7 @@ import {
   isCustomerAuthenticated, 
   getCustomerToken 
 } from '../utils/auth';
+import Loading from '../components/Loading';
 
 const Toast = ({ message, isVisible, onClose }) => {
   useEffect(() => {
@@ -245,10 +246,7 @@ const ProductDetailPage = () => {
     return (
       <div className="bg-black text-white min-h-screen">
         <ScrollToTop />
-        <div className="max-w-7xl mx-auto py-24 px-4 text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
-          <p className="mt-4 text-gray-400">Loading product details...</p>
-        </div>
+        <Loading message="Loading product details..." size="large" />
       </div>
     );
   }

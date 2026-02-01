@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ScrollToTop from '../components/ScrollToTop';
 import { isCustomerAuthenticated, getCustomerToken, customerLogout } from '../utils/auth';
+import Loading from '../components/Loading';
 
 const CustomerOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -183,12 +184,8 @@ const CustomerOrders = () => {
 
   if (loading) {
     return (
-      <div className="bg-black min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-10 w-10 border-2 border-gold border-t-transparent rounded-full mb-4 mx-auto"></div>
-          <p className="text-gray-400">Loading your orders...</p>
-        </div>
-      </div>
+      <Loading message="Loading your orders..." size="large" />
+      
     );
   }
 

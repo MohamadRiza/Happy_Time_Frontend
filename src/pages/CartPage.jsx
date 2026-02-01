@@ -10,6 +10,7 @@ import {
   customerLogout,
   getCustomer
 } from '../utils/auth';
+import Loading from '../components/Loading';
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -380,9 +381,7 @@ const CartPage = () => {
 
   if (loading) {
     return (
-      <div className="bg-black min-h-screen flex items-center justify-center">
-        <div className="animate-spin h-10 w-10 border-2 border-gold border-t-transparent rounded-full"></div>
-      </div>
+      <Loading message="Loading your cart..." size="large" />
     );
   }
 

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ScrollToTop from '../components/ScrollToTop';
+import Loading from '../components/Loading';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -44,12 +45,7 @@ const VacancyDetailPage = () => {
   /* -------------------- LOADING -------------------- */
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gold mb-4"></div>
-          <p className="text-gray-400">Loading vacancy...</p>
-        </div>
-      </div>
+      <Loading message="Loading vacancy details..." size="large" />
     );
   }
 

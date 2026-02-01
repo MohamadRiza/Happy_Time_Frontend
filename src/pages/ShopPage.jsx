@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ScrollToTop from '../components/ScrollToTop';
+import Loading from '../components/Loading';
 
 const ShopPage = () => {
   const [products, setProducts] = useState([]);
@@ -498,7 +499,7 @@ const ShopPage = () => {
             </div>
 
             {loading && (
-              <div className="text-center py-20 text-gray-500">Loading products...</div>
+              <Loading message="Loading products..." size="large" />
             )}
 
             {!loading && error && (

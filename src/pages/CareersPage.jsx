@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ScrollToTop from '../components/ScrollToTop';
+import Loading from '../components/Loading';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -174,10 +175,7 @@ const CareersPage = () => {
         </div>
 
         {loading ? (
-          <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold mb-4"></div>
-            <p className="text-gray-400 text-lg">Discovering exceptional opportunities...</p>
-          </div>
+          <Loading message="Loading vacancies..." size="large" />
         ) : error ? (
           <div className="text-center py-20">
             <div className="text-red-400 text-lg mb-4">⚠️ {error}</div>
