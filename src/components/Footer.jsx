@@ -10,7 +10,6 @@ const Footer = () => {
     { name: 'Careers', path: '/careers' },
     { name: 'Contact', path: '/contact' },
     { name: 'Privacy Policy', path: '/privacy' },
-    { name: 'ADMIN', path: '/admin/login' },
   ];
 
   // ✅ Updated Locations with Google Maps links
@@ -223,7 +222,7 @@ const Footer = () => {
         <div className="border-t border-gray-800/70 pt-8 pb-11 text-center">
           <p className="text-gray-400 text-sm">
             &copy; {new Date().getFullYear()}{' '}
-            <span className="text-white font-medium">Happy Time Pvt Ltd</span>. All Rights Reserved.
+            <span className="text-white font-medium"><Link to="/admin/login">Happy Time Pvt Ltd</Link></span>. All Rights Reserved.
           </p>
 
           <p className="mt-2 text-gray-400 text-sm max-w-2xl mx-auto">
