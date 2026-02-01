@@ -223,7 +223,7 @@ const Footer = () => {
           <p className="text-gray-400 text-sm">
             &copy; {new Date().getFullYear()}{' '}
             <span className="text-white font-medium"><Link to="/admin/login">Happy Time Pvt Ltd</Link></span>. All Rights Reserved.
-          </p>
+          </p> 
 
           <p className="mt-2 text-gray-400 text-sm max-w-2xl mx-auto">
             Trusted luxury watch retailer in Pettah, Colombo since 1996.
