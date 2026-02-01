@@ -539,6 +539,12 @@ const CartPage = () => {
                 >
                   Continue Shopping
                 </button>
+                <button
+                  onClick={() => navigate('/orders')}
+                  className="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-medium transition"
+                >
+                  My Orders
+                </button>
               </div>
             </div>
 
