@@ -45,6 +45,7 @@ import ApplicationStatusCheck from "./pages/ApplicationStatusCheck";
 import ApplicationSuccess from "./pages/ApplicationSuccess";
 import TawkToChat from "./components/TawkToChat";
 import MobileChatButton from "./components/MobileChatButton";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
@@ -54,6 +55,18 @@ function App() {
         <Navbar />
         <TawkToChat />
         <MobileChatButton />
+        <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
         <main>
           <Routes>
             <Route path="/" element={<Home />} />

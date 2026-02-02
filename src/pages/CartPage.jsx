@@ -1,7 +1,7 @@
 // src/pages/CartPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ScrollToTop from '../components/ScrollToTop';
 import {
@@ -388,18 +388,6 @@ const CartPage = () => {
   return (
     <div className="bg-black text-white min-h-screen">
       <ScrollToTop />
-      <ToastContainer 
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
       
       <div className="max-w-7xl mx-auto px-4 py-6 sm:py-10">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
