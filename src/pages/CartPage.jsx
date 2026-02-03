@@ -228,7 +228,7 @@ const CartPage = () => {
   ).length;
 
   return (
-    <div className="bg-black text-white min-h-screen pb-32 md:pb-8">
+    <div className="bg-black text-white min-h-screen pb-24 md:pb-8">
       <ScrollToTop />
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* Header */}
@@ -411,25 +411,25 @@ const CartPage = () => {
         )}
       </div>
 
-      {/* Mobile Sticky Bottom Bar */}
+      {/* Mobile Sticky Bottom Bar - FIXED */}
       {cartItems.length > 0 && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-3 safe-area-bottom z-50">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-xs text-gray-400">
+        <div className="md:hidden fixed bottom-16 left-0 right-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-800 safe-area-bottom p-3 z-50">
+          <div className="flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-xs text-gray-400 truncate">
                 Total ({selectedItems.size} {selectedItems.size === 1 ? 'item' : 'items'})
               </p>
-              <p className="text-lg font-bold text-gold">
+              <p className="text-base font-bold text-gold truncate">
                 {formatPrice(selectedTotal)}
               </p>
             </div>
             <button
               onClick={proceedToCheckout}
               disabled={selectedItems.size === 0}
-              className={`px-6 py-3 rounded-xl font-bold transition ${
+              className={`px-5 py-2.5 rounded-xl font-bold text-sm transition ${
                 selectedItems.size === 0
                   ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                  : 'bg-gold text-black hover:bg-gold/90'
+                  : 'bg-gold text-black hover:bg-gold/90 shadow-lg shadow-gold/20'
               }`}
             >
               Checkout
@@ -441,20 +441,20 @@ const CartPage = () => {
       {/* Desktop Checkout Section */}
       {cartItems.length > 0 && (
         <div className="hidden md:block max-w-6xl mx-auto px-4 mt-6">
-          <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6">
+          <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400 mb-1">
                   Selected Items: {selectedItems.size}
                 </p>
-                <p className="text-2xl font-bold text-gold">
+                <p className="text-xl font-bold text-gold">
                   Total: {formatPrice(selectedTotal)}
                 </p>
               </div>
               <button
                 onClick={proceedToCheckout}
                 disabled={selectedItems.size === 0}
-                className={`px-10 py-4 rounded-xl font-bold text-lg transition ${
+                className={`px-8 py-3 rounded-xl font-bold text-base transition ${
                   selectedItems.size === 0
                     ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                     : 'bg-gold text-black hover:bg-gold/90 shadow-lg hover:shadow-gold/20'

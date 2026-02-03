@@ -264,7 +264,7 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="bg-black text-white min-h-screen pb-32 md:pb-8">
+    <div className="bg-black text-white min-h-screen pb-24 md:pb-8">
       <ScrollToTop />
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* Header */}
@@ -529,20 +529,20 @@ const CheckoutPage = () => {
         </div>
       </div>
 
-      {/* Mobile Sticky Bottom Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-3 safe-area-bottom z-50">
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <p className="text-xs text-gray-400">Total Amount</p>
-            <p className="text-lg font-bold text-gold">{formatPrice(total)}</p>
+      {/* Mobile Sticky Bottom Bar - FIXED */}
+      <div className="lg:hidden fixed bottom-16 left-0 right-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-800 p-3 z-50">
+        <div className="flex items-center justify-between">
+          <div className="min-w-0">
+            <p className="text-xs text-gray-400 truncate">Total Amount</p>
+            <p className="text-base font-bold text-gold truncate">{formatPrice(total)}</p>
           </div>
           <button
             onClick={placeOrder}
             disabled={isProcessing}
-            className={`px-6 py-3 rounded-xl font-bold transition ${
+            className={`px-5 py-2.5 rounded-xl font-bold text-sm transition ${
               isProcessing
-                ? 'bg-gray-700 cursor-not-allowed text-gray-400'
-                : 'bg-gold text-black hover:bg-gold/90'
+                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                : 'bg-gold text-black hover:bg-gold/90 shadow-lg shadow-gold/20'
             }`}
           >
             {isProcessing ? 'Processing...' : 'Place Order'}
