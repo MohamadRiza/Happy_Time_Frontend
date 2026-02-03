@@ -26,7 +26,7 @@ const MobileChatButton = () => {
       {!isChatOpen && (
         <button
           onClick={handleChatToggle}
-          className="lg:hidden fixed bottom-32 right-4 z-50 bg-gold hover:bg-gold/90 text-black rounded-full p-4 shadow-2xl shadow-gold/30 transition-all duration-300 transform hover:scale-110 active:scale-95 group opacity-90"
+          className="lg:hidden fixed bottom-24 right-4 z-50 bg-gold hover:bg-gold/90 text-black rounded-full p-4 shadow-2xl shadow-gold/30 transition-all duration-300 transform hover:scale-110 active:scale-95 group opacity-90"
           aria-label="Open chat"
         >
           {/* Chat Icon */}
