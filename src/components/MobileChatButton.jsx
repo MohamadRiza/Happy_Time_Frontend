@@ -1,5 +1,6 @@
 // src/components/MobileChatButton.jsx
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const MobileChatButton = () => {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -19,6 +20,15 @@ const MobileChatButton = () => {
   const handleIframeLoad = () => {
     setIsLoading(false);
   };
+
+    const location = useLocation(); // <-- Get current route
+    // Hide chat button on /cart and /checkout
+  const shouldHide = location.pathname === '/cart' || location.pathname === '/checkout';
+
+  // If we're on a hidden route, render nothing
+  if (shouldHide) {
+    return null;
+  }
 
   return (
     <>
