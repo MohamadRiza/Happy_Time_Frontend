@@ -7,8 +7,7 @@ import ScrollToTop from '../components/ScrollToTop';
 import {
   isCustomerAuthenticated,
   getCustomerToken,
-  customerLogout,
-  getCustomer
+  customerLogout
 } from '../utils/auth';
 import Loading from '../components/Loading';
 
@@ -16,37 +15,7 @@ const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  
-  // Payment state
-  const [receiptFile, setReceiptFile] = useState(null);
-  const [receiptPreview, setReceiptPreview] = useState('');
-  
-  // Customer info
-  const [customerInfo, setCustomerInfo] = useState(null);
-  const [deliveryAddress, setDeliveryAddress] = useState({
-    address: '',
-    city: '',
-    province: '',
-    country: ''
-  });
-  const [isEditingAddress, setIsEditingAddress] = useState(false);
-  
-  // Confirmation state
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [addressConfirmed, setAddressConfirmed] = useState(false);
-  const [receiptConfirmed, setReceiptConfirmed] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  
-  // Bank account info
-  const bankInfo = {
-    accountNumber: '1234567890',
-    accountName: 'Happy Time PVT LTD',
-    bankName: 'Commercial Bank',
-    branch: 'Colombo 01'
-  };
-  
+  const [selectedItems, setSelectedItems] = useState(new Set());
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -58,34 +27,21 @@ const CartPage = () => {
 
     try {
       const token = getCustomerToken();
-      
-      // Fetch cart
       const cartRes = await fetch(`${API_URL}/api/cart`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const cartData = await cartRes.json();
 
-      // Fetch customer info
-      const customerRes = await fetch(`${API_URL}/api/customers/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const customerData = await customerRes.json();
-
       if (cartData.success) {
-        setCartItems(cartData.cart || []);
+        const items = cartData.cart || [];
+        setCartItems(items);
+        // Auto-select all in-stock items
+        const inStockIds = items
+          .filter(item => getMaxAvailableQuantity(item.productId._id, item.selectedColor) > 0)
+          .map(item => item._id);
+        setSelectedItems(new Set(inStockIds));
       } else {
         setError(cartData.message || 'Failed to load cart');
-      }
-
-      if (customerData.success) {
-        setCustomerInfo(customerData.data);
-        // Initialize delivery address with customer's saved address
-        setDeliveryAddress({
-          address: customerData.data.address || '',
-          city: customerData.data.city || '',
-          province: customerData.data.province || '',
-          country: customerData.data.country || 'Sri Lanka'
-        });
       }
     } catch (err) {
       console.error(err);
@@ -100,30 +56,24 @@ const CartPage = () => {
     fetchCart();
   }, []);
 
-  // ✅ NEW: Get maximum available quantity for a product/color
   const getMaxAvailableQuantity = (productId, selectedColor) => {
-    const item = cartItems.find(item => 
+    const item = cartItems.find(item =>
       item.productId._id === productId && item.selectedColor === selectedColor
     );
     
     if (!item || !item.productId) return 0;
     
-    // Find the color in product's colors array
-    const colorEntry = item.productId.colors?.find(color => 
+    const colorEntry = item.productId.colors?.find(color =>
       color.name === selectedColor
     );
     
-    // If quantity is null or undefined, assume unlimited stock
     if (colorEntry?.quantity == null) return Infinity;
-    
-    // Return available quantity
     return colorEntry.quantity;
   };
 
   const updateQuantity = async (itemId, qty) => {
     if (qty < 1) return;
 
-    // ✅ VALIDATE QUANTITY AGAINST AVAILABLE STOCK
     const item = cartItems.find(i => i._id === itemId);
     if (!item) return;
 
@@ -149,8 +99,7 @@ const CartPage = () => {
       if (data.success) {
         setCartItems(data.cart);
         window.dispatchEvent(new CustomEvent('cartUpdated'));
-        // ✅ Success toast
-        toast.success('Quantity updated successfully!');
+        toast.success('Quantity updated');
       } else {
         toast.error(data.message || 'Failed to update quantity');
       }
@@ -170,8 +119,12 @@ const CartPage = () => {
       });
 
       setCartItems(items => items.filter(i => i._id !== id));
+      setSelectedItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
       window.dispatchEvent(new CustomEvent('cartUpdated'));
-      // ✅ Success toast
       toast.success('Item removed from cart');
     } catch {
       toast.error('Failed to remove item');
@@ -189,322 +142,246 @@ const CartPage = () => {
       });
 
       setCartItems([]);
+      setSelectedItems(new Set());
       window.dispatchEvent(new CustomEvent('cartUpdated'));
-      // ✅ Success toast
-      toast.success('Cart cleared successfully');
+      toast.success('Cart cleared');
     } catch {
       toast.error('Failed to clear cart');
     }
   };
 
-  const handleReceiptChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
-      if (!validTypes.includes(file.type)) {
-        toast.error('Please upload JPG, PNG, or PDF files only');
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size must be less than 5MB');
-        return;
-      }
-      
-      setReceiptFile(file);
-      setReceiptPreview(URL.createObjectURL(file));
-      setReceiptConfirmed(false); // Reset confirmation when new file uploaded
-    }
-  };
-
-  const validateConfirmation = () => {
-    if (!addressConfirmed) {
-      toast.error('Please confirm your delivery address is correct');
-      return false;
-    }
-    if (!receiptConfirmed) {
-      toast.error('Please confirm your payment receipt is correct');
-      return false;
-    }
-    if (!termsAccepted) {
-      toast.error('Please accept our Terms and Conditions');
-      return false;
-    }
-    return true;
-  };
-
-  const placeOrder = async () => {
-    if (cartItems.length === 0) {
-      toast.error('Your cart is empty');
-      return;
-    }
-
-    // ✅ FINAL STOCK VALIDATION BEFORE ORDERING
-    for (const item of cartItems) {
-      const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
-      if (maxAvailable !== Infinity && item.quantity > maxAvailable) {
-        toast.error(`Insufficient stock for ${item.productId.title} - ${item.selectedColor}. Only ${maxAvailable} available.`);
-        return;
-      }
-    }
-
-    if (!receiptFile) {
-      toast.error('Please upload a bank transfer receipt');
-      return;
-    }
-
-    if (!showConfirmation) {
-      // Show confirmation modal first
-      setShowConfirmation(true);
-      return;
-    }
-
-    // Validate confirmation checkboxes
-    if (!validateConfirmation()) {
-      return;
-    }
-
-    setIsProcessing(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      const token = getCustomerToken();
-      const formData = new FormData();
-      
-      // Prepare items array
-      const items = cartItems.map(item => ({
-        productId: item.productId._id,
-        selectedColor: item.selectedColor,
-        quantity: item.quantity,
-        price: item.productId.price
-      }));
-      
-      formData.append('items', JSON.stringify(items));
-      formData.append('totalAmount', total.toString());
-      formData.append('receipt', receiptFile);
-      
-      // ✅ Add delivery address to order
-      formData.append('deliveryAddress', JSON.stringify(deliveryAddress));
-
-      const res = await fetch(`${API_URL}/api/orders`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
-      
-      const data = await res.json();
-      
-      if (data.success) {
-        setSuccess('Order placed successfully! Our team will verify your payment receipt and confirm your order.');
-        setCartItems([]);
-        window.dispatchEvent(new CustomEvent('cartUpdated'));
-        
-        // ✅ Success toast
-        toast.success('Order placed successfully!', {
-          autoClose: 3000
-        });
-        
-        setTimeout(() => {
-          navigate('/orders');
-        }, 3000);
-      } else {
-        toast.error(data.message || 'Failed to place order');
-      }
-    } catch (err) {
-      console.error('Place order error:', err);
-      toast.error('Network error. Please try again.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const total = cartItems.reduce(
-    (sum, i) => sum + (i.productId?.price || 0) * i.quantity,
-    0
-  );
-
-  const formatPrice = (p) =>
-    p == null ? 'Contact for Price' : `LKR ${p.toLocaleString()}`;
-
-  const formatAddress = (addressObj) => {
-    if (!addressObj) return 'Address not provided';
-    const { address, city, province, country } = addressObj;
-    const parts = [];
-    if (address) parts.push(address);
-    if (city) parts.push(city);
-    if (province) parts.push(province);
-    if (country) parts.push(country);
-    return parts.join(', ') || 'Address not provided';
-  };
-
-  // ✅ Handle address field changes
-  const handleAddressChange = (field, value) => {
-    setDeliveryAddress(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  // ✅ Save edited address
-  const saveAddress = () => {
-    // Basic validation
-    if (!deliveryAddress.address.trim() || !deliveryAddress.city.trim() || !deliveryAddress.province.trim()) {
-      toast.error('Please fill in all address fields');
+  const toggleSelectItem = (itemId) => {
+    const item = cartItems.find(i => i._id === itemId);
+    const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
+    if (maxAvailable === 0) {
+      toast.error('Cannot select out of stock items');
       return;
     }
     
-    setIsEditingAddress(false);
-    toast.success('Delivery address updated successfully!');
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
   };
 
-  // ✅ Cancel address editing
-  const cancelAddressEdit = () => {
-    // Restore original customer address
-    if (customerInfo) {
-      setDeliveryAddress({
-        address: customerInfo.address || '',
-        city: customerInfo.city || '',
-        province: customerInfo.province || '',
-        country: customerInfo.country || 'Sri Lanka'
-      });
+  const toggleSelectAll = () => {
+    const inStockItems = cartItems.filter(item =>
+      getMaxAvailableQuantity(item.productId._id, item.selectedColor) > 0
+    );
+    if (selectedItems.size === inStockItems.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(inStockItems.map(item => item._id)));
     }
-    setIsEditingAddress(false);
   };
 
-  // ✅ NEW: Format available quantity display
+  const proceedToCheckout = () => {
+    if (selectedItems.size === 0) {
+      toast.error('Please select at least one item');
+      return;
+    }
+    
+    // Validate selected items stock
+    const selectedCartItems = cartItems.filter(item => selectedItems.has(item._id));
+    for (const item of selectedCartItems) {
+      const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
+      if (maxAvailable !== Infinity && item.quantity > maxAvailable) {
+        toast.error(`Insufficient stock for ${item.productId.title}`);
+        return;
+      }
+    }
+    
+    // Navigate to checkout with selected items
+    navigate('/checkout', {
+      state: {
+        selectedItems: Array.from(selectedItems),
+        cartItems: selectedCartItems
+      }
+    });
+  };
+
+  const selectedTotal = cartItems
+    .filter(item => selectedItems.has(item._id))
+    .reduce((sum, item) => sum + (item.productId?.price || 0) * item.quantity, 0);
+
+  const formatPrice = (p) =>
+    p == null ? 'Contact' : `LKR ${p.toLocaleString()}`;
+
   const formatAvailableQuantity = (productId, selectedColor) => {
     const maxQty = getMaxAvailableQuantity(productId, selectedColor);
     if (maxQty === Infinity) return 'In Stock';
     if (maxQty === 0) return 'Out of Stock';
-    return `${maxQty} in stock`;
+    return `${maxQty} left`;
   };
 
   if (loading) {
-    return (
-      <Loading message="Loading your cart..." size="large" />
-    );
+    return <Loading message="Loading your cart..." size="large" />;
   }
 
+  const inStockCount = cartItems.filter(item =>
+    getMaxAvailableQuantity(item.productId._id, item.selectedColor) > 0
+  ).length;
+
   return (
-    <div className="bg-black text-white min-h-screen">
+    <div className="bg-black text-white min-h-screen pb-32 md:pb-8">
       <ScrollToTop />
-      
-      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-10">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold">Your Cart</h1>
-          <div className="text-gray-400">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Shopping Cart</h1>
+          <span className="text-sm text-gray-400">
             {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
-          </div>
+          </span>
         </div>
 
-        {error && <p className="text-red-400 mb-4">{error}</p>}
-        {success && <p className="text-green-400 mb-4">{success}</p>}
+        {error && <p className="text-red-400 mb-4 text-sm">{error}</p>}
 
         {cartItems.length === 0 ? (
-          <div className="text-center bg-gray-900/60 rounded-2xl p-10">
-            <div className="text-6xl mb-4">🛒</div>
-            <h2 className="text-xl font-bold mb-2">Cart is empty</h2>
-            <p className="text-gray-400 mb-6">
+          <div className="text-center bg-gray-900/60 rounded-2xl p-8 sm:p-10">
+            <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">🛒</div>
+            <h2 className="text-lg sm:text-xl font-bold mb-2">Cart is empty</h2>
+            <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base">
               Add items to your cart to see them here.
             </p>
             <button
               onClick={() => navigate('/shop')}
-              className="bg-gold text-black px-8 py-3 rounded-xl font-semibold hover:bg-gold/90 transition"
+              className="bg-gold text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl font-semibold hover:bg-gold/90 transition text-sm sm:text-base"
             >
               Browse Collection
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* CART ITEMS */}
-            <div className="lg:col-span-2 space-y-6">
+          <>
+            {/* Select All */}
+            <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-3 sm:p-4 mb-3 sm:mb-4 flex items-center justify-between">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedItems.size === inStockCount && inStockCount > 0}
+                  onChange={toggleSelectAll}
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold focus:ring-2"
+                />
+                <span className="ml-2 sm:ml-3 text-sm sm:text-base font-medium">
+                  Select All ({inStockCount})
+                </span>
+              </label>
+              {cartItems.length > 0 && (
+                <button
+                  onClick={clearCart}
+                  className="text-red-400 hover:text-red-300 text-xs sm:text-sm font-medium"
+                >
+                  Clear Cart
+                </button>
+              )}
+            </div>
+
+            {/* Cart Items */}
+            <div className="space-y-3 mb-4">
               {cartItems.map(item => {
                 const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
                 const isOutOfStock = maxAvailable === 0;
                 const canIncrease = maxAvailable === Infinity || item.quantity < maxAvailable;
+                const isSelected = selectedItems.has(item._id);
                 
                 return (
                   <div
                     key={item._id}
-                    className={`bg-gray-900/60 border ${
-                      isOutOfStock ? 'border-red-500/50' : 'border-gray-800'
-                    } rounded-2xl p-5 transition-all hover:border-gold/50`}
+                    className={`bg-gray-900/60 border rounded-xl p-3 sm:p-4 transition-all ${
+                      isSelected ? 'border-gold/50' :
+                      isOutOfStock ? 'border-red-500/30' : 'border-gray-800'
+                    }`}
                   >
-                    <div className="flex gap-5">
+                    <div className="flex gap-3">
+                      {/* Checkbox */}
+                      <div className="flex items-start pt-1">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelectItem(item._id)}
+                          disabled={isOutOfStock}
+                          className="w-4 h-4 sm:w-5 sm:h-5 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        />
+                      </div>
+                      
+                      {/* Product Image */}
                       <img
                         src={item.productId?.images?.[0]}
                         alt={item.productId?.title}
-                        className="w-28 h-28 rounded-xl object-cover flex-shrink-0"
+                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover flex-shrink-0"
                       />
-
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg mb-1">{item.productId?.title}</h3>
-                        <p className="text-gold text-sm mb-1">{item.productId?.brand}</p>
-                        <p className="text-gray-400 text-sm mb-2">
+                      
+                      {/* Product Details */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm sm:text-base mb-0.5 truncate">
+                          {item.productId?.title}
+                        </h3>
+                        <p className="text-gold text-xs mb-1">{item.productId?.brand}</p>
+                        <p className="text-gray-400 text-xs mb-1">
                           Color: {item.selectedColor}
                         </p>
                         
-                        {/* ✅ SHOW AVAILABLE QUANTITY */}
-                        <p className={`text-xs mb-3 ${
+                        {/* Stock Status */}
+                        <p className={`text-xs mb-2 ${
                           isOutOfStock ? 'text-red-400 font-medium' : 'text-gray-500'
                         }`}>
                           {formatAvailableQuantity(item.productId._id, item.selectedColor)}
                         </p>
-
-                        <div className="flex flex-wrap items-center justify-between gap-4">
-                          <div className="flex items-center bg-black/30 rounded-xl p-1">
+                        
+                        {/* Price and Quantity Controls */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center bg-black/30 rounded-lg">
                             <button
-                              onClick={() =>
-                                updateQuantity(item._id, item.quantity - 1)
-                              }
+                              onClick={() => updateQuantity(item._id, item.quantity - 1)}
                               disabled={item.quantity <= 1}
-                              className={`w-10 h-10 flex items-center justify-center ${
-                                item.quantity <= 1 
-                                  ? 'text-gray-600 cursor-not-allowed' 
+                              className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-lg ${
+                                item.quantity <= 1
+                                  ? 'text-gray-600 cursor-not-allowed'
                                   : 'text-white hover:bg-gray-800'
-                              } rounded-l-xl transition`}
+                              } rounded-l-lg transition`}
                             >
                               −
                             </button>
-                            <span className="w-12 h-10 flex items-center justify-center font-medium">
+                            <span className="w-8 sm:w-10 h-7 sm:h-8 flex items-center justify-center font-medium text-sm">
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() =>
-                                updateQuantity(item._id, item.quantity + 1)
-                              }
+                              onClick={() => updateQuantity(item._id, item.quantity + 1)}
                               disabled={!canIncrease || isOutOfStock}
-                              className={`w-10 h-10 flex items-center justify-center ${
+                              className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-lg ${
                                 !canIncrease || isOutOfStock
-                                  ? 'text-gray-600 cursor-not-allowed' 
+                                  ? 'text-gray-600 cursor-not-allowed'
                                   : 'text-white hover:bg-gray-800'
-                              } rounded-r-xl transition`}
+                              } rounded-r-lg transition`}
                             >
                               +
                             </button>
                           </div>
-
-                          <div className="flex items-center gap-4">
-                            <span className="font-semibold text-lg">
+                          <div className="text-right">
+                            <span className="font-bold text-sm sm:text-base block">
                               {formatPrice(item.productId?.price)}
                             </span>
                             <button
                               onClick={() => removeItem(item._id)}
-                              className="text-red-400 hover:text-red-300 text-sm font-medium transition"
+                              className="text-red-400 hover:text-red-300 text-xs font-medium"
                             >
                               Remove
                             </button>
                           </div>
                         </div>
                         
-                        {/* ✅ OUT OF STOCK WARNING */}
+                        {/* Out of Stock Warning */}
                         {isOutOfStock && (
-                          <div className="mt-3 p-3 bg-red-900/20 border border-red-800 rounded-lg">
-                            <p className="text-red-400 text-sm flex items-center gap-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <div className="mt-2 p-2 bg-red-900/20 border border-red-800 rounded-lg">
+                            <p className="text-red-400 text-xs flex items-center gap-1.5">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                               </svg>
-                              This item is out of stock. Please remove it to proceed.
+                              Out of stock
                             </p>
                           </div>
                         )}
@@ -513,252 +390,82 @@ const CartPage = () => {
                   </div>
                 );
               })}
-
-              <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-800/50">
-                <button
-                  onClick={clearCart}
-                  className="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-medium transition"
-                >
-                  Clear Cart
-                </button>
-                <button
-                  onClick={() => navigate('/shop')}
-                  className="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-medium transition"
-                >
-                  Continue Shopping
-                </button>
-                <button
-                  onClick={() => navigate('/orders')}
-                  className="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-medium transition"
-                >
-                  My Orders
-                </button>
-              </div>
             </div>
 
-            {/* SUMMARY & PAYMENT */}
-            <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6 h-fit lg:sticky lg:top-24">
-              <h2 className="text-xl font-bold mb-6 text-center">Order Summary</h2>
-
-              <div className="space-y-4 text-sm mb-8">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Subtotal</span>
-                  <span className="font-medium">{formatPrice(total)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Shipping</span>
-                  <span className="font-medium">Free</span>
-                </div>
-                <div className="flex justify-between pt-4 border-t border-gray-800 font-bold text-lg">
-                  <span>Total</span>
-                  <span>{formatPrice(total)}</span>
-                </div>
-              </div>
-
-              {/* DELIVERY ADDRESS */}
-              <div className="mb-6 p-4 bg-purple-900/20 border border-purple-800 rounded-xl">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-medium text-purple-300 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Delivery Address
-                  </h4>
-                  {!showConfirmation && (
-                    <button
-                      onClick={() => setIsEditingAddress(true)}
-                      className="text-purple-400 hover:text-purple-300 text-xs font-medium"
-                    >
-                      Edit
-                    </button>
-                  )}
-                </div>
-                
-                {!isEditingAddress ? (
-                  <div className="text-sm text-gray-300 mb-3 bg-black/20 p-3 rounded-lg">
-                    {formatAddress(deliveryAddress)}
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <input
-                      type="text"
-                      placeholder="Street Address"
-                      value={deliveryAddress.address}
-                      onChange={(e) => handleAddressChange('address', e.target.value)}
-                      className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gold"
-                    />
-                    <input
-                      type="text"
-                      placeholder="City"
-                      value={deliveryAddress.city}
-                      onChange={(e) => handleAddressChange('city', e.target.value)}
-                      className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gold"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Province/State"
-                      value={deliveryAddress.province}
-                      onChange={(e) => handleAddressChange('province', e.target.value)}
-                      className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gold"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Country"
-                      value={deliveryAddress.country}
-                      onChange={(e) => handleAddressChange('country', e.target.value)}
-                      className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gold"
-                    />
-                    <div className="flex gap-2 pt-2">
-                      <button
-                        onClick={saveAddress}
-                        className="flex-1 bg-gold text-black py-2 rounded-lg text-sm font-medium hover:bg-gold/90 transition"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={cancelAddressEdit}
-                        className="flex-1 bg-gray-800 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-                
-                {!showConfirmation && !isEditingAddress && (
-                  <p className="text-xs text-gray-500">
-                    Please ensure your delivery address is correct before placing the order.
-                  </p>
-                )}
-              </div>
-
-              {/* BANK TRANSFER DETAILS */}
-              <div className="mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-xl">
-                <h4 className="font-medium text-blue-300 mb-3 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Bank Transfer Instructions
-                </h4>
-                <p className="text-sm text-gray-300 mb-4">
-                  Please transfer <span className="font-bold text-gold">LKR {total.toLocaleString()}</span> to our bank account:
-                </p>
-                <div className="text-xs bg-black/30 p-3 rounded-lg mb-4">
-                  <div className="font-medium mb-1">Account Details:</div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div><span className="text-gray-400">Account Number:</span></div>
-                    <div>{bankInfo.accountNumber}</div>
-                    <div><span className="text-gray-400">Account Name:</span></div>
-                    <div>{bankInfo.accountName}</div>
-                    <div><span className="text-gray-400">Bank:</span></div>
-                    <div>{bankInfo.bankName}</div>
-                    <div><span className="text-gray-400">Branch:</span></div>
-                    <div>{bankInfo.branch}</div>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm mb-2 font-medium">Upload Receipt *</label>
-                  <input
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={handleReceiptChange}
-                    className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gray-800 file:text-white hover:file:bg-gray-700 file:transition"
-                  />
-                  {receiptPreview && (
-                    <div className="mt-3">
-                      <img
-                        src={receiptPreview}
-                        alt="Receipt preview"
-                        className="max-h-40 object-contain rounded-lg w-full"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReceiptFile(null);
-                          setReceiptPreview('');
-                        }}
-                        className="text-red-400 text-sm mt-2 hover:text-red-300 transition"
-                      >
-                        Remove Receipt
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* CONFIRMATION CHECKBOXES (Only shown when placing order) */}
-              {showConfirmation && (
-                <div className="mb-6 p-4 bg-gray-800/50 border border-gray-700 rounded-xl">
-                  <h4 className="font-medium text-white mb-4 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Order Confirmation
-                  </h4>
-                  
-                  <div className="space-y-4">
-                    <label className="flex items-start cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={addressConfirmed}
-                        onChange={(e) => setAddressConfirmed(e.target.checked)}
-                        className="mt-1 mr-3 w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold focus:ring-2"
-                      />
-                      <span className="text-sm">
-                        I confirm that my delivery address is correct and complete.
-                      </span>
-                    </label>
-                    
-                    <label className="flex items-start cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={receiptConfirmed}
-                        onChange={(e) => setReceiptConfirmed(e.target.checked)}
-                        className="mt-1 mr-3 w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold focus:ring-2"
-                      />
-                      <span className="text-sm">
-                        I confirm that the payment receipt shows the correct amount and transaction details.
-                      </span>
-                    </label>
-                    
-                    <label className="flex items-start cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={termsAccepted}
-                        onChange={(e) => setTermsAccepted(e.target.checked)}
-                        className="mt-1 mr-3 w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold focus:ring-2"
-                      />
-                      <span className="text-sm">
-                        I agree to the <a href="/terms" target="_blank" className="text-gold hover:underline font-medium">Terms of Service</a> and <a href="/privacy" target="_blank" className="text-gold hover:underline font-medium">Privacy Policy</a>.
-                      </span>
-                    </label>
-                  </div>
-                </div>
-              )}
-
+            {/* Desktop Action Buttons */}
+            <div className="hidden md:flex gap-3 pt-4 border-t border-gray-800/50">
               <button
-                onClick={placeOrder}
-                disabled={isProcessing}
-                className={`w-full py-4 rounded-xl font-bold text-lg transition ${
-                  isProcessing
-                    ? 'bg-gray-700 cursor-not-allowed'
+                onClick={() => navigate('/shop')}
+                className="px-6 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl font-medium transition text-sm"
+              >
+                Continue Shopping
+              </button>
+              <button
+                onClick={() => navigate('/orders')}
+                className="px-6 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl font-medium transition text-sm"
+              >
+                My Orders
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Mobile Sticky Bottom Bar */}
+      {cartItems.length > 0 && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-3 safe-area-bottom z-50">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-xs text-gray-400">
+                Total ({selectedItems.size} {selectedItems.size === 1 ? 'item' : 'items'})
+              </p>
+              <p className="text-lg font-bold text-gold">
+                {formatPrice(selectedTotal)}
+              </p>
+            </div>
+            <button
+              onClick={proceedToCheckout}
+              disabled={selectedItems.size === 0}
+              className={`px-6 py-3 rounded-xl font-bold transition ${
+                selectedItems.size === 0
+                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                  : 'bg-gold text-black hover:bg-gold/90'
+              }`}
+            >
+              Checkout
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop Checkout Section */}
+      {cartItems.length > 0 && (
+        <div className="hidden md:block max-w-6xl mx-auto px-4 mt-6">
+          <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-400 mb-1">
+                  Selected Items: {selectedItems.size}
+                </p>
+                <p className="text-2xl font-bold text-gold">
+                  Total: {formatPrice(selectedTotal)}
+                </p>
+              </div>
+              <button
+                onClick={proceedToCheckout}
+                disabled={selectedItems.size === 0}
+                className={`px-10 py-4 rounded-xl font-bold text-lg transition ${
+                  selectedItems.size === 0
+                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                     : 'bg-gold text-black hover:bg-gold/90 shadow-lg hover:shadow-gold/20'
                 }`}
               >
-                {showConfirmation 
-                  ? (isProcessing ? 'Confirming Order...' : 'Confirm Order') 
-                  : 'Place Order'}
+                Proceed to Checkout
               </button>
-              
-              <p className="text-gray-500 text-xs mt-4 text-center">
-                By placing your order, you agree to our Terms of Service and Privacy Policy
-              </p>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

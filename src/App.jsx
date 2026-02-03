@@ -46,6 +46,7 @@ import ApplicationSuccess from "./pages/ApplicationSuccess";
 import TawkToChat from "./components/TawkToChat";
 import MobileChatButton from "./components/MobileChatButton";
 import { ToastContainer } from "react-toastify";
+import CheckoutPage from "./pages/Checkoutpage";
 
 function App() {
   return (
@@ -66,6 +67,7 @@ function App() {
         draggable
         pauseOnHover
         theme="dark"
+        style={{zIndex: 99999}} //remove if no need 
       />
         <main>
           <Routes>
@@ -102,6 +104,13 @@ function App() {
               element={
                 <CustomerProtectedRoute>
                   <CartPage />
+                </CustomerProtectedRoute>
+              }
+            />
+            <Route path="/checkout"
+              element={
+                <CustomerProtectedRoute>
+                  <CheckoutPage />
                 </CustomerProtectedRoute>
               }
             />
