@@ -1,5 +1,6 @@
 // src/components/Loading.jsx
 import React from 'react';
+import ScrollToTop from './ScrollToTop';
 
 const Loading = ({ message = "Loading...", size = "default" }) => {
   // Size classes
@@ -12,6 +13,7 @@ const Loading = ({ message = "Loading...", size = "default" }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
       {/* Watch-themed Loading Animation */}
+      <ScrollToTop/>
       <div className={`relative ${sizeClasses[size]}`}>
         {/* Outer watch bezel */}
         <div className="absolute inset-0 rounded-full border-4 border-gold/30"></div>
