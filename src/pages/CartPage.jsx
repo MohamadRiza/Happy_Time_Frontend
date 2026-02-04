@@ -205,6 +205,30 @@ const CartPage = () => {
     });
   };
 
+  // ✅ Handle quantity input change
+  const handleQuantityInputChange = (itemId, value) => {
+    const item = cartItems.find(i => i._id === itemId);
+    if (!item) return;
+    
+    const numValue = parseInt(value, 10);
+    if (isNaN(numValue)) {
+      // If empty or invalid, set to 1
+      if (value === '') {
+        updateQuantity(itemId, 1);
+      }
+      return;
+    }
+    
+    const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
+    const clampedValue = Math.max(1, Math.min(numValue, maxAvailable !== Infinity ? maxAvailable : 999));
+    updateQuantity(itemId, clampedValue);
+  };
+
+  // ✅ Handle quantity input focus (select all text)
+  const handleQuantityInputFocus = (e) => {
+    e.target.select();
+  };
+
   const selectedTotal = cartItems
     .filter(item => selectedItems.has(item._id))
     .reduce((sum, item) => sum + (item.productId?.price || 0) * item.quantity, 0);
@@ -346,9 +370,16 @@ const CartPage = () => {
                             >
                               −
                             </button>
-                            <span className="w-8 sm:w-10 h-7 sm:h-8 flex items-center justify-center font-medium text-sm">
-                              {item.quantity}
-                            </span>
+                            {/* ✅ QUANTITY INPUT FIELD */}
+                            <input
+                              type="number"
+                              min="1"
+                              max={maxAvailable !== Infinity ? maxAvailable : 999}
+                              value={item.quantity}
+                              onChange={(e) => handleQuantityInputChange(item._id, e.target.value)}
+                              onFocus={handleQuantityInputFocus}
+                              className="w-8 sm:w-10 h-7 sm:h-8 bg-black border-y border-gray-700 text-white flex items-center justify-center font-medium text-center [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+                            />
                             <button
                               onClick={() => updateQuantity(item._id, item.quantity + 1)}
                               disabled={!canIncrease || isOutOfStock}
