@@ -16,6 +16,13 @@ const ProductsIcon = () => (
   </svg>
 );
 
+const StockIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+  </svg>
+);
+
+
 const CustomersIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
@@ -92,6 +99,7 @@ const AdminLayout = ({ children, title = "Admin Dashboard" }) => {
   const navItems = [
     { name: 'Dashboard', icon: <DashboardIcon />, path: '/admin/dashboard' },
     { name: 'Products', icon: <ProductsIcon />, path: '/admin/products' },
+    { name: 'Stock Control', icon: <StockIcon />, path: '/admin/inventory' },
     { name: 'Customers', icon: <CustomersIcon />, path: '/admin/customers' },
     { name: 'Orders', icon: <OrdersIcon />, path: '/admin/orders' },
     { name: 'Messages', icon: <MessagesIcon />, path: '/admin/messages' },

@@ -41,6 +41,13 @@ const MessageIcon = () => (
   </svg>
 );
 
+// ✅ Inventory Alert Icon
+const InventoryAlertIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+  </svg>
+);
+
 // ✅ Activity Icons
 const ActivityIcons = {
   product: ProductIcon,
@@ -58,7 +65,9 @@ const AdminDashboard = () => {
     newMessages: 0,
     customers: 0,
     pendingOrders: 0,
-    jobApplicants: 0
+    jobApplicants: 0,
+    outOfStockItems: 0,
+    lowStockItems: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -73,6 +82,27 @@ const AdminDashboard = () => {
       return;
     }
   }, [navigate]);
+
+  // ✅ Fetch inventory alerts
+  const fetchInventoryAlerts = async () => {
+    try {
+      const token = getToken();
+      const res = await fetch(`${API_URL}/api/admin/inventory/status`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        return {
+          outOfStockItems: data.summary.totalOutOfStock,
+          lowStockItems: data.summary.totalLowStock
+        };
+      }
+    } catch (err) {
+      console.warn('Failed to fetch inventory alerts:', err);
+    }
+    return { outOfStockItems: 0, lowStockItems: 0 };
+  };
 
   const fetchDashboardStats = async () => {
     if (!isAuthenticated()) {
@@ -160,6 +190,9 @@ const AdminDashboard = () => {
         console.warn('Messages API not available:', messagesError);
       }
 
+      // ✅ Fetch inventory alerts
+      const inventoryAlerts = await fetchInventoryAlerts();
+
       const totalProducts = productsData.success ? (productsData.products || []).length : 0;
       const openVacancies = vacanciesData.success 
         ? (vacanciesData.data || []).filter(v => v.status === 'active').length 
@@ -171,7 +204,9 @@ const AdminDashboard = () => {
         newMessages,
         customers: customersCount,
         pendingOrders: pendingOrdersCount,
-        jobApplicants: jobApplicantsCount
+        jobApplicants: jobApplicantsCount,
+        outOfStockItems: inventoryAlerts.outOfStockItems,
+        lowStockItems: inventoryAlerts.lowStockItems
       });
 
       // Build recent activity
@@ -375,6 +410,39 @@ const AdminDashboard = () => {
             <div className="mt-2 w-full h-0.5 bg-gray-800 group-hover:bg-gold transition-colors"></div>
           </Link>
         ))}
+        
+        {/* ✅ Inventory Alert Cards */}
+        {(stats.outOfStockItems > 0 || stats.lowStockItems > 0) && (
+          <>
+            {stats.outOfStockItems > 0 && (
+              <Link
+                to="/admin/inventory"
+                className="bg-gradient-to-br from-red-900/30 to-red-800/30 border border-red-700/50 rounded-xl p-6 shadow-lg hover:shadow-xl hover:border-red-500 transition-all duration-300 cursor-pointer group"
+              >
+                <div className="mb-3 text-red-400 group-hover:scale-110 transition-transform">
+                  <InventoryAlertIcon />
+                </div>
+                <h3 className="text-gray-400 text-sm font-medium mb-1">Out of Stock</h3>
+                <p className="text-2xl font-bold text-white">{stats.outOfStockItems.toLocaleString()}</p>
+                <div className="mt-2 w-full h-0.5 bg-red-800/50 group-hover:bg-red-500 transition-colors"></div>
+              </Link>
+            )}
+            
+            {stats.lowStockItems > 0 && (
+              <Link
+                to="/admin/inventory"
+                className="bg-gradient-to-br from-orange-900/30 to-orange-800/30 border border-orange-700/50 rounded-xl p-6 shadow-lg hover:shadow-xl hover:border-orange-500 transition-all duration-300 cursor-pointer group"
+              >
+                <div className="mb-3 text-orange-400 group-hover:scale-110 transition-transform">
+                  <InventoryAlertIcon />
+                </div>
+                <h3 className="text-gray-400 text-sm font-medium mb-1">Low Stock</h3>
+                <p className="text-2xl font-bold text-white">{stats.lowStockItems.toLocaleString()}</p>
+                <div className="mt-2 w-full h-0.5 bg-orange-800/50 group-hover:bg-orange-500 transition-colors"></div>
+              </Link>
+            )}
+          </>
+        )}
       </div>
 
       {/* Recent Activity */}

@@ -47,6 +47,7 @@ import TawkToChat from "./components/TawkToChat";
 import MobileChatButton from "./components/MobileChatButton";
 import { ToastContainer } from "react-toastify";
 import CheckoutPage from "./pages/Checkoutpage";
+import InventoryManagement from "./pages/AdminPages/InventoryManagement";
 
 function App() {
   return (
@@ -200,6 +201,12 @@ function App() {
             ></Route>
             {/* ✅ CATCH ALL - REDIRECT TO HOME */}
             <Route path="*" element={<Navigate to="/" replace />} />
+
+            <Route path="/admin/inventory" element={
+              <AdminProtectedRoute>
+                <InventoryManagement />
+              </AdminProtectedRoute>
+            } />
           </Routes>
         </main>
         <Footer />
