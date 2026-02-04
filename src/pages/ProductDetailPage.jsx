@@ -723,43 +723,49 @@ const ProductDetailPage = () => {
             </div>
 
             {/* ✅ WHOLESALE DEALER MESSAGE */}
-            <div className="mb-8 p-4 bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-purple-700/50 rounded-xl">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-purple-500/20 rounded-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-purple-300 mb-2">Wholesale Dealers</h3>
-                  <p className="text-gray-300 text-sm mb-3">
-                    Are you a registered wholesale dealer or retailer? Contact our team before placing your order to receive exclusive wholesale pricing and terms.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <a
-                      href="https://wa.me/94757575565"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.485-.883-.789-1.485-1.734-1.658-2.032-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.644-.506-.158-.005-.347-.005-.52-.005-.173 0-.471.074-.719.372-.247.297-1.016 1.016-1.016 2.489 0 1.473 1.068 2.922 1.217 3.12.149.199 2.096 3.17 5.077 4.485.709.313 1.262.49 1.694.622.712.219 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.726 9.726 0 01-4.83-1.318l-.361-.21-.36.21a9.726 9.726 0 01-4.83 1.318 2.94 2.94 0 01-3.54-3.54 9.765 9.765 0 011.318-4.83l.21-.36-.21-.36a9.726 9.726 0 01-1.318-4.83 2.94 2.94 0 013.54-3.54 9.726 9.726 0 014.83-1.318l.361.21.36-.21a9.726 9.726 0 014.83 1.318 2.94 2.94 0 013.54 3.54 9.726 9.726 0 011.318 4.83l-.21.36.21.36a9.726 9.726 0 011.318 4.83 2.94 2.94 0 01-3.54 3.54z" />
-                      </svg>
-                      WhatsApp Us
-                    </a>
-                    <button
-                      onClick={() => navigate('/contact')}
-                      className="inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                      Contact Team
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div className="mb-8 p-4 bg-gradient-to-r from-gray-900/70 to-black/70 border border-yellow-500/40 rounded-xl">
+  <div className="flex items-start gap-3">
+    <div className="p-2 bg-yellow-500/20 rounded-lg">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    </div>
+    <div className="flex-1">
+      <h3 className="font-semibold text-gold mb-2">Wholesale Dealers</h3>
+      <p className="text-gray-300 text-sm mb-3">
+        Are you a registered wholesale dealer or retailer? Contact our team before placing your order to receive exclusive wholesale pricing and terms.
+      </p>
+      <div className="flex flex-col sm:flex-row gap-3">
+        {/* WhatsApp Button */}
+        <a
+          href="https://wa.me/94757575565"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center gap-2 bg-gold hover:bg-yellow-500 text-black px-4 py-2 rounded-lg font-medium transition-all"
+        >
+          {/* Official WhatsApp Logo SVG */}
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M16 0C7.163 0 0 7.163 0 16c0 2.813.735 5.44 2.02 7.746L0 32l8.413-2.008A15.957 15.957 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm8.566 22.486c-.33.92-1.927 1.77-2.689 1.86-.717.083-1.598.115-5.488-2.078-4.572-2.566-7.506-9.118-7.718-9.505-.212-.388-1.715-2.452-1.715-4.676 0-2.224 1.112-3.316 1.507-3.765.397-.449.87-.575 1.164-.575.295 0 .59.003.847.01.273.007.64-.103.997.774.355.875 1.203 3.03 1.31 3.25.107.22.178.483-.106.775-.283.293-.515.637-.736.95-.223.314-.47.66-.218 1.05.252.388 1.124 1.853 2.406 2.998 1.657 1.55 3.041 2.07 3.534 2.3.493.229.781.191.975.116.193-.076.588-.22 1.074-.532.485-.313 1.28-1.488 1.457-2.926.176-1.438.176-2.658-.124-2.926-.3-.268-.557-.318-.747-.316-.19.003-.41.003-.63.003-.22 0-.577-.082-.88.623-.302.704-1.2 1.49-1.2 1.49s-.173.22-.31.365c-.137.145-.28.3-.28.3s-.263.22-.1.55c.163.33.744 1.205.8 1.29.056.085.93 1.56 2.39 2.51 1.46.95 2.285.905 2.62.85.334-.055 1.085-.44 1.238-.87.153-.43.153-.8.106-.88z"/>
+          </svg>
+          WhatsApp Us
+        </a>
+
+        {/* Contact Button */}
+        <button
+          onClick={() => navigate('/contact')}
+          className="inline-flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-yellow-400 px-4 py-2 rounded-lg font-medium transition-all"
+        >
+          {/* Phone Icon */}
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+          Contact Team
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">Description</h2>
