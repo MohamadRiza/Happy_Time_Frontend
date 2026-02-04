@@ -1,6 +1,8 @@
 // src/pages/ProductDetailPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import ScrollToTop from '../components/ScrollToTop';
 import { 
   isCustomerAuthenticated, 
@@ -8,55 +10,44 @@ import {
 } from '../utils/auth';
 import Loading from '../components/Loading';
 
-const Toast = ({ message, isVisible, onClose }) => {
-  useEffect(() => {
-    if (isVisible) {
-      const timer = setTimeout(onClose, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible, onClose]);
-
-  if (!isVisible) return null;
-
-  return (
-    <div className="fixed bottom-6 right-6 z-50">
-      <div className="bg-gold text-black px-5 py-3 rounded-xl shadow-lg font-medium flex items-center gap-2 animate-fade-in-up">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-        </svg>
-        {message}
-      </div>
-    </div>
-  );
-};
-
 const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedColorObj, setSelectedColorObj] = useState(null); // ✅ Store full color object
+  const [selectedColorObj, setSelectedColorObj] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [toastMessage, setToastMessage] = useState('');
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryCurrentIndex, setGalleryCurrentIndex] = useState(0);
+
+  // Refs for touch/swipe
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const galleryTouchStartX = useRef(0);
+  const galleryTouchEndX = useRef(0);
 
   const { id } = useParams();
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+  // Detect touch device
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   // ✅ HELPER: Parse colors from product
   const parseProductColors = (product) => {
     if (!product?.colors || !Array.isArray(product.colors)) return [];
     
     return product.colors.map(color => {
-      // Handle object format {name: "Gold - Black", quantity: 5}
       if (typeof color === 'object' && color.name) {
         return {
           name: color.name,
           quantity: color.quantity !== null && color.quantity !== undefined ? color.quantity : null
         };
       }
-      // Handle old string format for backward compatibility
       if (typeof color === 'string') {
         return {
           name: color,
@@ -74,12 +65,9 @@ const ProductDetailPage = () => {
       
       if (data.success) {
         setProduct(data.product);
-        
-        // ✅ Parse colors and set default selection
         const colors = parseProductColors(data.product);
         if (colors.length > 0) {
           setSelectedColorObj(colors[0]);
-          // ✅ Set quantity to 1 by default (will be validated against available stock)
           setQuantity(1);
         }
       } else {
@@ -116,27 +104,106 @@ const ProductDetailPage = () => {
     }
   }, [id]);
 
-  // ✅ Reset quantity when color changes
   useEffect(() => {
     if (selectedColorObj) {
       setQuantity(1);
     }
   }, [selectedColorObj]);
 
+  // ✅ Handle main image touch start for swipe
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  // ✅ Handle main image touch end for swipe
+  const handleTouchEnd = (e) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    handleSwipe();
+  };
+
+  // ✅ Handle main image swipe logic
+  const handleSwipe = () => {
+    const allMedia = [...(product.images || [])];
+    if (product.video) allMedia.push(product.video);
+    
+    if (allMedia.length <= 1) return;
+    
+    const minSwipeDistance = 50;
+    const diff = touchStartX.current - touchEndX.current;
+    
+    if (diff > minSwipeDistance) {
+      // Swipe left - next image
+      setMainImageIndex(prev => (prev + 1) % allMedia.length);
+    } else if (diff < -minSwipeDistance) {
+      // Swipe right - previous image
+      setMainImageIndex(prev => prev === 0 ? allMedia.length - 1 : prev - 1);
+    }
+  };
+
+  // ✅ Handle gallery touch start for swipe
+  const handleGalleryTouchStart = (e) => {
+    galleryTouchStartX.current = e.touches[0].clientX;
+  };
+
+  // ✅ Handle gallery touch end for swipe
+  const handleGalleryTouchEnd = (e) => {
+    galleryTouchEndX.current = e.changedTouches[0].clientX;
+    handleGallerySwipe();
+  };
+
+  // ✅ Handle gallery swipe logic
+  const handleGallerySwipe = () => {
+    const allMedia = [...(product.images || [])];
+    if (product.video) allMedia.push(product.video);
+    
+    if (allMedia.length <= 1) return;
+    
+    const minSwipeDistance = 50;
+    const diff = galleryTouchStartX.current - galleryTouchEndX.current;
+    
+    if (diff > minSwipeDistance) {
+      // Swipe left - next image
+      setGalleryCurrentIndex(prev => (prev + 1) % allMedia.length);
+    } else if (diff < -minSwipeDistance) {
+      // Swipe right - previous image
+      setGalleryCurrentIndex(prev => prev === 0 ? allMedia.length - 1 : prev - 1);
+    }
+  };
+
+  // ✅ Open gallery modal
+  const openGallery = (index) => {
+    setGalleryCurrentIndex(index);
+    setGalleryOpen(true);
+  };
+
+  // ✅ Close gallery modal
+  const closeGallery = () => {
+    setGalleryOpen(false);
+  };
+
+  // ✅ Navigate to next/previous in gallery
+  const navigateGallery = (direction) => {
+    const allMedia = [...(product.images || [])];
+    if (product.video) allMedia.push(product.video);
+    
+    if (direction === 'next') {
+      setGalleryCurrentIndex(prev => (prev + 1) % allMedia.length);
+    } else {
+      setGalleryCurrentIndex(prev => prev === 0 ? allMedia.length - 1 : prev - 1);
+    }
+  };
+
   const addToCart = async () => {
     if (!product || product.price === null || product.price === undefined) return;
     
     if (!selectedColorObj) {
-      setError('Please select a color');
+      toast.error('Please select a color');
       return;
     }
 
-    // ✅ Validate quantity against available stock
-    if (selectedColorObj.quantity !== null) {
-      if (quantity > selectedColorObj.quantity) {
-        setError(`Only ${selectedColorObj.quantity} available in stock`);
-        return;
-      }
+    if (selectedColorObj.quantity !== null && quantity > selectedColorObj.quantity) {
+      toast.error(`Only ${selectedColorObj.quantity} available in stock`);
+      return;
     }
     
     if (!isCustomerAuthenticated()) {
@@ -177,16 +244,20 @@ const ProductDetailPage = () => {
       const data = await response.json();
       
       if (data.success) {
-        setToastMessage('Added to cart successfully!');
-        setError(''); // Clear any errors
+        toast.success('Added to cart successfully!');
+        setError('');
         window.dispatchEvent(new CustomEvent('cartUpdated'));
       } else {
-        setError(data.message || 'Failed to add to cart');
+        toast.error(data.message || 'Failed to add to cart');
       }
     } catch (err) {
       console.error('Add to cart error:', err);
-      setError('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     }
+  };
+
+  const goToCart = () => {
+    navigate('/cart');
   };
 
   const formatPrice = (price) => {
@@ -220,24 +291,41 @@ const ProductDetailPage = () => {
     navigate('/shop');
   };
 
+  // ✅ Handle quantity input change
+  const handleQuantityInputChange = (e) => {
+    const value = e.target.value;
+    if (value === '') {
+      setQuantity(1);
+      return;
+    }
+    
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue)) {
+      const maxQty = getMaxQuantity();
+      setQuantity(Math.max(1, Math.min(numValue, maxQty)));
+    }
+  };
+
+  // ✅ Handle quantity input focus (select all text)
+  const handleQuantityInputFocus = (e) => {
+    e.target.select();
+  };
+
   // ✅ Handle quantity change with validation
   const handleQuantityChange = (newQty) => {
     if (!selectedColorObj) return;
     
-    // Validate against available stock
     if (selectedColorObj.quantity !== null) {
       const maxQty = selectedColorObj.quantity;
       setQuantity(Math.max(1, Math.min(newQty, maxQty)));
     } else {
-      // No stock limit
       setQuantity(Math.max(1, newQty));
     }
   };
 
-  // ✅ Get max quantity for selected color
   const getMaxQuantity = () => {
     if (!selectedColorObj || selectedColorObj.quantity === null) {
-      return 999; // No limit
+      return 999;
     }
     return selectedColorObj.quantity;
   };
@@ -247,6 +335,18 @@ const ProductDetailPage = () => {
       <div className="bg-black text-white min-h-screen">
         <ScrollToTop />
         <Loading message="Loading product details..." size="large" />
+        <ToastContainer 
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
       </div>
     );
   }
@@ -266,6 +366,18 @@ const ProductDetailPage = () => {
             Browse Collection
           </button>
         </div>
+        <ToastContainer 
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
       </div>
     );
   }
@@ -275,19 +387,91 @@ const ProductDetailPage = () => {
   const allMedia = [...(product.images || [])];
   if (product.video) allMedia.push(product.video);
   const isVideo = mainImageIndex >= (product.images?.length || 0) && product.video;
-
-  // ✅ Get parsed colors
   const productColors = parseProductColors(product);
 
   return (
     <div className="bg-black text-white min-h-screen relative">
       <ScrollToTop />
       
-      <Toast 
-        message={toastMessage} 
-        isVisible={!!toastMessage} 
-        onClose={() => setToastMessage('')} 
+      <ToastContainer 
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
       />
+
+      {/* ✅ GALLERY MODAL */}
+      {galleryOpen && (
+        <div 
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={closeGallery}
+        >
+          <div className="relative w-full max-w-4xl max-h-[90vh]">
+            {/* Close button */}
+            <button
+              onClick={closeGallery}
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition"
+            >
+              ✕
+            </button>
+            
+            {/* Navigation buttons */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigateGallery('prev');
+              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition"
+            >
+              ‹
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigateGallery('next');
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition"
+            >
+              ›
+            </button>
+            
+            {/* Main media */}
+            <div 
+              className="relative w-full h-full"
+              onTouchStart={handleGalleryTouchStart}
+              onTouchEnd={handleGalleryTouchEnd}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {galleryCurrentIndex >= (product.images?.length || 0) && product.video ? (
+                <video
+                  src={product.video}
+                  controls
+                  className="w-full h-full max-h-[80vh] object-contain"
+                  onError={(e) => e.target.style.display = 'none'}
+                />
+              ) : (
+                <img
+                  src={product.images?.[galleryCurrentIndex] || ''}
+                  alt={`${product.title} - ${galleryCurrentIndex + 1}`}
+                  className="w-full h-full max-h-[80vh] object-contain"
+                  onError={(e) => e.target.style.display = 'none'}
+                />
+              )}
+            </div>
+            
+            {/* Counter */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
+              {galleryCurrentIndex + 1} / {allMedia.length}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-6 sm:mb-8">
@@ -305,11 +489,15 @@ const ProductDetailPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Media Gallery */}
           <div>
-            <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-2xl overflow-hidden aspect-square flex items-center justify-center mb-4">
+            <div 
+              className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-2xl overflow-hidden aspect-square flex items-center justify-center mb-4 relative cursor-pointer"
+              onTouchStart={isTouchDevice ? handleTouchStart : undefined}
+              onTouchEnd={isTouchDevice ? handleTouchEnd : undefined}
+              onClick={() => openGallery(mainImageIndex)}
+            >
               {isVideo ? (
                 <video
                   src={product.video}
-                  controls
                   className="w-full h-full object-contain"
                   onError={(e) => e.target.style.display = 'none'}
                 />
@@ -321,9 +509,33 @@ const ProductDetailPage = () => {
                   onError={(e) => e.target.style.display = 'none'}
                 />
               )}
+              
+              {/* Click to view gallery indicator */}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
+                <div className="bg-black/60 px-4 py-2 rounded-lg flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-white text-sm">View Gallery</span>
+                </div>
+              </div>
+              
+              {/* Mobile swipe indicators */}
+              {isTouchDevice && allMedia.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                  {allMedia.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`w-2 h-2 rounded-full ${
+                        index === mainImageIndex ? 'bg-gold' : 'bg-gray-600'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
-            {allMedia.length > 1 && (
+            {allMedia.length > 1 && !isTouchDevice && (
               <div className="grid grid-cols-4 gap-3">
                 {allMedia.map((media, index) => {
                   const isThumbVideo = index >= (product.images?.length || 0);
@@ -339,14 +551,12 @@ const ProductDetailPage = () => {
                     >
                       {isThumbVideo ? (
                         <div className="relative w-full h-full">
-                          {/* Video thumbnail */}
                           <video
                             src={media}
                             className="w-full h-full object-cover"
                             muted
                             playsInline
                           />
-                          {/* Play icon overlay */}
                           <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none">
                             <div className="bg-gold/90 rounded-full p-2">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-black" fill="currentColor" viewBox="0 0 24 24">
@@ -401,7 +611,7 @@ const ProductDetailPage = () => {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* ✅ IMPROVED COLOR SELECTION */}
+                  {/* Color Selection */}
                   {productColors.length > 0 && (
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-3">Available Colors</h3>
@@ -421,7 +631,7 @@ const ProductDetailPage = () => {
                         ))}
                       </div>
                       
-                      {/* ✅ SHOW AVAILABLE QUANTITY AFTER COLOR SELECTION */}
+                      {/* Stock Status */}
                       {selectedColorObj && selectedColorObj.quantity !== null && (
                         <div className="mt-3 flex items-center gap-2 text-sm">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -446,7 +656,7 @@ const ProductDetailPage = () => {
                     </div>
                   )}
 
-                  {/* ✅ IMPROVED QUANTITY SELECTOR WITH VALIDATION */}
+                  {/* Quantity Selector with Input */}
                   <div>
                     <h3 className="text-lg font-semibold text-white mb-3">Quantity</h3>
                     <div className="flex items-center gap-4">
@@ -458,9 +668,15 @@ const ProductDetailPage = () => {
                         >
                           −
                         </button>
-                        <span className="w-16 h-10 bg-black border-y border-gray-700 text-white flex items-center justify-center font-medium">
-                          {quantity}
-                        </span>
+                        <input
+                          type="number"
+                          min="1"
+                          max={getMaxQuantity()}
+                          value={quantity}
+                          onChange={handleQuantityInputChange}
+                          onFocus={handleQuantityInputFocus}
+                          className="w-16 h-10 bg-black border-y border-gray-700 text-white flex items-center justify-center font-medium text-center [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+                        />
                         <button
                           onClick={() => handleQuantityChange(quantity + 1)}
                           disabled={selectedColorObj && selectedColorObj.quantity !== null && quantity >= selectedColorObj.quantity}
@@ -470,7 +686,6 @@ const ProductDetailPage = () => {
                         </button>
                       </div>
                       
-                      {/* ✅ Show max quantity info */}
                       {selectedColorObj && selectedColorObj.quantity !== null && (
                         <span className="text-gray-400 text-sm">
                           Max: {selectedColorObj.quantity}
@@ -479,27 +694,71 @@ const ProductDetailPage = () => {
                     </div>
                   </div>
 
-                  {/* ✅ Show error message if any */}
-                  {error && (
-                    <div className="bg-red-900/20 border border-red-700 rounded-lg p-3 flex items-start gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  {/* Dual Action Buttons */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={addToCart}
+                      disabled={!selectedColorObj || (selectedColorObj.quantity !== null && selectedColorObj.quantity === 0)}
+                      className="flex-1 bg-gold text-black py-4 rounded-xl font-bold text-lg hover:bg-gold/90 transition-all duration-200 shadow-lg shadow-gold/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
-                      <span className="text-red-300 text-sm">{error}</span>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={addToCart}
-                    disabled={!selectedColorObj || (selectedColorObj.quantity !== null && selectedColorObj.quantity === 0)}
-                    className="w-full bg-gold text-black py-4 rounded-xl font-bold text-lg hover:bg-gold/90 transition shadow-lg shadow-gold/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {selectedColorObj && selectedColorObj.quantity === 0 
-                      ? 'Out of Stock' 
-                      : 'Add to Cart'}
-                  </button>
+                      {selectedColorObj && selectedColorObj.quantity === 0 
+                        ? 'Out of Stock' 
+                        : 'Add to Cart'}
+                    </button>
+                    <button
+                      onClick={goToCart}
+                      className="px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-bold text-lg transition-all duration-200 border border-gray-700 hover:border-gray-600 flex items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                      </svg>
+                      My Cart
+                    </button>
+                  </div>
                 </div>
               )}
+            </div>
+
+            {/* ✅ WHOLESALE DEALER MESSAGE */}
+            <div className="mb-8 p-4 bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-purple-700/50 rounded-xl">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-purple-500/20 rounded-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-purple-300 mb-2">Wholesale Dealers</h3>
+                  <p className="text-gray-300 text-sm mb-3">
+                    Are you a registered wholesale dealer or retailer? Contact our team before placing your order to receive exclusive wholesale pricing and terms.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <a
+                      href="https://wa.me/94757575565"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.485-.883-.789-1.485-1.734-1.658-2.032-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.644-.506-.158-.005-.347-.005-.52-.005-.173 0-.471.074-.719.372-.247.297-1.016 1.016-1.016 2.489 0 1.473 1.068 2.922 1.217 3.12.149.199 2.096 3.17 5.077 4.485.709.313 1.262.49 1.694.622.712.219 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.726 9.726 0 01-4.83-1.318l-.361-.21-.36.21a9.726 9.726 0 01-4.83 1.318 2.94 2.94 0 01-3.54-3.54 9.765 9.765 0 011.318-4.83l.21-.36-.21-.36a9.726 9.726 0 01-1.318-4.83 2.94 2.94 0 013.54-3.54 9.726 9.726 0 014.83-1.318l.361.21.36-.21a9.726 9.726 0 014.83 1.318 2.94 2.94 0 013.54 3.54 9.726 9.726 0 011.318 4.83l-.21.36.21.36a9.726 9.726 0 011.318 4.83 2.94 2.94 0 01-3.54 3.54z" />
+                      </svg>
+                      WhatsApp Us
+                    </a>
+                    <button
+                      onClick={() => navigate('/contact')}
+                      className="inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      Contact Team
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="mb-8">
@@ -509,7 +768,7 @@ const ProductDetailPage = () => {
               </p>
             </div>
 
-            {/* ✅ IMPROVED SPECIFICATIONS WITH CUSTOM SPECS */}
+            {/* Specifications */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">Specifications</h2>
               <div className="space-y-3">
@@ -534,11 +793,9 @@ const ProductDetailPage = () => {
                   <span className="text-white text-sm">{product.watchShape}</span>
                 </div>
                 
-                {/* ✅ DISPLAY CUSTOM SPECIFICATIONS */}
                 {product.specifications && Array.isArray(product.specifications) && product.specifications.length > 0 && (
                   <>
                     {product.specifications.map((spec, idx) => {
-                      // Handle both object format and old format
                       const key = typeof spec === 'object' ? spec.key : spec;
                       const value = typeof spec === 'object' ? spec.value : '';
                       
@@ -604,7 +861,7 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        {/* ✅ RELATED PRODUCTS WITH PROPER COLOR HANDLING */}
+        {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div className="mt-16 pt-8 border-t border-gray-800/50">
             <h2 className="text-2xl font-bold text-white mb-6 text-center">
@@ -619,7 +876,6 @@ const ProductDetailPage = () => {
                   className="group cursor-pointer"
                   onClick={() => navigate(`/shop/${relatedProduct._id}`)}
                 >
-                  {/* Image Container - Mobile Optimized */}
                   <div className="aspect-square bg-gray-900/40 border border-gray-800 rounded-xl overflow-hidden mb-3 transition-all hover:border-gold">
                     {relatedProduct.images?.[0] ? (
                       <img
@@ -635,7 +891,6 @@ const ProductDetailPage = () => {
                     )}
                   </div>
 
-                  {/* Product Info */}
                   <div className="text-center">
                     <h3 className="text-white text-sm font-semibold line-clamp-1 mb-1">
                       {relatedProduct.title}
