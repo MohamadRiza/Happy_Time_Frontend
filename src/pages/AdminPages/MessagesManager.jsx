@@ -1,4 +1,3 @@
-// src/pages/MessagesManager.jsx
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getToken } from '../../utils/auth';
@@ -10,6 +9,7 @@ const MessagesManager = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [deleting, setDeleting] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const [branchFilter, setBranchFilter] = useState('all');
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -36,6 +36,11 @@ const MessagesManager = () => {
     fetchMessages();
   }, []);
 
+  // ✅ Filter messages by branch
+  const filteredMessages = branchFilter === 'all' 
+    ? messages 
+    : messages.filter(msg => msg.branch === branchFilter);
+
   const closeModal = () => {
     setSelectedMessage(null);
   };
@@ -49,10 +54,10 @@ const MessagesManager = () => {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === messages.length) {
+    if (selectedIds.length === filteredMessages.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(messages.map(m => m._id));
+      setSelectedIds(filteredMessages.map(m => m._id));
     }
   };
 
@@ -132,25 +137,47 @@ const MessagesManager = () => {
     });
   };
 
-  // Truncate message for preview
   const truncateMessage = (msg, maxLength = 80) => {
     if (msg.length <= maxLength) return msg;
     return msg.substring(0, maxLength) + '...';
   };
 
+  // ✅ Get unique branches for filter
+  const uniqueBranches = [...new Set(messages.map(msg => msg.branch))].sort();
+
   return (
     <AdminLayout title="Messages Inbox">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2 xl font-bold text-white">Customer Messages</h2>
-        {selectedIds.length > 0 && (
-          <button
-            onClick={bulkDelete}
-            disabled={deleting}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors disabled:opacity-60"
-          >
-            {deleting ? 'Deleting...' : `Delete (${selectedIds.length})`}
-          </button>
-        )}
+      {/* Header with Filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h2 className="text-2xl font-bold text-white">Customer Messages</h2>
+        
+        <div className="flex items-center gap-4">
+          {/* Branch Filter */}
+          <div className="flex items-center gap-2">
+            <label className="text-gray-400 text-sm whitespace-nowrap">Filter by Branch:</label>
+            <select
+              value={branchFilter}
+              onChange={(e) => setBranchFilter(e.target.value)}
+              className="bg-black border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-gold"
+            >
+              <option value="all">All Branches</option>
+              {uniqueBranches.map(branch => (
+                <option key={branch} value={branch}>{branch}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Bulk Delete Button */}
+          {selectedIds.length > 0 && (
+            <button
+              onClick={bulkDelete}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors disabled:opacity-60 text-sm"
+            >
+              {deleting ? 'Deleting...' : `Delete (${selectedIds.length})`}
+            </button>
+          )}
+        </div>
       </div>
 
       {error && <p className="text-red-400 mb-4">{error}</p>}
@@ -160,18 +187,22 @@ const MessagesManager = () => {
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
           <p className="mt-4 text-gray-400">Loading messages...</p>
         </div>
-      ) : messages.length === 0 ? (
+      ) : filteredMessages.length === 0 ? (
         <div className="text-center py-12 bg-gray-900/50 border border-gray-800 rounded-xl">
-          <p className="text-gray-500">No messages received yet.</p>
+          <p className="text-gray-500">
+            {branchFilter === 'all' 
+              ? 'No messages received yet.' 
+              : `No messages from ${branchFilter} branch.`}
+          </p>
         </div>
       ) : (
         <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
-          {/* Header Row - FIXED GRID */}
+          {/* Header Row */}
           <div className="grid grid-cols-[40px,180px,180px,1fr,120px] gap-4 p-4 bg-black/30 border-b border-gray-800 font-medium text-gray-400 text-sm">
             <label className="flex items-center justify-center">
               <input
                 type="checkbox"
-                checked={selectedIds.length === messages.length && messages.length > 0}
+                checked={selectedIds.length === filteredMessages.length && filteredMessages.length > 0}
                 onChange={toggleSelectAll}
                 className="w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold"
               />
@@ -182,43 +213,45 @@ const MessagesManager = () => {
             <span>Status</span>
           </div>
 
-          {/* Messages List - FIXED GRID */}
+          {/* Messages List */}
           <div className="divide-y divide-gray-800 max-h-[70vh] overflow-y-auto">
-            {messages.map((msg) => (
+            {filteredMessages.map((msg) => (
               <div
                 key={msg._id}
                 className={`p-4 hover:bg-gray-800/30 transition-colors cursor-pointer ${
                   msg.status === 'unread' ? 'bg-gold/5 border-l-2 border-gold' : ''
                 }`}
+                // ✅ ONLY open modal when clicking non-checkbox area
                 onClick={() => setSelectedMessage(msg)}
               >
                 <div className="grid grid-cols-[40px,180px,180px,1fr,120px] gap-4 items-start">
-                  {/* Checkbox */}
+                  {/* Checkbox - STOP PROPAGATION */}
                   <div className="flex items-center justify-center">
                     <input
                       type="checkbox"
                       checked={selectedIds.includes(msg._id)}
                       onChange={(e) => {
-                        e.stopPropagation();
+                        e.stopPropagation(); // ✅ Prevents opening modal
                         toggleSelect(msg._id);
                       }}
+                      onClick={(e) => e.stopPropagation()} // ✅ Also stop click
                       className="w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold"
                     />
                   </div>
 
-                  {/* From - FIXED WIDTH */}
+                  {/* From */}
                   <div className="truncate">
                     <p className="font-medium text-white truncate">{msg.name}</p>
                     <p className="text-sm text-gray-400 truncate">{msg.email}</p>
                     {msg.phone && <p className="text-xs text-gray-500 truncate">📞 {msg.phone}</p>}
                   </div>
 
-                  {/* Branch - FIXED WIDTH */}
+                  {/* Branch */}
                   <div className="text-gray-300 truncate">
                     {msg.branch}
                   </div>
 
-                  {/* Message Preview - FLEXIBLE WIDTH */}
+                  {/* Message Preview */}
                   <div className="min-w-0">
                     <p className="text-gray-300 line-clamp-2 break-words">
                       {truncateMessage(msg.message)}
@@ -226,7 +259,7 @@ const MessagesManager = () => {
                     <p className="text-xs text-gold mt-1">Click to view full message</p>
                   </div>
 
-                  {/* Status - FIXED WIDTH */}
+                  {/* Status */}
                   <div className="flex items-center justify-end">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
