@@ -1,4 +1,3 @@
-// src/pages/ProductDetailPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
@@ -21,6 +20,7 @@ const ProductDetailPage = () => {
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryCurrentIndex, setGalleryCurrentIndex] = useState(0);
+  const [thumbnailStartIndex, setThumbnailStartIndex] = useState(0);
 
   // Refs for touch/swipe
   const touchStartX = useRef(0);
@@ -32,15 +32,12 @@ const ProductDetailPage = () => {
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  // Detect touch device
   useEffect(() => {
     setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
   }, []);
 
-  // ✅ HELPER: Parse colors from product
   const parseProductColors = (product) => {
     if (!product?.colors || !Array.isArray(product.colors)) return [];
-    
     return product.colors.map(color => {
       if (typeof color === 'object' && color.name) {
         return {
@@ -62,7 +59,6 @@ const ProductDetailPage = () => {
     try {
       const res = await fetch(`${API_URL}/api/products/${id}`);
       const data = await res.json();
-      
       if (data.success) {
         setProduct(data.product);
         const colors = parseProductColors(data.product);
@@ -85,7 +81,6 @@ const ProductDetailPage = () => {
     try {
       const res = await fetch(`${API_URL}/api/products`);
       const data = await res.json();
-      
       if (data.success) {
         const related = data.products
           .filter(p => p._id !== id && p.status === 'active')
@@ -110,82 +105,59 @@ const ProductDetailPage = () => {
     }
   }, [selectedColorObj]);
 
-  // ✅ Handle main image touch start for swipe
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
   };
 
-  // ✅ Handle main image touch end for swipe
   const handleTouchEnd = (e) => {
     touchEndX.current = e.changedTouches[0].clientX;
     handleSwipe();
   };
 
-  // ✅ Handle main image swipe logic
   const handleSwipe = () => {
-    const allMedia = [...(product.images || [])];
-    if (product.video) allMedia.push(product.video);
-    
+    const allMedia = [...(product.images || []), ...(product.videos || [])];
     if (allMedia.length <= 1) return;
-    
     const minSwipeDistance = 50;
     const diff = touchStartX.current - touchEndX.current;
-    
     if (diff > minSwipeDistance) {
-      // Swipe left - next image
       setMainImageIndex(prev => (prev + 1) % allMedia.length);
     } else if (diff < -minSwipeDistance) {
-      // Swipe right - previous image
       setMainImageIndex(prev => prev === 0 ? allMedia.length - 1 : prev - 1);
     }
   };
 
-  // ✅ Handle gallery touch start for swipe
   const handleGalleryTouchStart = (e) => {
     galleryTouchStartX.current = e.touches[0].clientX;
   };
 
-  // ✅ Handle gallery touch end for swipe
   const handleGalleryTouchEnd = (e) => {
     galleryTouchEndX.current = e.changedTouches[0].clientX;
     handleGallerySwipe();
   };
 
-  // ✅ Handle gallery swipe logic
   const handleGallerySwipe = () => {
-    const allMedia = [...(product.images || [])];
-    if (product.video) allMedia.push(product.video);
-    
+    const allMedia = [...(product.images || []), ...(product.videos || [])];
     if (allMedia.length <= 1) return;
-    
     const minSwipeDistance = 50;
     const diff = galleryTouchStartX.current - galleryTouchEndX.current;
-    
     if (diff > minSwipeDistance) {
-      // Swipe left - next image
       setGalleryCurrentIndex(prev => (prev + 1) % allMedia.length);
     } else if (diff < -minSwipeDistance) {
-      // Swipe right - previous image
       setGalleryCurrentIndex(prev => prev === 0 ? allMedia.length - 1 : prev - 1);
     }
   };
 
-  // ✅ Open gallery modal
   const openGallery = (index) => {
     setGalleryCurrentIndex(index);
     setGalleryOpen(true);
   };
 
-  // ✅ Close gallery modal
   const closeGallery = () => {
     setGalleryOpen(false);
   };
 
-  // ✅ Navigate to next/previous in gallery
   const navigateGallery = (direction) => {
-    const allMedia = [...(product.images || [])];
-    if (product.video) allMedia.push(product.video);
-    
+    const allMedia = [...(product.images || []), ...(product.videos || [])];
     if (direction === 'next') {
       setGalleryCurrentIndex(prev => (prev + 1) % allMedia.length);
     } else {
@@ -193,19 +165,33 @@ const ProductDetailPage = () => {
     }
   };
 
+  // ✅ Thumbnail navigation
+  const allMedia = [...(product?.images || []), ...(product?.videos || [])];
+  const totalMedia = allMedia.length;
+  const visibleThumbnails = 4;
+
+  const nextThumbnails = () => {
+    if (thumbnailStartIndex + visibleThumbnails < totalMedia) {
+      setThumbnailStartIndex(prev => prev + 1);
+    }
+  };
+
+  const prevThumbnails = () => {
+    if (thumbnailStartIndex > 0) {
+      setThumbnailStartIndex(prev => prev - 1);
+    }
+  };
+
   const addToCart = async () => {
     if (!product || product.price === null || product.price === undefined) return;
-    
     if (!selectedColorObj) {
       toast.error('Please select a color');
       return;
     }
-
     if (selectedColorObj.quantity !== null && quantity > selectedColorObj.quantity) {
       toast.error(`Only ${selectedColorObj.quantity} available in stock`);
       return;
     }
-    
     if (!isCustomerAuthenticated()) {
       const pendingItem = {
         _id: product._id,
@@ -220,7 +206,6 @@ const ProductDetailPage = () => {
         watchShape: product.watchShape,
         productType: product.productType
       };
-      
       sessionStorage.setItem('pendingCartItem', JSON.stringify(pendingItem));
       navigate('/login', { state: { from: `/shop/${id}` } });
       return;
@@ -240,9 +225,7 @@ const ProductDetailPage = () => {
           quantity
         })
       });
-      
       const data = await response.json();
-      
       if (data.success) {
         toast.success('Added to cart successfully!');
         setError('');
@@ -291,14 +274,12 @@ const ProductDetailPage = () => {
     navigate('/shop');
   };
 
-  // ✅ Handle quantity input change
   const handleQuantityInputChange = (e) => {
     const value = e.target.value;
     if (value === '') {
       setQuantity(1);
       return;
     }
-    
     const numValue = parseInt(value, 10);
     if (!isNaN(numValue)) {
       const maxQty = getMaxQuantity();
@@ -306,15 +287,12 @@ const ProductDetailPage = () => {
     }
   };
 
-  // ✅ Handle quantity input focus (select all text)
   const handleQuantityInputFocus = (e) => {
     e.target.select();
   };
 
-  // ✅ Handle quantity change with validation
   const handleQuantityChange = (newQty) => {
     if (!selectedColorObj) return;
-    
     if (selectedColorObj.quantity !== null) {
       const maxQty = selectedColorObj.quantity;
       setQuantity(Math.max(1, Math.min(newQty, maxQty)));
@@ -384,10 +362,12 @@ const ProductDetailPage = () => {
 
   if (!product) return null;
 
-  const allMedia = [...(product.images || [])];
-  if (product.video) allMedia.push(product.video);
-  const isVideo = mainImageIndex >= (product.images?.length || 0) && product.video;
+  const currentMediaUrl = allMedia[mainImageIndex];
+  const isVideo = mainImageIndex >= (product.images?.length || 0);
   const productColors = parseProductColors(product);
+
+  // ✅ Get up to 4 thumbnails starting from thumbnailStartIndex
+  const visibleMedia = allMedia.slice(thumbnailStartIndex, thumbnailStartIndex + visibleThumbnails);
 
   return (
     <div className="bg-black text-white min-h-screen relative">
@@ -406,14 +386,13 @@ const ProductDetailPage = () => {
         theme="dark"
       />
 
-      {/* ✅ GALLERY MODAL */}
+      {/* Gallery Modal */}
       {galleryOpen && (
         <div 
           className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
           onClick={closeGallery}
         >
           <div className="relative w-full max-w-4xl max-h-[90vh]">
-            {/* Close button */}
             <button
               onClick={closeGallery}
               className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition"
@@ -421,7 +400,6 @@ const ProductDetailPage = () => {
               ✕
             </button>
             
-            {/* Navigation buttons */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -441,23 +419,22 @@ const ProductDetailPage = () => {
               ›
             </button>
             
-            {/* Main media */}
             <div 
               className="relative w-full h-full"
               onTouchStart={handleGalleryTouchStart}
               onTouchEnd={handleGalleryTouchEnd}
               onClick={(e) => e.stopPropagation()}
             >
-              {galleryCurrentIndex >= (product.images?.length || 0) && product.video ? (
+              {galleryCurrentIndex >= (product.images?.length || 0) ? (
                 <video
-                  src={product.video}
+                  src={allMedia[galleryCurrentIndex]}
                   controls
                   className="w-full h-full max-h-[80vh] object-contain"
                   onError={(e) => e.target.style.display = 'none'}
                 />
               ) : (
                 <img
-                  src={product.images?.[galleryCurrentIndex] || ''}
+                  src={allMedia[galleryCurrentIndex] || ''}
                   alt={`${product.title} - ${galleryCurrentIndex + 1}`}
                   className="w-full h-full max-h-[80vh] object-contain"
                   onError={(e) => e.target.style.display = 'none'}
@@ -465,7 +442,6 @@ const ProductDetailPage = () => {
               )}
             </div>
             
-            {/* Counter */}
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
               {galleryCurrentIndex + 1} / {allMedia.length}
             </div>
@@ -489,6 +465,7 @@ const ProductDetailPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Media Gallery */}
           <div>
+            {/* Main Media */}
             <div 
               className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-2xl overflow-hidden aspect-square flex items-center justify-center mb-4 relative cursor-pointer"
               onTouchStart={isTouchDevice ? handleTouchStart : undefined}
@@ -497,85 +474,103 @@ const ProductDetailPage = () => {
             >
               {isVideo ? (
                 <video
-                  src={product.video}
+                  src={currentMediaUrl}
                   className="w-full h-full object-contain"
                   onError={(e) => e.target.style.display = 'none'}
                 />
               ) : (
                 <img
-                  src={product.images?.[mainImageIndex] || ''}
+                  src={currentMediaUrl || ''}
                   alt={product.title}
                   className="max-h-[85%] max-w-[85%] object-contain"
                   onError={(e) => e.target.style.display = 'none'}
                 />
               )}
               
-              {/* Click to view gallery indicator */}
               <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
                 <div className="bg-black/60 px-4 py-2 rounded-lg flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-white text-sm">View Gallery</span>
+                  <span className="text-white text-sm">View Gallery ({allMedia.length})</span>
                 </div>
               </div>
-              
-              {/* Mobile swipe indicators */}
-              {isTouchDevice && allMedia.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                  {allMedia.map((_, index) => (
-                    <div
-                      key={index}
-                      className={`w-2 h-2 rounded-full ${
-                        index === mainImageIndex ? 'bg-gold' : 'bg-gray-600'
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
             </div>
 
-            {allMedia.length > 1 && !isTouchDevice && (
-              <div className="grid grid-cols-4 gap-3">
-                {allMedia.map((media, index) => {
-                  const isThumbVideo = index >= (product.images?.length || 0);
-                  return (
+            {/* Thumbnail Strip with Navigation */}
+            {allMedia.length > 0 && (
+              <div className="relative">
+                {/* Navigation Arrows */}
+                {totalMedia > visibleThumbnails && (
+                  <>
                     <button
-                      key={index}
-                      onClick={() => setMainImageIndex(index)}
-                      className={`bg-gray-900/40 backdrop-blur border rounded-lg overflow-hidden aspect-square flex items-center justify-center transition-all relative ${
-                        mainImageIndex === index 
-                          ? 'border-gold shadow-lg shadow-gold/20' 
-                          : 'border-gray-800 hover:border-gray-600'
+                      onClick={prevThumbnails}
+                      disabled={thumbnailStartIndex === 0}
+                      className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-black/60 text-white rounded-full flex items-center justify-center ${
+                        thumbnailStartIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/80'
                       }`}
                     >
-                      {isThumbVideo ? (
-                        <div className="relative w-full h-full">
-                          <video
-                            src={media}
-                            className="w-full h-full object-cover"
-                            muted
-                            playsInline
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none">
-                            <div className="bg-gold/90 rounded-full p-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-black" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
+                      ‹
+                    </button>
+                    <button
+                      onClick={nextThumbnails}
+                      disabled={thumbnailStartIndex + visibleThumbnails >= totalMedia}
+                      className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-black/60 text-white rounded-full flex items-center justify-center ${
+                        thumbnailStartIndex + visibleThumbnails >= totalMedia ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/80'
+                      }`}
+                    >
+                      ›
+                    </button>
+                  </>
+                )}
+
+                {/* Thumbnails */}
+                <div className="flex gap-2 overflow-hidden">
+                  {visibleMedia.map((media, idx) => {
+                    const globalIndex = thumbnailStartIndex + idx;
+                    const isThumbVideo = globalIndex >= (product.images?.length || 0);
+                    return (
+                      <button
+                        key={globalIndex}
+                        onClick={() => {
+                          setMainImageIndex(globalIndex);
+                          openGallery(globalIndex);
+                        }}
+                        className={`flex-shrink-0 bg-gray-900/40 backdrop-blur border rounded-lg overflow-hidden aspect-square flex items-center justify-center transition-all relative ${
+                          mainImageIndex === globalIndex
+                            ? 'border-gold shadow-lg shadow-gold/20'
+                            : 'border-gray-800 hover:border-gray-600'
+                        }`}
+                        style={{ width: 'calc(25% - 6px)' }} // 4 items with gap
+                      >
+                        {isThumbVideo ? (
+                          <div className="relative w-full h-full">
+                            <video
+                              src={media}
+                              className="w-full h-full object-cover"
+                              muted
+                              playsInline
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none">
+                              <div className="bg-gold/90 rounded-full p-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-black" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ) : (
-                        <img
-                          src={media}
-                          alt={`Thumbnail ${index + 1}`}
-                          className="max-h-[80%] max-w-[80%] object-contain p-0.5"
-                          onError={(e) => e.target.style.display = 'none'}
-                        />
-                      )}
-                    </button>
-                  );
-                })}
+                        ) : (
+                          <img
+                            src={media}
+                            alt={`Thumbnail ${globalIndex + 1}`}
+                            className="max-h-[80%] max-w-[80%] object-contain p-0.5"
+                            onError={(e) => e.target.style.display = 'none'}
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
@@ -611,7 +606,6 @@ const ProductDetailPage = () => {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* Color Selection */}
                   {productColors.length > 0 && (
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-3">Available Colors</h3>
@@ -631,7 +625,6 @@ const ProductDetailPage = () => {
                         ))}
                       </div>
                       
-                      {/* Stock Status */}
                       {selectedColorObj && selectedColorObj.quantity !== null && (
                         <div className="mt-3 flex items-center gap-2 text-sm">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -656,7 +649,6 @@ const ProductDetailPage = () => {
                     </div>
                   )}
 
-                  {/* Quantity Selector with Input */}
                   <div>
                     <h3 className="text-lg font-semibold text-white mb-3">Quantity</h3>
                     <div className="flex items-center gap-4">
@@ -694,7 +686,6 @@ const ProductDetailPage = () => {
                     </div>
                   </div>
 
-                  {/* Dual Action Buttons */}
                   <div className="flex gap-3">
                     <button
                       onClick={addToCart}
@@ -722,50 +713,44 @@ const ProductDetailPage = () => {
               )}
             </div>
 
-            {/* ✅ WHOLESALE DEALER MESSAGE */}
+            {/* WHOLESALE DEALER MESSAGE */}
             <div className="mb-8 p-4 bg-gradient-to-r from-gray-900/70 to-black/70 border border-yellow-500/40 rounded-xl">
-  <div className="flex items-start gap-3">
-    <div className="p-2 bg-yellow-500/20 rounded-lg">
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>
-    </div>
-    <div className="flex-1">
-      <h3 className="font-semibold text-gold mb-2">Wholesale Dealers</h3>
-      <p className="text-gray-300 text-sm mb-3">
-        Are you a registered wholesale dealer or retailer? Contact our team before placing your order to receive exclusive wholesale pricing and terms.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-3">
-        {/* WhatsApp Button */}
-        <a
-          href="https://wa.me/94757575565"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 bg-gold hover:bg-yellow-500 text-black px-4 py-2 rounded-lg font-medium transition-all"
-        >
-          {/* Official WhatsApp Logo SVG */}
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 32 32" fill="currentColor">
-            <path d="M16 0C7.163 0 0 7.163 0 16c0 2.813.735 5.44 2.02 7.746L0 32l8.413-2.008A15.957 15.957 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm8.566 22.486c-.33.92-1.927 1.77-2.689 1.86-.717.083-1.598.115-5.488-2.078-4.572-2.566-7.506-9.118-7.718-9.505-.212-.388-1.715-2.452-1.715-4.676 0-2.224 1.112-3.316 1.507-3.765.397-.449.87-.575 1.164-.575.295 0 .59.003.847.01.273.007.64-.103.997.774.355.875 1.203 3.03 1.31 3.25.107.22.178.483-.106.775-.283.293-.515.637-.736.95-.223.314-.47.66-.218 1.05.252.388 1.124 1.853 2.406 2.998 1.657 1.55 3.041 2.07 3.534 2.3.493.229.781.191.975.116.193-.076.588-.22 1.074-.532.485-.313 1.28-1.488 1.457-2.926.176-1.438.176-2.658-.124-2.926-.3-.268-.557-.318-.747-.316-.19.003-.41.003-.63.003-.22 0-.577-.082-.88.623-.302.704-1.2 1.49-1.2 1.49s-.173.22-.31.365c-.137.145-.28.3-.28.3s-.263.22-.1.55c.163.33.744 1.205.8 1.29.056.085.93 1.56 2.39 2.51 1.46.95 2.285.905 2.62.85.334-.055 1.085-.44 1.238-.87.153-.43.153-.8.106-.88z"/>
-          </svg>
-          WhatsApp Us
-        </a>
-
-        {/* Contact Button */}
-        <button
-          onClick={() => navigate('/contact')}
-          className="inline-flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-yellow-400 px-4 py-2 rounded-lg font-medium transition-all"
-        >
-          {/* Phone Icon */}
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-          </svg>
-          Contact Team
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-yellow-500/20 rounded-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gold mb-2">Wholesale Dealers</h3>
+                  <p className="text-gray-300 text-sm mb-3">
+                    Are you a registered wholesale dealer or retailer? Contact our team before placing your order to receive exclusive wholesale pricing and terms.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <a
+                      href="https://wa.me/94757575565"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 bg-gold hover:bg-yellow-500 text-black px-4 py-2 rounded-lg font-medium transition-all"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 32 32" fill="currentColor">
+                        <path d="M16 0C7.163 0 0 7.163 0 16c0 2.813.735 5.44 2.02 7.746L0 32l8.413-2.008A15.957 15.957 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm8.566 22.486c-.33.92-1.927 1.77-2.689 1.86-.717.083-1.598.115-5.488-2.078-4.572-2.566-7.506-9.118-7.718-9.505-.212-.388-1.715-2.452-1.715-4.676 0-2.224 1.112-3.316 1.507-3.765.397-.449.87-.575 1.164-.575.295 0 .59.003.847.01.273.007.64-.103.997.774.355.875 1.203 3.03 1.31 3.25.107.22.178.483-.106.775-.283.293-.515.637-.736.95-.223.314-.47.66-.218 1.05.252.388 1.124 1.853 2.406 2.998 1.657 1.55 3.041 2.07 3.534 2.3.493.229.781.191.975.116.193-.076.588-.22 1.074-.532.485-.313 1.28-1.488 1.457-2.926.176-1.438.176-2.658-.124-2.926-.3-.268-.557-.318-.747-.316-.19.003-.41.003-.63.003-.22 0-.577-.082-.88.623-.302.704-1.2 1.49-1.2 1.49s-.173.22-.31.365c-.137.145-.28.3-.28.3s-.263.22-.1.55c.163.33.744 1.205.8 1.29.056.085.93 1.56 2.39 2.51 1.46.95 2.285.905 2.62.85.334-.055 1.085-.44 1.238-.87.153-.43.153-.8.106-.88z"/>
+                      </svg>
+                      WhatsApp Us
+                    </a>
+                    <button
+                      onClick={() => navigate('/contact')}
+                      className="inline-flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-yellow-400 px-4 py-2 rounded-lg font-medium transition-all"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      Contact Team
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">Description</h2>
@@ -774,7 +759,6 @@ const ProductDetailPage = () => {
               </p>
             </div>
 
-            {/* Specifications */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">Specifications</h2>
               <div className="space-y-3">
@@ -804,9 +788,7 @@ const ProductDetailPage = () => {
                     {product.specifications.map((spec, idx) => {
                       const key = typeof spec === 'object' ? spec.key : spec;
                       const value = typeof spec === 'object' ? spec.value : '';
-                      
                       if (!key || !value) return null;
-                      
                       return (
                         <div key={idx} className="flex justify-between pb-2 border-b border-gray-800/50">
                           <span className="text-gray-400 text-sm">{key}</span>
@@ -819,7 +801,6 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            {/* Return & Warranty */}
             <div className="pt-6 border-t border-gray-800/50 mt-auto">
               <div className="flex flex-col sm:flex-row gap-4 mb-5">
                 <div className="flex items-center gap-2 bg-black/40 border border-gray-800 rounded-lg px-4 py-2.5">
@@ -867,7 +848,6 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div className="mt-16 pt-8 border-t border-gray-800/50">
             <h2 className="text-2xl font-bold text-white mb-6 text-center">
