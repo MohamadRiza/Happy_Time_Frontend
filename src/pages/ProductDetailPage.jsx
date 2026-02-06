@@ -22,7 +22,7 @@ const ProductDetailPage = () => {
   const [galleryCurrentIndex, setGalleryCurrentIndex] = useState(0);
   const [thumbnailStartIndex, setThumbnailStartIndex] = useState(0);
 
-  // Refs for touch/swipe
+  // Touch refs
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
   const galleryTouchStartX = useRef(0);
@@ -105,44 +105,36 @@ const ProductDetailPage = () => {
     }
   }, [selectedColorObj]);
 
+  // ✅ Swipe handlers (main image)
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
   };
 
   const handleTouchEnd = (e) => {
     touchEndX.current = e.changedTouches[0].clientX;
-    handleSwipe();
-  };
-
-  const handleSwipe = () => {
+    const diff = touchStartX.current - touchEndX.current;
     const allMedia = [...(product.images || []), ...(product.videos || [])];
     if (allMedia.length <= 1) return;
-    const minSwipeDistance = 50;
-    const diff = touchStartX.current - touchEndX.current;
-    if (diff > minSwipeDistance) {
+    if (diff > 50) {
       setMainImageIndex(prev => (prev + 1) % allMedia.length);
-    } else if (diff < -minSwipeDistance) {
+    } else if (diff < -50) {
       setMainImageIndex(prev => prev === 0 ? allMedia.length - 1 : prev - 1);
     }
   };
 
+  // ✅ Gallery swipe
   const handleGalleryTouchStart = (e) => {
     galleryTouchStartX.current = e.touches[0].clientX;
   };
 
   const handleGalleryTouchEnd = (e) => {
     galleryTouchEndX.current = e.changedTouches[0].clientX;
-    handleGallerySwipe();
-  };
-
-  const handleGallerySwipe = () => {
     const allMedia = [...(product.images || []), ...(product.videos || [])];
     if (allMedia.length <= 1) return;
-    const minSwipeDistance = 50;
     const diff = galleryTouchStartX.current - galleryTouchEndX.current;
-    if (diff > minSwipeDistance) {
+    if (diff > 50) {
       setGalleryCurrentIndex(prev => (prev + 1) % allMedia.length);
-    } else if (diff < -minSwipeDistance) {
+    } else if (diff < -50) {
       setGalleryCurrentIndex(prev => prev === 0 ? allMedia.length - 1 : prev - 1);
     }
   };
@@ -162,23 +154,6 @@ const ProductDetailPage = () => {
       setGalleryCurrentIndex(prev => (prev + 1) % allMedia.length);
     } else {
       setGalleryCurrentIndex(prev => prev === 0 ? allMedia.length - 1 : prev - 1);
-    }
-  };
-
-  // ✅ Thumbnail navigation
-  const allMedia = [...(product?.images || []), ...(product?.videos || [])];
-  const totalMedia = allMedia.length;
-  const visibleThumbnails = 4;
-
-  const nextThumbnails = () => {
-    if (thumbnailStartIndex + visibleThumbnails < totalMedia) {
-      setThumbnailStartIndex(prev => prev + 1);
-    }
-  };
-
-  const prevThumbnails = () => {
-    if (thumbnailStartIndex > 0) {
-      setThumbnailStartIndex(prev => prev - 1);
     }
   };
 
@@ -362,11 +337,14 @@ const ProductDetailPage = () => {
 
   if (!product) return null;
 
-  const currentMediaUrl = allMedia[mainImageIndex];
+  const allMedia = [...(product.images || []), ...(product.videos || [])];
   const isVideo = mainImageIndex >= (product.images?.length || 0);
+  const currentMediaUrl = allMedia[mainImageIndex];
   const productColors = parseProductColors(product);
+  const totalMedia = allMedia.length;
+  const visibleThumbnails = 4;
 
-  // ✅ Get up to 4 thumbnails starting from thumbnailStartIndex
+  // For thumbnail navigation
   const visibleMedia = allMedia.slice(thumbnailStartIndex, thumbnailStartIndex + visibleThumbnails);
 
   return (
@@ -443,13 +421,14 @@ const ProductDetailPage = () => {
             </div>
             
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
-              {galleryCurrentIndex + 1} / {allMedia.length}
+              {galleryCurrentIndex + 1} / {totalMedia}
             </div>
           </div>
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Back Button */}
         <div className="mb-6 sm:mb-8">
           <button
             onClick={handleBackToShop}
@@ -462,10 +441,10 @@ const ProductDetailPage = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
           {/* Media Gallery */}
           <div>
-            {/* Main Media */}
+            {/* Main Image/Video */}
             <div 
               className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-2xl overflow-hidden aspect-square flex items-center justify-center mb-4 relative cursor-pointer"
               onTouchStart={isTouchDevice ? handleTouchStart : undefined}
@@ -492,19 +471,19 @@ const ProductDetailPage = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-white text-sm">View Gallery ({allMedia.length})</span>
+                  <span className="text-white text-sm">View Gallery ({totalMedia})</span>
                 </div>
               </div>
             </div>
 
-            {/* Thumbnail Strip with Navigation */}
-            {allMedia.length > 0 && (
+            {/* Thumbnail Strip */}
+            {totalMedia > 0 && (
               <div className="relative">
                 {/* Navigation Arrows */}
                 {totalMedia > visibleThumbnails && (
                   <>
                     <button
-                      onClick={prevThumbnails}
+                      onClick={() => setThumbnailStartIndex(Math.max(0, thumbnailStartIndex - 1))}
                       disabled={thumbnailStartIndex === 0}
                       className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-black/60 text-white rounded-full flex items-center justify-center ${
                         thumbnailStartIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/80'
@@ -513,7 +492,7 @@ const ProductDetailPage = () => {
                       ‹
                     </button>
                     <button
-                      onClick={nextThumbnails}
+                      onClick={() => setThumbnailStartIndex(Math.min(totalMedia - visibleThumbnails, thumbnailStartIndex + 1))}
                       disabled={thumbnailStartIndex + visibleThumbnails >= totalMedia}
                       className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-black/60 text-white rounded-full flex items-center justify-center ${
                         thumbnailStartIndex + visibleThumbnails >= totalMedia ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/80'
@@ -541,7 +520,7 @@ const ProductDetailPage = () => {
                             ? 'border-gold shadow-lg shadow-gold/20'
                             : 'border-gray-800 hover:border-gray-600'
                         }`}
-                        style={{ width: 'calc(25% - 6px)' }} // 4 items with gap
+                        style={{ width: 'calc(25% - 6px)' }}
                       >
                         {isThumbVideo ? (
                           <div className="relative w-full h-full">
@@ -577,38 +556,43 @@ const ProductDetailPage = () => {
 
           {/* Product Info */}
           <div className="flex flex-col">
-            <div className="mb-6">
-              <p className="text-gold text-sm font-semibold tracking-wide mb-2">{product.brand}</p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3 leading-tight">{product.title}</h1>
-              <div className="flex items-center text-gray-400 text-sm space-x-2">
-                <span>{getCategoryDisplay()}</span>
-                <span>•</span>
-                <span>{product.watchShape}</span>
-              </div>
+            {/* Brand & Title */}
+            <div className="mb-3">
+              <p className="text-gold text-sm font-semibold tracking-wide mb-1">{product.brand}</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">{product.title}</h1>
             </div>
 
-            <div className="mb-8">
-              <div className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            {/* Category & Shape */}
+            <div className="flex items-center text-gray-400 text-sm space-x-2 mb-4">
+              <span>{getCategoryDisplay()}</span>
+              <span>•</span>
+              <span>{product.watchShape}</span>
+            </div>
+
+            {/* Price */}
+            <div className="mb-5">
+              <div className="text-3xl sm:text-4xl font-bold text-white mb-2">
                 {formatPrice(product.price)}
               </div>
               
               {product.price === null || product.price === undefined ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <p className="text-gray-400 text-sm">
-                    Please contact our luxury specialists for pricing details and availability.
+                    Please contact our luxury specialists for pricing details and.
                   </p>
                   <button
                     onClick={() => navigate('/contact')}
-                    className="w-full sm:w-auto bg-gold text-black px-8 py-3 rounded-xl font-bold hover:bg-gold/90 transition shadow-lg shadow-gold/20"
+                    className="w-full sm:w-auto bg-gold text-black px-6 py-3 rounded-xl font-bold hover:bg-gold/90 transition shadow-lg shadow-gold/20"
                   >
                     Contact for Pricing
                   </button>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-5">
+                  {/* Available Colors */}
                   {productColors.length > 0 && (
                     <div>
-                      <h3 className="text-lg font-semibold text-white mb-3">Available Colors</h3>
+                      <h3 className="text-lg font-semibold text-white mb-2">Available Colors</h3>
                       <div className="flex flex-wrap gap-2">
                         {productColors.map((colorObj, idx) => (
                           <button
@@ -649,14 +633,15 @@ const ProductDetailPage = () => {
                     </div>
                   )}
 
+                  {/* Quantity Selector */}
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-3">Quantity</h3>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center">
+                    <h3 className="text-lg font-semibold text-white mb-2">Quantity</h3>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center bg-gray-900/50 border border-gray-700 rounded-lg overflow-hidden">
                         <button
                           onClick={() => handleQuantityChange(quantity - 1)}
                           disabled={quantity <= 1}
-                          className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-l-lg text-white hover:bg-gray-700 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-10 h-10 bg-gray-800 text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           −
                         </button>
@@ -667,12 +652,12 @@ const ProductDetailPage = () => {
                           value={quantity}
                           onChange={handleQuantityInputChange}
                           onFocus={handleQuantityInputFocus}
-                          className="w-16 h-10 bg-black border-y border-gray-700 text-white flex items-center justify-center font-medium text-center [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+                          className="w-12 h-10 bg-black border-y border-gray-700 text-white text-center font-medium [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
                         />
                         <button
                           onClick={() => handleQuantityChange(quantity + 1)}
                           disabled={selectedColorObj && selectedColorObj.quantity !== null && quantity >= selectedColorObj.quantity}
-                          className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-r-lg text-white hover:bg-gray-700 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-10 h-10 bg-gray-800 text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           +
                         </button>
@@ -686,11 +671,12 @@ const ProductDetailPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-3">
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3 pt-1">
                     <button
                       onClick={addToCart}
                       disabled={!selectedColorObj || (selectedColorObj.quantity !== null && selectedColorObj.quantity === 0)}
-                      className="flex-1 bg-gold text-black py-4 rounded-xl font-bold text-lg hover:bg-gold/90 transition-all duration-200 shadow-lg shadow-gold/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="flex-1 bg-gold text-black py-3.5 rounded-xl font-bold text-lg hover:bg-gold/90 transition-all duration-200 shadow-lg shadow-gold/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -701,7 +687,7 @@ const ProductDetailPage = () => {
                     </button>
                     <button
                       onClick={goToCart}
-                      className="px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-bold text-lg transition-all duration-200 border border-gray-700 hover:border-gray-600 flex items-center gap-2"
+                      className="px-6 py-3.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-bold text-lg transition-all duration-200 border border-gray-700 hover:border-gray-600 flex items-center justify-center gap-2"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -713,8 +699,8 @@ const ProductDetailPage = () => {
               )}
             </div>
 
-            {/* WHOLESALE DEALER MESSAGE */}
-            <div className="mb-8 p-4 bg-gradient-to-r from-gray-900/70 to-black/70 border border-yellow-500/40 rounded-xl">
+            {/* Wholesale Dealer Section */}
+            <div className="mb-6 p-4 bg-gradient-to-r from-gray-900/70 to-black/70 border border-yellow-500/40 rounded-xl">
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-yellow-500/20 rounded-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -722,8 +708,8 @@ const ProductDetailPage = () => {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gold mb-2">Wholesale Dealers</h3>
-                  <p className="text-gray-300 text-sm mb-3">
+                  <h3 className="font-semibold text-gold mb-1">Wholesale Dealers</h3>
+                  <p className="text-gray-300 text-sm mb-2">
                     Are you a registered wholesale dealer or retailer? Contact our team before placing your order to receive exclusive wholesale pricing and terms.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3">
@@ -752,16 +738,18 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Description</h2>
+            {/* Description */}
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-white mb-2">Description</h2>
               <p className="text-gray-300 leading-relaxed text-sm">
                 {product.description}
               </p>
             </div>
 
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Specifications</h2>
-              <div className="space-y-3">
+            {/* Specifications */}
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-white mb-2">Specifications</h2>
+              <div className="space-y-2">
                 {product.modelNumber && product.modelNumber !== 'N/A' && (
                   <div className="flex justify-between pb-2 border-b border-gray-800/50">
                     <span className="text-gray-400 text-sm">Model Number</span>
@@ -801,8 +789,9 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            <div className="pt-6 border-t border-gray-800/50 mt-auto">
-              <div className="flex flex-col sm:flex-row gap-4 mb-5">
+            {/* Return & Warranty */}
+            <div className="pt-4 border-t border-gray-800/50 mt-auto">
+              <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 <div className="flex items-center gap-2 bg-black/40 border border-gray-800 rounded-lg px-4 py-2.5">
                   <div className="bg-gold/20 p-1.5 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -830,8 +819,8 @@ const ProductDetailPage = () => {
                 </div>
               </div>
 
-              <h3 className="text-lg font-semibold text-white mb-3">Need Assistance?</h3>
-              <p className="text-gray-400 text-sm mb-4">
+              <h3 className="text-lg font-semibold text-white mb-2">Need Assistance?</h3>
+              <p className="text-gray-400 text-sm mb-3">
                 Our specialists are available to provide personalized consultation 
                 and answer any questions about this {product.productType === 'wall_clock' ? 'wall clock' : 'timepiece'}.
               </p>
@@ -848,8 +837,9 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
+        {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <div className="mt-16 pt-8 border-t border-gray-800/50">
+          <div className="mt-12 pt-8 border-t border-gray-800/50">
             <h2 className="text-2xl font-bold text-white mb-6 text-center">
               {product.productType === 'wall_clock' 
                 ? 'You May Also Like Wall Clocks' 
@@ -867,7 +857,7 @@ const ProductDetailPage = () => {
                       <img
                         src={relatedProduct.images[0]}
                         alt={relatedProduct.title}
-                        className="w-full h-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-contain"
                         onError={(e) => e.target.style.display = 'none'}
                       />
                     ) : (
