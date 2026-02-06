@@ -48,11 +48,17 @@ import MobileChatButton from "./components/MobileChatButton";
 import { ToastContainer } from "react-toastify";
 import CheckoutPage from "./pages/Checkoutpage";
 import InventoryManagement from "./pages/AdminPages/InventoryManagement";
+import Snowfall from "./components/Snowfall";
+import { isChristmasSeason } from "./utils/dateUtils";
 
 function App() {
+
+  const showSnow = isChristmasSeason();
+
   return (
     <Router>
       <div className="min-h-screen bg-black text-white">
+        {showSnow && <Snowfall />}
         <TopInfoBar />
         <Navbar />
         <TawkToChat />
