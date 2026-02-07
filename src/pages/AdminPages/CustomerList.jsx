@@ -1,71 +1,129 @@
-// src/pages/AdminPages/CustomerList.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { getToken } from '../../utils/auth';
 
 const CustomerList = () => {
-  const [customers, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState([]); // Full list
+  const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pages: 1,
-    limit: 10,
-    total: 0
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const customersPerPage = 10;
 
   const [searchFilters, setSearchFilters] = useState({
     search: '',
     city: '',
-    country: ''
+    country: 'all',
+    businessAccount: 'all'
   });
+
+  const [availableCountries, setAvailableCountries] = useState([]);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  const fetchCustomers = async (page = 1, filters = {}) => {
+  const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '10',
-        ...filters
-      });
-
-      const res = await fetch(`${API_URL}/api/admin/customers?${params}`, {
+      // Fetch up to 1000 customers to enable full frontend filtering
+      const res = await fetch(`${API_URL}/api/admin/customers?limit=1000`, {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       const data = await res.json();
 
       if (data.success) {
-        setCustomers(data.data.customers);
-        setPagination(data.data.pagination);
-        setSearchFilters(data.data.filters || { search: '', city: '', country: '' });
+        const allCustomers = data.data?.customers || data.customers || [];
+        setCustomers(allCustomers);
+
+        // ✅ Extract unique, sorted countries
+        const countries = [...new Set(
+          allCustomers
+            .map(c => c.country)
+            .filter(Boolean)
+            .sort()
+        )];
+        setAvailableCountries(countries);
+
+        applyFilters(allCustomers, searchFilters);
       } else {
         setError(data.message || 'Failed to load customers');
       }
-    } catch {
+    } catch (err) {
+      console.error('Fetch error:', err);
       setError('Network error');
     } finally {
       setLoading(false);
     }
   };
 
+  const applyFilters = (customerList, filters) => {
+    let result = [...customerList];
+
+    // Search by name, email, username
+    if (filters.search) {
+      const term = filters.search.toLowerCase();
+      result = result.filter(c =>
+        c.fullName?.toLowerCase().includes(term) ||
+        c.email?.toLowerCase().includes(term) ||
+        c.username?.toLowerCase().includes(term)
+      );
+    }
+
+    // City filter
+    if (filters.city) {
+      const term = filters.city.toLowerCase();
+      result = result.filter(c => c.city?.toLowerCase().includes(term));
+    }
+
+    // Country filter
+    if (filters.country !== 'all') {
+      result = result.filter(c => c.country === filters.country);
+    }
+
+    // Business Account filter
+    if (filters.businessAccount === 'yes') {
+      result = result.filter(c => c.businessDetails?.sellsWatches === true);
+    } else if (filters.businessAccount === 'no') {
+      result = result.filter(c => !c.businessDetails?.sellsWatches);
+    }
+
+    setFilteredCustomers(result);
+    setCurrentPage(1); // Reset to first page on filter change
+  };
+
   useEffect(() => {
     fetchCustomers();
   }, []);
 
-  const handlePageChange = (page) => fetchCustomers(page, searchFilters);
-  const handleSearch = (e) => { e.preventDefault(); fetchCustomers(1, searchFilters); };
-  const handleFilterChange = (f, v) => setSearchFilters(p => ({ ...p, [f]: v }));
+  useEffect(() => {
+    applyFilters(customers, searchFilters);
+  }, [searchFilters, customers]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+  };
+
+  const handleFilterChange = (field, value) => {
+    setSearchFilters(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleResetFilters = () => {
-    const reset = { search: '', city: '', country: '' };
+    const reset = { search: '', city: '', country: 'all', businessAccount: 'all' };
     setSearchFilters(reset);
-    fetchCustomers(1, reset);
   };
 
   const formatDate = (d) =>
     d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
+
+  const isBusinessAccount = (customer) => {
+    return customer.businessDetails?.sellsWatches === true;
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
+  const indexOfLastCustomer = currentPage * customersPerPage;
+  const indexOfFirstCustomer = indexOfLastCustomer - customersPerPage;
+  const currentCustomers = filteredCustomers.slice(indexOfFirstCustomer, indexOfLastCustomer);
 
   if (loading) {
     return (
@@ -80,33 +138,66 @@ const CustomerList = () => {
 
   return (
     <AdminLayout title="Customer Management">
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <h2 className="text-2xl font-bold text-white">Customers</h2>
         <span className="text-gray-400 text-sm">
-          Total {pagination.total} customers
+          Total {filteredCustomers.length} customers
         </span>
       </div>
 
       {/* Filters */}
       <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-6 mb-6">
-        <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {['search', 'city', 'country'].map((f) => (
-            <input
-              key={f}
-              placeholder={f === 'search' ? 'Search name, email…' : f}
-              value={searchFilters[f]}
-              onChange={(e) => handleFilterChange(f, e.target.value)}
-              className="bg-black/40 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-gold outline-none"
-            />
-          ))}
+        <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {/* Search */}
+          <input
+            placeholder="Search name, email…"
+            value={searchFilters.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            className="bg-black/40 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-gold outline-none"
+          />
+          
+          {/* City */}
+          <input
+            placeholder="City"
+            value={searchFilters.city}
+            onChange={(e) => handleFilterChange('city', e.target.value)}
+            className="bg-black/40 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-gold outline-none"
+          />
+          
+          {/* ✅ Country Dropdown (only available countries) */}
+          <select
+            value={searchFilters.country}
+            onChange={(e) => handleFilterChange('country', e.target.value)}
+            className="bg-black border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-gold outline-none appearance-none"
+          >
+            <option value="all">All Countries</option>
+            {availableCountries.map(country => (
+              <option key={country} value={country}>{country}</option>
+            ))}
+          </select>
+          
+          {/* Business Account */}
+          <select
+            value={searchFilters.businessAccount}
+            onChange={(e) => handleFilterChange('businessAccount', e.target.value)}
+            className="bg-black border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-gold outline-none appearance-none"
+          >
+            <option value="all">All Accounts</option>
+            <option value="yes">Business Account</option>
+            <option value="no">Personal Account</option>
+          </select>
+
+          {/* Action Buttons */}
           <div className="flex gap-2">
-            <button className="flex-1 bg-gold text-black rounded-lg font-semibold hover:bg-gold/90">
+            <button type="submit" className="flex-1 bg-gold text-black rounded-lg font-semibold hover:bg-gold/90">
               Search
             </button>
-            <button type="button" onClick={handleResetFilters}
-              className="flex-1 bg-gray-800 rounded-lg text-white hover:bg-gray-700">
+            <button 
+              type="button" 
+              onClick={handleResetFilters}
+              className="flex-1 bg-gray-800 rounded-lg text-white hover:bg-gray-700"
+            >
               Reset
             </button>
           </div>
@@ -125,17 +216,18 @@ const CustomerList = () => {
                 <th className="px-6 py-4 text-left">Contact</th>
                 <th className="px-6 py-4 text-left">Location</th>
                 <th className="px-6 py-4 text-left">Account</th>
+                <th className="px-6 py-4 text-left">Type</th>
                 <th className="px-6 py-4 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {customers.length === 0 ? (
+              {currentCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-16 text-gray-500">
+                  <td colSpan="6" className="text-center py-16 text-gray-500">
                     No customers found
                   </td>
                 </tr>
-              ) : customers.map(c => (
+              ) : currentCustomers.map(c => (
                 <tr key={c._id} className="border-b border-gray-800 hover:bg-gray-800/40 transition">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -162,6 +254,15 @@ const CustomerList = () => {
                     <p className="text-white">{formatDate(c.createdAt)}</p>
                   </td>
                   <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      isBusinessAccount(c)
+                        ? 'bg-blue-900/30 text-blue-300'
+                        : 'bg-gray-800 text-gray-300'
+                    }`}>
+                      {isBusinessAccount(c) ? 'Business' : 'Personal'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
                     <div className="flex flex-col gap-2">
                       <Link to={`/admin/customers/${c._id}`} className="text-gold hover:underline">
                         View
@@ -179,14 +280,14 @@ const CustomerList = () => {
       </div>
 
       {/* Pagination */}
-      {pagination.pages > 1 && (
+      {totalPages > 1 && (
         <div className="flex justify-center mt-6 gap-2">
-          {[...Array(pagination.pages)].map((_, i) => (
+          {[...Array(totalPages)].map((_, i) => (
             <button
               key={i}
-              onClick={() => handlePageChange(i + 1)}
+              onClick={() => setCurrentPage(i + 1)}
               className={`px-4 py-1 rounded-lg text-sm
-                ${pagination.page === i + 1
+                ${currentPage === i + 1
                   ? 'bg-gold text-black'
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
             >
@@ -195,7 +296,6 @@ const CustomerList = () => {
           ))}
         </div>
       )}
-
     </AdminLayout>
   );
 };
