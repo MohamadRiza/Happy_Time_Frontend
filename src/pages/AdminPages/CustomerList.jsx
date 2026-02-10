@@ -250,8 +250,8 @@ const CustomerList = () => {
                     <p className="text-gray-400 text-xs">{c.country}</p>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-gray-400 text-xs">Joined</p>
-                    <p className="text-white">{formatDate(c.createdAt)}</p>
+                    <p className="text-gray-400 text-xs">Last Login</p>
+                    <p className="text-white">{formatDate(c.lastLogin)}</p>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
