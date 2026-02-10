@@ -442,7 +442,7 @@ const OrdersList = () => {
                   <select
                     value={selectedOrder.status}
                     onChange={(e) => updateOrderStatus(selectedOrder._id, { status: e.target.value })}
-                    className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
+                    className="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
                   >
                     <option value="pending_payment">Pending Payment</option>
                     <option value="processing">Processing</option>
@@ -458,7 +458,7 @@ const OrdersList = () => {
                   <select
                     value={selectedOrder.receiptStatus}
                     onChange={(e) => updateOrderStatus(selectedOrder._id, { receiptStatus: e.target.value })}
-                    className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
+                    className="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold"
                   >
                     <option value="pending">Pending Verification</option>
                     <option value="verified">Verified ✓</option>

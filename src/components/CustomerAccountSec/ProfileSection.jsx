@@ -245,7 +245,7 @@ const ProfileSection = ({ customer, onProfileUpdate }) => {
                     name="businessDetails.businessType"
                     value={editForm.businessDetails.businessType}
                     onChange={handleInputChange}
-                    className="w-full bg-black/40 border border-gray-700 focus:border-gold rounded-lg px-3 py-2 sm:py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-gold text-sm sm:text-base"
+                    className="w-full bg-black border border-gray-700 focus:border-gold rounded-lg px-3 py-2 sm:py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-gold text-sm sm:text-base"
                   >
                     <option value="">Select business type</option>
                     <option value="retail">Retail Store</option>
