@@ -130,14 +130,14 @@ function App() {
                 </AdminProtectedRoute>
               }
             />
-            <Route
+            {/* <Route
               path="/admin/customers/:id"
               element={
                 <AdminProtectedRoute>
                   <CustomerDetail />
                 </AdminProtectedRoute>
               }
-            />
+            /> */}
             <Route path="/apply-job" element={<ApplyJobPage />} />
             {/* ADMIN ROUTES */}
             <Route path="/admin/login" element={<AdminLogin />} />
