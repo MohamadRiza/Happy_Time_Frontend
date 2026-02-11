@@ -74,7 +74,8 @@ function App() {
         draggable
         pauseOnHover
         theme="dark"
-        style={{zIndex: 99999}} //remove if no need 
+        className="!z-[99999]"
+  bodyClassName="!z-[99999]"
       />
         <main>
           <Routes>

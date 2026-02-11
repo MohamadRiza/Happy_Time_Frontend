@@ -24,12 +24,46 @@ const CheckoutPage = () => {
   const [receiptFile, setReceiptFile] = useState(null);
   const [receiptPreview, setReceiptPreview] = useState('');
   
+  // ✅ Country list as per requirement
+  const allowedCountries = [
+    'Sri Lanka',
+    'United Arab Emirates',
+    'Bahrain',
+    'Egypt',
+    'Iran',
+    'Iraq',
+    'Jordan',
+    'Kuwait',
+    'Lebanon',
+    'Oman',
+    'Palestine',
+    'Qatar',
+    'Saudi Arabia',
+    'Syria',
+    'Turkey',
+    'Yemen',
+    'India',
+    'Maldives',
+    'Bangladesh',
+    'Pakistan',
+    'Nepal',
+    'Bhutan',
+    'Myanmar',
+    'Afghanistan',
+    'Kazakhstan',
+    'Turkmenistan',
+    'Uzbekistan',
+    'Azerbaijan',
+    'Georgia',
+    'Armenia'
+  ];
+
   // Delivery address state
   const [deliveryAddress, setDeliveryAddress] = useState({
     address: '',
     city: '',
     province: '',
-    country: 'Sri Lanka'
+    country: 'Sri Lanka' // Default to Sri Lanka
   });
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   
@@ -52,7 +86,6 @@ const CheckoutPage = () => {
       return;
     }
     
-    // Check if we have items from cart
     const { selectedItems, cartItems: items } = location.state || {};
     if (!selectedItems || !items || items.length === 0) {
       toast.error('No items selected for checkout');
@@ -73,23 +106,25 @@ const CheckoutPage = () => {
       const customerData = await customerRes.json();
       if (customerData.success) {
         setCustomerInfo(customerData.data);
+        // Ensure country is in allowed list
+        const savedCountry = customerData.data.country;
+        const countryToUse = allowedCountries.includes(savedCountry) ? savedCountry : 'Sri Lanka';
         setDeliveryAddress({
           address: customerData.data.address || '',
           city: customerData.data.city || '',
           province: customerData.data.province || '',
-          country: customerData.data.country || 'Sri Lanka'
+          country: countryToUse
         });
       }
     } catch (err) {
       console.error(err);
       toast.error('Failed to load customer information');
-      navigate('/cart'); // ✅ Redirect back to cart on error
+      navigate('/cart');
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Helper function to get max available quantity
   const getMaxAvailableQuantity = (productId, selectedColor) => {
     const item = cartItems.find(item =>
       item.productId._id === productId && item.selectedColor === selectedColor
@@ -143,17 +178,18 @@ const CheckoutPage = () => {
 
   const cancelAddressEdit = () => {
     if (customerInfo) {
+      const savedCountry = customerInfo.country;
+      const countryToUse = allowedCountries.includes(savedCountry) ? savedCountry : 'Sri Lanka';
       setDeliveryAddress({
         address: customerInfo.address || '',
         city: customerInfo.city || '',
         province: customerInfo.province || '',
-        country: customerInfo.country || 'Sri Lanka'
+        country: countryToUse
       });
     }
     setIsEditingAddress(false);
   };
 
-  // ✅ Enhanced validation with stock check
   const validateOrder = () => {
     if (!receiptFile) {
       toast.error('Please upload a bank transfer receipt');
@@ -175,7 +211,6 @@ const CheckoutPage = () => {
       return false;
     }
     
-    // ✅ STOCK VALIDATION
     const hasSufficientStock = cartItems.every(item => {
       const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
       return maxAvailable === Infinity || item.quantity <= maxAvailable;
@@ -183,6 +218,12 @@ const CheckoutPage = () => {
     
     if (!hasSufficientStock) {
       toast.error('Some items are out of stock. Please update your cart.');
+      return false;
+    }
+    
+    // ✅ Validate country is in allowed list
+    if (!allowedCountries.includes(deliveryAddress.country)) {
+      toast.error('Selected country is not supported for delivery');
       return false;
     }
     
@@ -212,7 +253,6 @@ const CheckoutPage = () => {
       formData.append('receipt', receiptFile);
       formData.append('deliveryAddress', JSON.stringify(deliveryAddress));
       
-      // ✅ Include cart item IDs for removal
       const selectedItemIds = location.state?.selectedItems || [];
       formData.append('cartItemIds', JSON.stringify(selectedItemIds));
       
@@ -357,13 +397,18 @@ const CheckoutPage = () => {
                     onChange={(e) => handleAddressChange('province', e.target.value)}
                     className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gold"
                   />
-                  <input
-                    type="text"
-                    placeholder="Country"
+                  {/* ✅ Country Dropdown */}
+                  <select
                     value={deliveryAddress.country}
                     onChange={(e) => handleAddressChange('country', e.target.value)}
-                    className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gold"
-                  />
+                    className="w-full bg-black/30 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-gold appearance-none"
+                  >
+                    {allowedCountries.map((country) => (
+                      <option key={country} value={country}>
+                        {country}
+                      </option>
+                    ))}
+                  </select>
                   <div className="flex gap-2">
                     <button
                       onClick={saveAddress}
@@ -529,7 +574,7 @@ const CheckoutPage = () => {
         </div>
       </div>
 
-      {/* Mobile Sticky Bottom Bar - FIXED */}
+      {/* Mobile Sticky Bottom Bar */}
       <div className="lg:hidden fixed bottom-16 left-0 right-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-800 p-3 z-50">
         <div className="flex items-center justify-between">
           <div className="min-w-0">

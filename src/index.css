@@ -132,3 +132,24 @@ html {
     opacity: 0;
   }
 }
+
+/* Ensure toasts are visible on mobile */
+@media (max-width: 768px) {
+  .Toastify__toast-container--top-right {
+    top: 15px !important;
+    right: 15px !important;
+    left: auto !important;
+    max-width: calc(100% - 30px) !important;
+  }
+  
+  /* Prevent bottom bar overlap */
+  .Toastify__toast {
+    margin-bottom: 20px !important;
+  }
+}
+
+/* Force z-index everywhere */
+.Toastify__toast-container,
+.Toastify__toast {
+  z-index: 99999 !important;
+}
