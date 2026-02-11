@@ -34,7 +34,7 @@ import {
   CustomerProtectedRoute,
 } from "./components/CustomerProtectedRoute";
 import CartPage from "./pages/CartPage";
-import CustomerDetail from "./pages/AdminPages/CustomerDetail";
+// import CustomerDetail from "./pages/AdminPages/CustomerDetail";
 import CustomerList from "./pages/AdminPages/CustomerList";
 import ApplyJobPage from "./pages/ApplyJobPage";
 import ApplicantsList from "./pages/AdminPages/ApplicantsList";
