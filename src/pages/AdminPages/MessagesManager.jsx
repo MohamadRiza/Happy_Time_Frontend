@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getToken } from '../../utils/auth';
+import Loading from '../../components/Loading';
 
 const MessagesManager = () => {
   const [messages, setMessages] = useState([]);
@@ -184,8 +185,7 @@ const MessagesManager = () => {
 
       {loading ? (
         <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
-          <p className="mt-4 text-gray-400">Loading messages...</p>
+          <Loading message="Loading messages..." />
         </div>
       ) : filteredMessages.length === 0 ? (
         <div className="text-center py-12 bg-gray-900/50 border border-gray-800 rounded-xl">

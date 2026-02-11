@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getToken, logout } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
+import Loading from '../../components/Loading';
 
 const AdminSettings = () => {
   const [currentAdmin, setCurrentAdmin] = useState(null);
@@ -154,8 +155,7 @@ const AdminSettings = () => {
     return (
       <AdminLayout title="Admin Settings">
         <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
-          <p className="mt-4 text-gray-400">Loading admin settings...</p>
+          <Loading message="Loading admin settings..." />
         </div>
       </AdminLayout>
     );

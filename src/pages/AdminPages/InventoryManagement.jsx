@@ -158,7 +158,9 @@ const InventoryManagement = () => {
   if (loading) {
     return (
       <AdminLayout title="Inventory Management">
-        <Loading message="Loading inventory data..." size="large" />
+        <div className='text-center py-8'>
+        <Loading message="Loading inventory data..." />
+        </div>
       </AdminLayout>
     );
   }

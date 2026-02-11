@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { getToken, isAuthenticated } from '../../utils/auth';
+import Loading from '../../components/Loading';
 
 // ✅ Professional SVG Icons
 const ProductIcon = () => (
@@ -362,8 +363,7 @@ const AdminDashboard = () => {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold mb-4"></div>
-          <p className="text-gray-400">Verifying admin access...</p>
+          <Loading message="Loading Dashboard..." />
         </div>
       </div>
     );

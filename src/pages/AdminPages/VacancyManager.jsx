@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getToken } from '../../utils/auth';
 import AdminLayout from '../../components/AdminLayout';
+import Loading from '../../components/Loading';
 
 const VacancyManager = () => {
   const [vacancies, setVacancies] = useState([]);
@@ -456,8 +457,7 @@ const VacancyManager = () => {
       {/* Vacancy List */}
       {loading ? (
         <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
-          <p className="mt-4 text-gray-400">Loading vacancies...</p>
+          <Loading message="Loading vacancies..." />
         </div>
       ) : vacancies.length === 0 ? (
         <div className="text-center py-12 bg-gray-900/50 border border-gray-800 rounded-xl backdrop-blur-sm">

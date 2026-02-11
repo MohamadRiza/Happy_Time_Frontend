@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getToken } from '../../utils/auth';
+import Loading from '../../components/Loading';
 
 const ApplicantsList = () => {
   const [applicants, setApplicants] = useState([]);
@@ -115,8 +116,7 @@ const ApplicantsList = () => {
     return (
       <AdminLayout title="Job Applicants">
         <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
-          <p className="mt-4 text-gray-400">Loading applicants...</p>
+          <Loading message="Loading applicants..." />
         </div>
       </AdminLayout>
     );

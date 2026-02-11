@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getToken } from '../../utils/auth';
 import { toast } from 'react-toastify';
+import Loading from '../../components/Loading';
 
 const ProductManager = () => {
   const [products, setProducts] = useState([]);
@@ -913,9 +914,8 @@ const ProductManager = () => {
 
       {/* Results */}
       {loading ? (
-        <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
-          <p className="mt-4 text-gray-400">Loading...</p>
+        <div className="text-center">
+          <Loading message="Loading products..." />
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="text-center py-12 bg-gray-900/50 border border-gray-800 rounded-xl">

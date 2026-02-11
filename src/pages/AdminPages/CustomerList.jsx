@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getToken } from '../../utils/auth';
+import Loading from '../../components/Loading';
 
 const CustomerList = () => {
   const [customers, setCustomers] = useState([]);
@@ -302,13 +303,7 @@ const CustomerList = () => {
     return (
       <AdminLayout title="Customer Management">
         <div className="flex flex-col items-center justify-center py-24">
-          <div className="relative">
-            <div className="animate-spin h-16 w-16 rounded-full border-4 border-gray-800 border-t-gold"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-8 w-8 rounded-full bg-gold/20"></div>
-            </div>
-          </div>
-          <p className="mt-6 text-gray-400 font-medium">Loading customers...</p>
+          <Loading message="Loading customers..." />
         </div>
       </AdminLayout>
     );
