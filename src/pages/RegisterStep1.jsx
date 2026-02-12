@@ -1,7 +1,7 @@
 // src/pages/RegisterStep1.jsx
 import React, { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { customerLogin } from '../utils/auth'; // ✅ ADD AUTH IMPORT
+import { customerLogin } from '../utils/auth';
 
 const RegisterStep1 = () => {
   const [formData, setFormData] = useState({
@@ -25,18 +25,39 @@ const RegisterStep1 = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
-  const countryCodes = [
+  // ✅ SYNCED COUNTRY LIST - Only allowed countries with their codes
+  const countryOptions = [
     { code: '+94', name: 'Sri Lanka' },
-    { code: '+1', name: 'United States' },
-    { code: '+44', name: 'United Kingdom' },
-    { code: '+91', name: 'India' },
     { code: '+971', name: 'United Arab Emirates' },
-    { code: '+86', name: 'China' },
-    { code: '+81', name: 'Japan' },
-    { code: '+49', name: 'Germany' },
-    { code: '+33', name: 'France' },
-    { code: '+39', name: 'Italy' }
-  ].sort((a, b) => a.name.localeCompare(b.name));
+    { code: '+973', name: 'Bahrain' },
+    { code: '+20', name: 'Egypt' },
+    { code: '+98', name: 'Iran' },
+    { code: '+964', name: 'Iraq' },
+    { code: '+962', name: 'Jordan' },
+    { code: '+965', name: 'Kuwait' },
+    { code: '+961', name: 'Lebanon' },
+    { code: '+968', name: 'Oman' },
+    { code: '+970', name: 'Palestine' },
+    { code: '+974', name: 'Qatar' },
+    { code: '+966', name: 'Saudi Arabia' },
+    { code: '+963', name: 'Syria' },
+    { code: '+90', name: 'Turkey' },
+    { code: '+967', name: 'Yemen' },
+    { code: '+91', name: 'India' },
+    { code: '+960', name: 'Maldives' },
+    { code: '+880', name: 'Bangladesh' },
+    { code: '+92', name: 'Pakistan' },
+    { code: '+977', name: 'Nepal' },
+    { code: '+995', name: 'Georgia' },
+    { code: '+374', name: 'Armenia' },
+    { code: '+994', name: 'Azerbaijan' }
+    // Note: Removed countries not in your allowed list
+    // Myanmar (+95), Bhutan (+975), Afghanistan (+93), Kazakhstan (+7), Turkmenistan (+993), Uzbekistan (+998) 
+    // can be added if you have their country codes
+  ];
+
+  // Sort by country name
+  const countryCodes = countryOptions.sort((a, b) => a.name.localeCompare(b.name));
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -48,6 +69,14 @@ const RegisterStep1 = () => {
     } else if (name === 'fullName') {
       const limitedName = value.slice(0, 40);
       setFormData(prev => ({ ...prev, fullName: limitedName }));
+    } else if (name === 'country') {
+      // ✅ Auto-update country code when country changes
+      const selectedCountry = countryOptions.find(c => c.name === value);
+      setFormData(prev => ({
+        ...prev,
+        country: value,
+        countryCode: selectedCountry?.code || '+94'
+      }));
     } else {
       setFormData(prev => ({
         ...prev,
@@ -149,12 +178,10 @@ const RegisterStep1 = () => {
     return true;
   };
 
-  // ✅ NEW: Handle retail registration
   const handleRetailRegistration = async () => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      // Prepare retail registration data
       const registerData = {
         fullName: formData.fullName,
         dob: formData.dob,
@@ -204,10 +231,8 @@ const RegisterStep1 = () => {
     setLoading(true);
     
     if (formData.customerType === 'retail') {
-      // ✅ ACTUAL RETAIL REGISTRATION
       await handleRetailRegistration();
     } else {
-      // Wholesale customer - save to session and go to step 2
       sessionStorage.setItem('registerStep1', JSON.stringify(formData));
       navigate('/register/step2');
     }
