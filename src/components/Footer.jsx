@@ -23,6 +23,11 @@ const Footer = () => {
       name: 'Dubai – UAE Branch',
       address: 'Business Bay, Dubai, United Arab Emirates',
       mapUrl: 'https://www.google.com/maps?ll=25.269188,55.297272&z=16&t=m&hl=en&gl=LK&mapclient=embed&q=25%C2%B016%2709.1%22N+55%C2%B017%2759.5%22E+25.269194,+55.299861@25.2691944,55.29986109999999'
+    },
+    {
+      name: 'Kandy (KCC) – Winsor Brand',
+      address: 'Level 3, Kandy City Center, Kandy, Sri Lanka',
+      mapUrl: 'https://maps.app.goo.gl/ZHh8w9NojuM97WHm9'
     }
   ];
 
@@ -89,8 +94,8 @@ const Footer = () => {
                   </svg>
                 </div>
                 <div>
-                  <a href="tel:+94771234567" className="block hover:text-gold transition-colors">+94 77 123 4567</a>
-                  <a href="tel:+94719876543" className="block hover:text-gold transition-colors mt-1">+94 71 987 6543</a>
+                  <a href="tel:+94755775565" className="block hover:text-gold transition-colors">+94 75 577 5565</a>
+                  <a href="tel:+94757575565 " className="block hover:text-gold transition-colors mt-1">+94 75 757 5565</a>
                 </div>
               </div>
 
@@ -102,7 +107,7 @@ const Footer = () => {
                   </svg>
                 </div>
                 <a href="mailto:info@happytime.lk" className="hover:text-gold transition-colors">
-                  info@happytime.lk
+                  happytime143b@gmail.com
                 </a>
               </div>
             </div>
@@ -171,22 +176,22 @@ const Footer = () => {
             </h3>
             <div className="flex gap-4">
               {[
-                { platform: 'TikTok', url: 'https://tiktok.com/@happytime', icon: (
+                { platform: 'TikTok', url: 'https://www.tiktok.com/@happytime_pvtltd?_r=1&_t=ZS-93nVkM8WbJY', icon: (
                   <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
                     <path d="M16 3a5.7 5.7 0 0 0 4 4v3.2 a8.9 8.9 0 0 1-4-1.1V16a5 5 0 1 1-5-5c.3 0 .6 0 .9.1v3.2a2 2 0 1 0 2.1 2V3h2z" />
                   </svg>
                 )},
-                { platform: 'Facebook', url: 'https://facebook.com/happytime', icon: (
+                { platform: 'Facebook', url: 'https://facebook.com/happy-time-time-pvt-ltd', icon: (
                   <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
                     <path d="M22 12a10 10 0 1 0-11.5 9.9v-7H8v-3h2.5V9.5c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.5V12H16l-.5 3h-2.8v7A10 10 0 0 0 22 12z" />
                   </svg>
                 )},
-                { platform: 'LinkedIn', url: 'https://linkedin.com/company/happytime', icon: (
+                { platform: 'Youtube', url: 'https://youtube.com/@happytimepvt077?si=zN4VfnTDUnbyFRLG', icon: (
                   <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-                    <path d="M4.98 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM3 21h4V9H3v12zm7 0h4v-6.2c0-3.3 4-3.6 4 0V21h4v-7.5c0-6-6.5-5.8-8-2.8V9h-4v12z" />
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.507 3.545 12 3.545 12 3.545s-7.507 0-9.376.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.869.505 9.376.505 9.376.505s7.507 0 9.376-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                   </svg>
                 )},
-                { platform: 'Instagram', url: 'https://instagram.com/happytime', icon: (
+                { platform: 'Instagram', url: 'https://www.instagram.com/happy_time_pvt_ltd?igsh=MXdkcHV2bnFpenBjMw%3D%3D&utm_source=qr', icon: (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -226,7 +231,7 @@ const Footer = () => {
           </p> 
 
           <p className="mt-2 text-gray-400 text-sm max-w-2xl mx-auto">
-            Trusted luxury watch retailer in Pettah, Colombo since 1996.
+            A trusted luxury watch retailer and wholesaler in Sri Lanka and the UAE since 1996.
           </p>
 
           <div className="mt-4">
