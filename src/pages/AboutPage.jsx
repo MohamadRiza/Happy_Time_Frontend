@@ -47,7 +47,7 @@ const branches = [
   {
     id: 6,
     name: 'Dubai – UAE Branch',
-    address: 'No. 102, Al-Buteen (Opposite of Dubai Wholesale Plaza), Murshid Bazar, Deira, Dubai, UAE',
+    address: 'No. 102, Al-Buteen (Opposite to Dubai Wholesale Plaza), Murshid Bazar, Deira, Dubai, UAE',
     phone: '+971 58 667 7143',
     image: './DubaiBranch1.jpeg',
     mapLink: 'https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3608.041541217658!2d55.29727207538427!3d25.269187977664714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjXCsDE2JzA5LjEiTiA1NcKwMTcnNTkuNSJF!5e0!3m2!1sen!2slk!4v1767425006177!5m2!1sen!2slk',

@@ -5,52 +5,61 @@ import 'react-toastify/dist/ReactToastify.css';
 import ScrollToTop from '../components/ScrollToTop';
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
-// ✅ All URLs and names cleaned - NO trailing spaces
+// ✅ UPDATED with REAL branch information
 const branches = [
   {
     id: 1,
-    name: 'Colombo – Head Office',
-    address: '49A Keyzer Street, Pettah, Colombo, Sri Lanka',
-    phone: '+94 77 123 4567',
-    email: 'info@happytime.lk',
+    name: 'Colombo – Head Office (Sri Lanka Main Branch)',
+    address: 'No 49A, Keyzer Street, Pettah, Colombo 11, Sri Lanka',
+    phone: '+94 76 300 9123',
+    email: 'happytime143b@gmail.com',
     mapLink: 'https://www.google.com/maps?q=Happy+Time+Pvt+Ltd,+Pettah,+Colombo&output=embed',
-    image: 'https://lh3.googleusercontent.com/gps-cs-s/AG0ilSy6UDynoIaGrBBe5auk2SVB2B-uXWf0Y6lYYBYbYHgfGw37o3DkPW7PCwCblIwyoydTk3UOal3RS-EreuI8ISWdVUbUc7Fh5zKqa47Y79BDckNRGkBCocD3PYtInikpi63J3c6NJVyw5Ik=s680-w680-h510',
+    image: './MainBranchPettah.jpeg',
   },
   {
     id: 2,
-    name: 'Pettah – Online Branch',
-    address: 'No 143, 2nd Cross Street, Pettah, Colombo, Sri Lanka',
-    phone: '+94 71 987 6543',
-    email: 'online@happytime.lk',
-    mapLink: 'https://www.google.com/maps?q=No+143,+2nd+Cross+Street,+Pettah,+Colombo&output=embed',
-    image: 'https://lh3.googleusercontent.com/p/AF1QipPCaSrRY-KInMSCHCAVmckf46xC4ASBekS6FeGR=s680-w680-h510',
+    name: 'Online Branch - Pettah 143',
+    address: 'No 143, 2nd Cross Street, Pettah, Colombo 11, Sri Lanka',
+    phone: '+94 75 757 5565',
+    email: 'happytime143b@gmail.com',
+    mapLink: 'https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3960.608471754673!2d79.84937707499664!3d6.937308993062671!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNsKwNTYnMTQuMyJOIDc5wrA1MScwNy4wIkU!5e0!3m2!1sen!2slk!4v1767424589827!5m2!1sen!2slk',
+    image: './143_OnlineBranch.jpeg',
   },
   {
     id: 3,
-    name: 'Pettah – Retail Branch',
-    address: 'No 84, 2nd Cross Street, Pettah, Colombo, Sri Lanka',
-    phone: '+94 75 456 7890',
-    email: 'retail@happytime.lk',
-    mapLink: 'https://www.google.com/maps?q=No+84,+2nd+Cross+Street,+Pettah,+Colombo&output=embed',
-    image: 'https://lh3.googleusercontent.com/gps-cs-s/AG0ilSx3VTjZPG1WzVFKWAOlfELllTrBAZF3xGC2lwWQWwMQOWMCbiDIRpd77aLZQuHBkiCvsuDz95jyfDUnuGFrEmJ4jjY__wBEXzoAUd_NxRZ18ILihq23rALg_rrFVtUdhIoK7EtA6A=s680-w680-h510',
+    name: '84 Branch - Wholesale',
+    address: 'No 84, 2nd Cross Street, Pettah, Colombo 11, Sri Lanka',
+    phone: '+94 75 577 5565',
+    email: 'happytime143b@gmail.com',
+    mapLink: 'https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3960.6176388086064!2d79.84965107499666!3d6.936218993063737!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNsKwNTYnMTAuNCJOIDc5wrA1MScwOC4wIkU!5e0!3m2!1sen!2slk!4v1767424754590!5m2!1sen!2slk',
+    image: './2nd_CS_86.jpeg',
   },
   {
     id: 4,
     name: 'Kandy Branch',
     address: 'No 57, Yatinuwara Lane (Alimudukkuwa), Kandy, Sri Lanka',
-    phone: '+94 77 654 3210',
-    email: 'kandy@happytime.lk',
-    mapLink: 'https://www.google.com/maps?q=No+57,+Yatinuwara+Lane,+Kandy&output=embed',
-    image: 'https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg',
+    phone: '+94 77 345 2456',
+    email: 'happytime143b@gmail.com',
+    mapLink: 'https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3957.5350371179384!2d80.633076075!3d7.2936209927139055!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zN8KwMTcnMzcuMCJOIDgwwrAzOCcwOC4zIkU!5e0!3m2!1sen!2slk!4v1767424839096!5m2!1sen!2slk',
+    image: '',
   },
   {
     id: 5,
+    name: 'Kandy City Center Branch (KCC) - Winsor (Wholesale)',
+    address: 'Level 3, Kandy City Center, Kandy, Sri Lanka',
+    phone: '+94 77 977 9666',
+    email: 'happytime143b@gmail.com',
+    mapLink: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3957.5477352274393!2d80.63232717026546!3d7.292184497679624!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae3662be0e19fad%3A0xfc32bb846bc0d50a!2sKandy%20City%20Centre%2C%20Kandy!5e0!3m2!1sen!2slk!4v1767424917683!5m2!1sen!2slk',
+    image: '',
+  },
+  {
+    id: 6,
     name: 'Dubai – UAE Branch',
-    address: 'No. 102–104, Behind Masjid Bin Dafoos, Murshid Bazar, Deira, Dubai, UAE',
-    phone: '+971 55 123 4567',
-    email: 'dubai@happytime.lk',
-    mapLink: 'https://www.google.com/maps?q=No.102-104,+Murshid+Bazar,+Deira,+Dubai&output=embed',
-    image: 'https://images.pexels.com/photos/4388167/pexels-photo-4388167.jpeg',
+    address: 'No. 102, Al-Buteen (Oppsite to Dubai Wholesale Plaza), Murshid Bazar, Deira, Dubai, UAE',
+    phone: '+971 58 667 7143',
+    email: 'happytime143b@gmail.com',
+    mapLink: 'https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3608.041541217658!2d55.29727207538427!3d25.269187977664714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjXCsDE2JzA5LjEiTiA1NcKwMTcnNTkuNSJF!5e0!3m2!1sen!2slk!4v1767425006177!5m2!1sen!2slk',
+    image: './DubaiBranch1.jpeg',
   },
 ];
 
@@ -210,7 +219,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <div className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300">
       <h3 className="text-2xl font-bold text-white mb-6">Send a Message</h3>
       
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -220,7 +229,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
           placeholder="Full Name *"
           value={formData.name}
           onChange={handleChange}
-          className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
+          className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm transition-colors"
         />
         <input
           type="email"
@@ -228,7 +237,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
           placeholder="Email *"
           value={formData.email}
           onChange={handleChange}
-          className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
+          className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm transition-colors"
         />
         
         {/* PHONE WITH COUNTRY CODE */}
@@ -239,7 +248,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
               name="countryCode"
               value={formData.countryCode}
               onChange={handleChange}
-              className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
+              className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm transition-colors"
             >
               {countryCodes.map((country) => (
                 <option key={country.code} value={country.code}>
@@ -257,7 +266,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
               value={formData.phone}
               onChange={handleChange}
               maxLength="10"
-              className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
+              className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm transition-colors"
             />
           </div>
         </div>
@@ -268,7 +277,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
           placeholder="Your Message *"
           value={formData.message}
           onChange={handleChange}
-          className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm"
+          className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm resize-none transition-colors"
         ></textarea>
         
         {/* reCAPTCHA Notice */}
@@ -287,7 +296,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-gold text-black font-bold py-3 rounded-xl hover:bg-gold/90 transition-all disabled:opacity-70"
+          className="w-full bg-gold text-black font-bold py-3 rounded-xl hover:bg-gold/90 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {submitting ? 'Sending...' : 'Send Message'}
         </button>
@@ -298,7 +307,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
 
 // ✅ Main Contact Page Component
 const ContactPage = () => {
-  const [selectedBranchId, setSelectedBranchId] = useState(null); // ✅ Initially null
+  const [selectedBranchId, setSelectedBranchId] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
@@ -329,21 +338,21 @@ const ContactPage = () => {
         
         {/* HERO */}
         <div className="relative h-[60vh] md:h-[70vh]">
-        <img
-          src="/MainBranchPettah.jpeg"
-          alt="Happy Time Careers"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black" />
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-4 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gold mb-4 tracking-wide">
-            Contact Us
-          </h1>
-          <p className="max-w-2xl text-gray-300 text-lg md:text-xl mb-8">
-            Shape the future of luxury timekeeping with Sri Lanka’s most trusted watch connoisseur since 1996.
-          </p>
+          <img
+            src="/MainBranchPettah.jpeg"
+            alt="Happy Time Contact"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black" />
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-4 text-center">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gold mb-4 tracking-wide">
+              Contact Us
+            </h1>
+            <p className="max-w-2xl text-gray-300 text-lg md:text-xl">
+              We're here to help. Reach out to any of our branches.
+            </p>
+          </div>
         </div>
-      </div>
 
         {/* MAIN CONTENT */}
         <div className="max-w-7xl mx-auto py-20 px-4">
@@ -351,7 +360,6 @@ const ContactPage = () => {
             {/* LEFT: Branch Info */}
             <div>
               <div className="mb-6">
-                {/* ✅ NEW: Clear, user-focused label */}
                 <h3 className="text-gold font-semibold text-lg mb-2">Which branch would you like to contact?</h3>
                 <select
                   value={selectedBranchId || ''}
@@ -360,7 +368,7 @@ const ContactPage = () => {
                     setSelectedBranchId(val ? Number(val) : null);
                     setMapLoaded(false);
                   }}
-                  className="w-full bg-black border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gold shadow-sm"
+                  className="w-full bg-black border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gold shadow-sm transition-colors"
                 >
                   <option value="">— Select a branch —</option>
                   {branches.map((branch) => (
@@ -372,15 +380,33 @@ const ContactPage = () => {
               </div>
 
               {selectedBranch ? (
-                <div className="space-y-4 mt-4 p-6 bg-gray-900 rounded-2xl border border-gray-800 shadow-md">
+                <div className="space-y-4 mt-4 p-6 bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
                   <div>
-                    <h3 className="text-gold font-semibold text-lg mb-1">Address</h3>
-                    <p className="text-gray-300">{selectedBranch.address}</p>
+                    <h3 className="text-gold font-semibold text-lg mb-2 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Address
+                    </h3>
+                    <p className="text-gray-300 leading-relaxed">{selectedBranch.address}</p>
                   </div>
                   <div>
-                    <h3 className="text-gold font-semibold text-lg mb-1">Contact</h3>
-                    <p className="text-gray-300 flex items-center gap-2">📞 {selectedBranch.phone}</p>
-                    <p className="text-gray-300 flex items-center gap-2">✉️ {selectedBranch.email}</p>
+                    <h3 className="text-gold font-semibold text-lg mb-2">Contact</h3>
+                    <a 
+                      href={`tel:${selectedBranch.phone}`}
+                      className="text-gray-300 flex items-center gap-2 mb-2 hover:text-gold transition-colors group"
+                    >
+                      <span className="text-gold group-hover:scale-110 transition-transform">📞</span>
+                      <span className="group-hover:underline">{selectedBranch.phone}</span>
+                    </a>
+                    <a 
+                      href={`mailto:${selectedBranch.email}`}
+                      className="text-gray-300 flex items-center gap-2 hover:text-gold transition-colors group"
+                    >
+                      <span className="text-gold group-hover:scale-110 transition-transform">✉️</span>
+                      <span className="group-hover:underline">{selectedBranch.email}</span>
+                    </a>
                   </div>
                 </div>
               ) : (
@@ -402,11 +428,14 @@ const ContactPage = () => {
 
           {/* GOOGLE MAP */}
           <div className="mt-20">
-            <h3 className="text-2xl font-bold text-white text-center mb-6">Location</h3>
-            <div className="rounded-2xl overflow-hidden border border-gray-800 h-96 md:h-[500px] relative shadow-lg">
+            <h3 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">Location</h3>
+            <div className="rounded-2xl overflow-hidden border border-gray-700/50 h-96 md:h-[500px] relative shadow-lg">
               {!mapLoaded && selectedBranch && (
                 <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/50">
-                  <span className="text-white">Loading map...</span>
+                  <div className="flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-gold border-t-transparent mb-2"></div>
+                    <span className="text-white">Loading map...</span>
+                  </div>
                 </div>
               )}
               {selectedBranch ? (
