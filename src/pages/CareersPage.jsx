@@ -92,7 +92,7 @@ const CareersPage = () => {
       {/* Hero Banner - Updated to match About page */}
       <div className="relative h-[60vh] md:h-[70vh]">
         <img
-          src="https://images.pexels.com/photos/11489971/pexels-photo-11489971.jpeg"
+          src="https://images.pexels.com/photos/1181396/pexels-photo-1181396.jpeg"
           alt="Happy Time Careers"
           className="w-full h-full object-cover"
         />

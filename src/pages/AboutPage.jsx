@@ -6,10 +6,10 @@ import ScrollToTop from '../components/ScrollToTop';
 const branches = [
   {
     id: 1,
-    name: 'Colombo – Head Office',
-    address: '49A Keyzer Street, Pettah, Colombo 11, Sri Lanka',
-    phone: '+94 11 244 1800',
-    image: './MainBranchPettah.jpeg',
+    name: 'Colombo – Head Office Sri Lanka',
+    address: 'No 49A, Keyzer Street, Pettah, Colombo 11, Sri Lanka',
+    phone: '+94 76 300 9123',
+    image: './inside.jpg',
     mapLink: 'https://www.google.com/maps?q=Happy+Time+(Pvt)+Ltd,+Pettah,+Colombo&output=embed',
   },
   {
@@ -22,9 +22,9 @@ const branches = [
   },
   {
     id: 3,
-    name: '2nd Cross Street 86 Branch - Wholesale',
-    address: 'No 84, 2nd Cross Street, Pettah, Colombo, Sri Lanka',
-    phone: '+94 11 244 1800',
+    name: '84 Branch - Wholesale',
+    address: 'No 84, 2nd Cross Street, Pettah, Colombo 11, Sri Lanka',
+    phone: '+94 75 577 5565',
     image: './2nd_CS_86.jpeg',
     mapLink: 'https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3960.6176388086064!2d79.84965107499666!3d6.936218993063737!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNsKwNTYnMTAuNCJOIDc5wrA1MScwOC4wIkU!5e0!3m2!1sen!2slk!4v1767424754590!5m2!1sen!2slk',
   },
@@ -32,23 +32,23 @@ const branches = [
     id: 4,
     name: 'Kandy Branch',
     address: 'No 57, Yatinuwara Lane (Alimudukkuwa), Kandy, Sri Lanka',
-    phone: '+94 11 244 1800',
-    image: '',
+    phone: '+94 77 345 2456',
+    image: 'interior.jpg',
     mapLink: 'https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3957.5350371179384!2d80.633076075!3d7.2936209927139055!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zN8KwMTcnMzcuMCJOIDgwwrAzOCcwOC4zIkU!5e0!3m2!1sen!2slk!4v1767424839096!5m2!1sen!2slk',
   },
   {
     id: 5,
-    name: 'Kandy City Center Branch (KCC)',
-    address: 'KCC, 2nd Floor, No 01, Kandy, Sri Lanka',
-    phone: '+94 11 244 1800',
-    image: '',
+    name: 'Kandy City Center Branch (KCC) - Winsor (Retail)',
+    address: 'Level 3, Kandy City Center, No 01, Kandy, Sri Lanka',
+    phone: '+94 77 977 9666',
+    image: '/KCC.webp',
     mapLink: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3957.5477352274393!2d80.63232717026546!3d7.292184497679624!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae3662be0e19fad%3A0xfc32bb846bc0d50a!2sKandy%20City%20Centre%2C%20Kandy!5e0!3m2!1sen!2slk!4v1767424917683!5m2!1sen!2slk',
   },
   {
     id: 6,
     name: 'Dubai – UAE Branch',
-    address: 'No. 102–104, Behind Masjid Bin Dafoos, Murshid Bazar, Deira, Dubai, UAE',
-    phone: '+971 55 123 4567',
+    address: 'No. 102, Al-Buteen (Opposite of Dubai Wholesale Plaza), Murshid Bazar, Deira, Dubai, UAE',
+    phone: '+971 58 667 7143',
     image: './DubaiBranch1.jpeg',
     mapLink: 'https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3608.041541217658!2d55.29727207538427!3d25.269187977664714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjXCsDE2JzA5LjEiTiA1NcKwMTcnNTkuNSJF!5e0!3m2!1sen!2slk!4v1767425006177!5m2!1sen!2slk',
   },
@@ -88,25 +88,31 @@ const AboutPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Sri Lanka’s Trusted <span className="text-gold">Luxury Watch Destination</span>
+                Sri Lanka's Trusted <span className="text-gold">Watch Destination</span>
               </h2>
               <div className="w-16 h-1 bg-gold mb-6" />
               <p className="text-gray-300 mb-6 leading-relaxed">
-                Since <span className="text-gold font-semibold">2014</span>, Happy Time Pvt Ltd has been 
-                the cornerstone of luxury timepiece retail in Sri Lanka, serving discerning collectors 
-                and enthusiasts with unwavering commitment to authenticity and excellence.
+                Happy Time Pvt Ltd is a growing watch distribution and retail company serving 
+                customers across <span className="text-gold font-semibold">Sri Lanka and abroad</span>, 
+                including the UAE. Over the years, we have built our business through dedication, 
+                hard work, and strong customer relationships.
+              </p>
+              <p className="text-gray-400 leading-relaxed mb-6">
+                We supply watches for both wholesale and retail markets and proudly manage our own 
+                brands - <span className="text-gold">Winsor and Orix</span> for wrist watches, and 
+                <span className="text-gold"> Arial</span> for wall clocks. Our goal is to offer 
+                timepieces that combine good design, quality, and affordable pricing.
               </p>
               <p className="text-gray-400 leading-relaxed">
-                With over a decade of expertise, we've built lasting relationships with the world's 
-                most prestigious watchmakers, ensuring our clients receive genuine masterpieces backed 
-                by comprehensive service and support.
+                At Happy Time, we believe business is not only about selling products - it is about 
+                building trust, creating long-term partnerships, and delivering value every single day.
               </p>
             </div>
 
             <div className="relative rounded-2xl overflow-hidden border border-gray-800 group">
               <div className="absolute inset-0 bg-gradient-to-tr from-gold/10 via-transparent to-gold/5 transition-opacity duration-300 group-hover:from-gold/20 group-hover:to-gold/10" />
               <img
-                src="https://images.pexels.com/photos/11489971/pexels-photo-11489971.jpeg"
+                src="/DubaiBranch1.jpeg"
                 alt="Happy Time Boutique"
                 className="w-full h-full object-cover relative z-10 transition-transform duration-500 group-hover:scale-105"
               />
@@ -120,39 +126,44 @@ const AboutPage = () => {
             Our Philosophy
           </h2>
 
-          <div className="flex flex-col md:flex-row gap-12">
-            {/* Vision */}
-            <div className="flex-1">
-              <div className="flex items-start mb-4">
-                <div className="text-gold mr-4 mt-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Vision Card */}
+            <div className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300 group">
+              <div className="flex items-center mb-6">
+                <div className="bg-gold/10 p-3 rounded-xl mr-4 group-hover:bg-gold/20 transition-colors duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                 </div>
                 <h3 className="text-2xl font-bold text-gold">Vision</h3>
               </div>
-              <p className="text-gray-300 leading-relaxed text-lg">
-                To be the premier destination for luxury timepieces in South Asia, 
-                recognized for our unparalleled expertise, authentic collections, 
-                and exceptional customer experience.
+              <p className="text-gray-300 leading-relaxed text-base">
+                At Happy Time, our vision is simple - to become a trusted name in every home when 
+                it comes to watches. We want our brand to represent reliability, style, and value, 
+                not just in Sri Lanka but internationally as well. We believe time is important in 
+                everyone's life, and we want to be part of those everyday moments.
               </p>
             </div>
 
-            {/* Mission */}
-            <div className="flex-1">
-              <div className="flex items-start mb-4">
-                <div className="text-gold mr-4 mt-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {/* Mission Card */}
+            <div className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300 group">
+              <div className="flex items-center mb-6">
+                <div className="bg-gold/10 p-3 rounded-xl mr-4 group-hover:bg-gold/20 transition-colors duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
                 </div>
                 <h3 className="text-2xl font-bold text-gold">Mission</h3>
               </div>
-              <p className="text-gray-300 leading-relaxed text-lg">
-                To provide authentic luxury timepieces with expert guidance, 
-                comprehensive after-sales service, and a personalized shopping 
-                experience that exceeds our clients' expectations.
+              <p className="text-gray-300 leading-relaxed text-base mb-4">
+                Our mission is to provide quality watches at the right price while building strong 
+                and honest relationships with our customers, dealers, and partners.
+              </p>
+              <p className="text-gray-400 leading-relaxed text-sm">
+                We focus on: supplying stylish and durable watches, supporting both wholesale and 
+                retail customers, growing our own brands like Winsor, Orix, and Arial, and expanding 
+                step by step into new markets. We are committed to service, trust, and long-term success.
               </p>
             </div>
           </div>
@@ -164,57 +175,92 @@ const AboutPage = () => {
             Our Exclusive Brands
           </h2>
 
-          <div className="flex flex-col md:flex-row gap-16 items-center justify-center">
-            {/* Orix */}
-            <div className="text-center max-w-md">
-              <div className="flex justify-center mb-6">
-                <img
-                  src="/watchFTR.jpg"
-                  alt="Orix Logo"
-                  className="h-26 w-auto object-contain filter hover:grayscale-0 transition-all duration-300"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    // Fallback text
-                    const span = document.createElement('span');
-                    span.textContent = 'ORIX';
-                    span.className = 'text-white text-2xl font-bold';
-                    e.target.parentNode.appendChild(span);
-                  }}
-                />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Orix</h3>
-              <h4 className="text-gold font-semibold mb-3">Precision Wrist Watches</h4>
-              <p className="text-gray-300 leading-relaxed">
-                Orix represents the perfect fusion of Swiss precision engineering 
-                and contemporary design. Each timepiece is crafted for the modern 
-                professional who demands accuracy, reliability, and sophisticated style.
-              </p>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Winsor */}
-            <div className="text-center max-w-md">
-              <div className="flex justify-center mb-6">
+            <div className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300 group hover:scale-105">
+              <div className="flex justify-center mb-6 h-32 items-center">
                 <img
-                  src="/watchFTR.jpg"
+                  src="/winsor.png"
                   alt="Winsor Logo"
-                  className="h-26 w-auto object-contain filter hover:grayscale-0 transition-all duration-300"
+                  className="h-24 w-auto object-contain filter rounded-lg transition-all duration-300"
                   onError={(e) => {
                     e.target.style.display = 'none';
-                    // Fallback text
                     const span = document.createElement('span');
                     span.textContent = 'WINSOR';
-                    span.className = 'text-white text-2xl font-bold';
+                    span.className = 'text-white text-3xl font-bold tracking-wider';
                     e.target.parentNode.appendChild(span);
                   }}
                 />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Winsor</h3>
-              <h4 className="text-gold font-semibold mb-3">Classic Wrist Watches</h4>
-              <p className="text-gray-300 leading-relaxed">
-                Winsor embodies timeless elegance and traditional craftsmanship. 
-                Inspired by vintage horology, each piece combines heritage design 
-                elements with modern functionality for the discerning collector.
-              </p>
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-gold transition-colors">Winsor</h3>
+                <h4 className="text-gold font-semibold mb-4 text-sm">Classic Wrist Watches</h4>
+                <div className="w-12 h-0.5 bg-gold/30 mx-auto mb-4"></div>
+                <p className="text-gray-300 leading-relaxed text-sm text-justify">
+                  Winsor embodies timeless elegance and traditional craftsmanship. 
+                  Inspired by vintage horology, each piece combines heritage design 
+                  elements with modern functionality for the discerning collector who 
+                  appreciates classic sophistication.
+                </p>
+              </div>
+            </div>
+
+            {/* Orix */}
+            <div className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300 group hover:scale-105">
+              <div className="flex justify-center mb-6 h-32 items-center">
+                <img
+                  src="/OrixBrand.webp"
+                  alt="Orix Logo"
+                  className="h-24 w-auto object-contain filter rounded-lg transition-all duration-300"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    const span = document.createElement('span');
+                    span.textContent = 'ORIX';
+                    span.className = 'text-white text-3xl font-bold tracking-wider';
+                    e.target.parentNode.appendChild(span);
+                  }}
+                />
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-gold transition-colors">Orix</h3>
+                <h4 className="text-gold font-semibold mb-4 text-sm">Precision Wrist Watches</h4>
+                <div className="w-12 h-0.5 bg-gold/30 mx-auto mb-4"></div>
+                <p className="text-gray-300 leading-relaxed text-sm text-justify">
+                  Orix represents the perfect fusion of precision engineering 
+                  and contemporary design. Each timepiece is crafted for the modern 
+                  professional who demands accuracy, reliability, and sophisticated style 
+                  in their everyday life.
+                </p>
+              </div>
+            </div>
+
+            {/* Arial */}
+            <div className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300 group hover:scale-105">
+              <div className="flex justify-center mb-6 h-32 items-center">
+                <img
+                  src="/ArielBrand.webp"
+                  alt="Arial Logo"
+                  className="h-24 w-auto object-contain filter rounded-lg transition-all duration-300"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    const span = document.createElement('span');
+                    span.textContent = 'ARIAL';
+                    span.className = 'text-white text-3xl font-bold tracking-wider';
+                    e.target.parentNode.appendChild(span);
+                  }}
+                />
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-gold transition-colors">Arial</h3>
+                <h4 className="text-gold font-semibold mb-4 text-sm">Wall Clocks</h4>
+                <div className="w-12 h-0.5 bg-gold/30 mx-auto mb-4"></div>
+                <p className="text-gray-300 leading-relaxed text-sm text-justify">
+                  Arial brings elegance and precision to your living spaces with our 
+                  premium wall clock collection. Combining functional design with 
+                  artistic craftsmanship, each piece serves as both a timekeeper and 
+                  a statement of style for your home or office.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -233,7 +279,7 @@ const AboutPage = () => {
                   setSelectedBranch(branch);
                   setMapLoaded(false);
                 }}
-                className="bg-gray-900/50 border border-gray-800 rounded-2xl overflow-hidden hover:border-gold/50 transition-all duration-300 group"
+                className="bg-gray-900/50 border border-gray-800 rounded-2xl overflow-hidden hover:border-gold/50 transition-all duration-300 group text-left"
               >
                 <div className="h-48 overflow-hidden">
                   {branch.image ? (
@@ -254,7 +300,7 @@ const AboutPage = () => {
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-start">
-                      <div className="text-gold mr-2 mt-0.5">
+                      <div className="text-gold mr-2 mt-0.5 flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -263,7 +309,7 @@ const AboutPage = () => {
                       <span className="text-gray-400">{branch.address}</span>
                     </div>
                     <div className="flex items-center">
-                      <div className="text-gold mr-2">
+                      <div className="text-gold mr-2 flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>

@@ -324,8 +324,8 @@ const ShopPage = () => {
   // ✅ Brand logo mapping
   const brandLogos = {
     Winsor: "/winsor.png",
-    Orix: "/orix.png",
-    Arial: "/logo1.png" //HAVE TO CHANGE THE LOGO
+    Orix: "/OrixBrand.webp",
+    Arial: "/ArielBrand.webp" //HAVE TO CHANGE THE LOGO
   };
 
   return (
