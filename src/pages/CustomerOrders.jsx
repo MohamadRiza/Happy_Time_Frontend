@@ -554,7 +554,7 @@ const CustomerOrders = () => {
                       >
                         <div className="text-2xl sm:text-3xl animate-bounce">
                           <img
-                            src="/truck.png"
+                            src="/Delivery_Truck.webp"
                             alt="truck icon"
                             className="h-8 w-8 sm:h-10 sm:w-10"
                           />

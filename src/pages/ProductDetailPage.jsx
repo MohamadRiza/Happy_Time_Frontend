@@ -714,7 +714,7 @@ const ProductDetailPage = () => {
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <a
-                      href="https://wa.me/94757575565"
+                      href="https://wa.me/94763009123"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-2 bg-gold hover:bg-yellow-500 text-black px-4 py-2 rounded-lg font-medium transition-all"

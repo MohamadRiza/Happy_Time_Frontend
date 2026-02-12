@@ -23,10 +23,10 @@ const SupportSection = () => {
           <div className="min-w-0 flex-1">
             <div className="text-gray-400 text-xs sm:text-sm">Email</div>
             <a 
-              href="mailto:happy@itteam.com" 
+              href="mailto:happytime143b@gmail.com" 
               className="text-gold hover:text-yellow-300 text-sm sm:text-base break-all transition"
             >
-              happy@itteam.com
+              happytime143b@gmail.com
             </a>
           </div>
         </div>
@@ -41,10 +41,10 @@ const SupportSection = () => {
           <div className="min-w-0 flex-1">
             <div className="text-gray-400 text-xs sm:text-sm">Phone</div>
             <a 
-              href="tel:+94112441800" 
+              href="tel:+94763009123" 
               className="text-gold hover:text-yellow-300 text-sm sm:text-base transition"
             >
-              +94 11 244 1800
+              +94 76 300 9123
             </a>
           </div>
         </div>

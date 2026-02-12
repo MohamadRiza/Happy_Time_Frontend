@@ -119,7 +119,7 @@ const ApplicationStatusCheck = () => {
       </div>
 
       <ScrollToTop />
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} theme='dark'/>
       
       <div className="max-w-3xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -191,6 +191,15 @@ const ApplicationStatusCheck = () => {
                   </span>
                 ) : 'Check Application Status'}
               </button>
+              <button
+                  onClick={() => navigate('/careers')}
+                  className="flex-1 inline-flex items-center justify-center bg-gray-800 text-gold hover:bg-gray-700 text-sm font-medium border border-gray-700 rounded-lg py-2 hover:border-gold/60 transition px-4"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 0l-7 7 7 7" />
+                  </svg>
+                  Back to Careers
+                </button>
             </form>
           ) : (
             <div className="space-y-6">
