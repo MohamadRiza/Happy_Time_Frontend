@@ -13,6 +13,7 @@ const OrdersList = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [receiptStatusFilter, setReceiptStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState('recent'); // 'recent', 'qty-high', 'qty-low', 'price-high', 'price-low'
   
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -52,6 +53,48 @@ const OrdersList = () => {
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  // ✅ Calculate total quantity and price for each order
+  const getSortableValues = (order) => {
+    const totalQty = order.items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = order.totalAmount;
+    return { totalQty, totalPrice };
+  };
+
+  // ✅ Enhanced filtering with sorting
+  const filteredAndSortedOrders = orders
+    .filter(order => {
+      const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+      const matchesReceipt = receiptStatusFilter === 'all' || order.receiptStatus === receiptStatusFilter;
+      
+      const searchLower = searchQuery.toLowerCase().trim();
+      const matchesSearch = !searchLower || 
+        order._id.toLowerCase().includes(searchLower) ||
+        (order.customer?.fullName || '').toLowerCase().includes(searchLower) ||
+        (order.customer?.email || '').toLowerCase().includes(searchLower) ||
+        (order.customer?.username || '').toLowerCase().includes(searchLower) ||
+        order.totalAmount.toString().includes(searchLower);
+
+      return matchesStatus && matchesReceipt && matchesSearch;
+    })
+    .sort((a, b) => {
+      const aVals = getSortableValues(a);
+      const bVals = getSortableValues(b);
+      
+      switch (sortOption) {
+        case 'qty-high':
+          return bVals.totalQty - aVals.totalQty;
+        case 'qty-low':
+          return aVals.totalQty - bVals.totalQty;
+        case 'price-high':
+          return bVals.totalPrice - aVals.totalPrice;
+        case 'price-low':
+          return aVals.totalPrice - bVals.totalPrice;
+        case 'recent':
+        default:
+          return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+    });
 
   const submitOrderUpdates = async () => {
     const updates = {};
@@ -131,21 +174,6 @@ const OrdersList = () => {
       minute: '2-digit'
     });
   };
-
-  const filteredOrders = orders.filter(order => {
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    const matchesReceipt = receiptStatusFilter === 'all' || order.receiptStatus === receiptStatusFilter;
-    
-    const searchLower = searchQuery.toLowerCase().trim();
-    const matchesSearch = !searchLower || 
-      order._id.toLowerCase().includes(searchLower) ||
-      (order.customer?.fullName || '').toLowerCase().includes(searchLower) ||
-      (order.customer?.email || '').toLowerCase().includes(searchLower) ||
-      (order.customer?.username || '').toLowerCase().includes(searchLower) ||
-      order.totalAmount.toString().includes(searchLower);
-
-    return matchesStatus && matchesReceipt && matchesSearch;
-  });
 
   const totalOrders = orders.length;
   const pendingPayment = orders.filter(o => o.status === 'pending_payment').length;
@@ -276,15 +304,28 @@ const OrdersList = () => {
             <option value="rejected">Receipt Rejected</option>
           </select>
           
+          {/* ✅ SORTING DROPDOWN */}
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-gold"
+          >
+            <option value="recent">Recent Orders</option>
+            <option value="qty-high">Quantity: High to Low</option>
+            <option value="qty-low">Quantity: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="price-low">Price: Low to High</option>
+          </select>
+          
           <div className="text-gray-400 whitespace-nowrap">
-            Showing: {filteredOrders.length} orders
+            Showing: {filteredAndSortedOrders.length} orders
           </div>
         </div>
       </div>
 
       {error && <p className="text-red-400 mb-4">{error}</p>}
 
-      {filteredOrders.length === 0 ? (
+      {filteredAndSortedOrders.length === 0 ? (
         <div className="text-center py-12 bg-gray-900/50 border border-gray-800 rounded-xl">
           <p className="text-gray-500">No orders match your search and filters</p>
         </div>
@@ -303,66 +344,69 @@ const OrdersList = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.map((order) => (
-                  <tr key={order._id} className="border-b border-gray-800 hover:bg-gray-800/30">
-                    <td className="py-4 px-6">
-                      <div className="font-semibold text-white">#{order._id.substring(order._id.length - 6)}</div>
-                      <div className="text-gray-400 text-sm">{formatDate(order.createdAt)}</div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="font-semibold text-white">{order.customer?.fullName}</div>
-                      <div className="text-gray-400 text-sm">@{order.customer?.username}</div>
-                      <div className="text-gray-500 text-xs">{order.customer?.email}</div>
-                      {order.customer?.mobileNumber && (
-                        <div className="text-gray-400 text-xs mt-1">
-                          📱 {order.customer.mobileNumber}
-                        </div>
-                      )}
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="text-white">{order.items.length} items</div>
-                      <div className="text-gray-400 text-sm">
-                        {order.items[0]?.productId?._id ? (
-                          <Link 
-                            to={`/shop/${order.items[0].productId._id}`}
-                            className="hover:text-gold transition-colors"
-                          >
-                            {order.items[0]?.productId?.title}
-                          </Link>
-                        ) : (
-                          order.items[0]?.productId?.title || 'Product'
+                {filteredAndSortedOrders.map((order) => {
+                  const { totalQty } = getSortableValues(order);
+                  return (
+                    <tr key={order._id} className="border-b border-gray-800 hover:bg-gray-800/30">
+                      <td className="py-4 px-6">
+                        <div className="font-semibold text-white">#{order._id.substring(order._id.length - 6)}</div>
+                        <div className="text-gray-400 text-sm">{formatDate(order.createdAt)}</div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="font-semibold text-white">{order.customer?.fullName}</div>
+                        <div className="text-gray-400 text-sm">@{order.customer?.username}</div>
+                        <div className="text-gray-500 text-xs">{order.customer?.email}</div>
+                        {order.customer?.mobileNumber && (
+                          <div className="text-gray-400 text-xs mt-1">
+                            📱 {order.customer.mobileNumber}
+                          </div>
                         )}
-                        {order.items.length > 1 && ` +${order.items.length - 1}`}
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="text-white font-semibold">{formatPrice(order.totalAmount)}</div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="space-y-1">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(order.status)}`}>
-                          {order.status.replace(/_/g, ' ').toUpperCase()}
-                        </span>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getReceiptStatusBadge(order.receiptStatus)}`}>
-                          {order.receiptStatus.toUpperCase()}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <button
-                        onClick={() => {
-                          setSelectedOrder(order);
-                          setEditStatus(order.status);
-                          setEditReceiptStatus(order.receiptStatus);
-                          setEditAdminNotes(order.adminNotes || '');
-                        }}
-                        className="text-gold hover:text-yellow-300 text-sm font-medium"
-                      >
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="text-white">{order.items.length} items ({totalQty} qty)</div>
+                        <div className="text-gray-400 text-sm">
+                          {order.items[0]?.productId?._id ? (
+                            <Link 
+                              to={`/shop/${order.items[0].productId._id}`}
+                              className="hover:text-gold transition-colors"
+                            >
+                              {order.items[0]?.productId?.title}
+                            </Link>
+                          ) : (
+                            order.items[0]?.productId?.title || 'Product'
+                          )}
+                          {order.items.length > 1 && ` +${order.items.length - 1}`}
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="text-white font-semibold">{formatPrice(order.totalAmount)}</div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="space-y-1">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(order.status)}`}>
+                            {order.status.replace(/_/g, ' ').toUpperCase()}
+                          </span>
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${getReceiptStatusBadge(order.receiptStatus)}`}>
+                            {order.receiptStatus.toUpperCase()}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <button
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setEditStatus(order.status);
+                            setEditReceiptStatus(order.receiptStatus);
+                            setEditAdminNotes(order.adminNotes || '');
+                          }}
+                          className="text-gold hover:text-yellow-300 text-sm font-medium"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

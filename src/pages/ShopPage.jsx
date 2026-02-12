@@ -325,7 +325,7 @@ const ShopPage = () => {
   const brandLogos = {
     Winsor: "/winsor.png",
     Orix: "/orix.png",
-    // 'Arial': '/logo1.png'
+    Arial: "/logo1.png" //HAVE TO CHANGE THE LOGO
   };
 
   return (
