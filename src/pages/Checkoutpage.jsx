@@ -1,5 +1,5 @@
 // src/pages/CheckoutPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -79,6 +79,12 @@ const CheckoutPage = () => {
     bankName: 'Commercial Bank',
     branch: 'Colombo 01'
   };
+
+  // ✅ Refs for scroll targets
+  const receiptInputRef = useRef(null);
+  const addressCheckboxRef = useRef(null);
+  const receiptCheckboxRef = useRef(null);
+  const termsCheckboxRef = useRef(null);
 
   useEffect(() => {
     if (!isCustomerAuthenticated()) {
@@ -190,24 +196,46 @@ const CheckoutPage = () => {
     setIsEditingAddress(false);
   };
 
+  // ✅ Enhanced validation with scroll-to-error
   const validateOrder = () => {
+    // Reset blinking classes
+    document.querySelectorAll('.blink-error').forEach(el => {
+      el.classList.remove('blink-error');
+    });
+
     if (!receiptFile) {
       toast.error('Please upload a bank transfer receipt');
+      if (receiptInputRef.current) {
+        receiptInputRef.current.classList.add('blink-error');
+        receiptInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return false;
     }
     
     if (!addressConfirmed) {
       toast.error('Please confirm your delivery address is correct');
+      if (addressCheckboxRef.current) {
+        addressCheckboxRef.current.classList.add('blink-error');
+        addressCheckboxRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return false;
     }
     
     if (!receiptConfirmed) {
       toast.error('Please confirm your payment receipt is correct');
+      if (receiptCheckboxRef.current) {
+        receiptCheckboxRef.current.classList.add('blink-error');
+        receiptCheckboxRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return false;
     }
     
     if (!termsAccepted) {
       toast.error('Please accept our Terms and Conditions');
+      if (termsCheckboxRef.current) {
+        termsCheckboxRef.current.classList.add('blink-error');
+        termsCheckboxRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return false;
     }
     
@@ -462,7 +490,9 @@ const CheckoutPage = () => {
                 <label className="block text-sm font-medium mb-2">
                   Upload Payment Receipt *
                 </label>
+                {/* ✅ Add ref to receipt input */}
                 <input
+                  ref={receiptInputRef}
                   type="file"
                   accept="image/*,.pdf"
                   onChange={handleReceiptChange}
@@ -500,7 +530,11 @@ const CheckoutPage = () => {
                 Order Confirmation
               </h2>
               <div className="space-y-4">
-                <label className="flex items-start cursor-pointer">
+                {/* ✅ Add ref to address checkbox */}
+                <label 
+                  ref={addressCheckboxRef}
+                  className="flex items-start cursor-pointer blink-target"
+                >
                   <input
                     type="checkbox"
                     checked={addressConfirmed}
@@ -511,7 +545,11 @@ const CheckoutPage = () => {
                     I confirm that my delivery address is correct and complete.
                   </span>
                 </label>
-                <label className="flex items-start cursor-pointer">
+                {/* ✅ Add ref to receipt checkbox */}
+                <label 
+                  ref={receiptCheckboxRef}
+                  className="flex items-start cursor-pointer blink-target"
+                >
                   <input
                     type="checkbox"
                     checked={receiptConfirmed}
@@ -522,7 +560,11 @@ const CheckoutPage = () => {
                     I confirm that the payment receipt shows the correct amount and transaction details.
                   </span>
                 </label>
-                <label className="flex items-start cursor-pointer">
+                {/* ✅ Add ref to terms checkbox */}
+                <label 
+                  ref={termsCheckboxRef}
+                  className="flex items-start cursor-pointer blink-target"
+                >
                   <input
                     type="checkbox"
                     checked={termsAccepted}
@@ -594,6 +636,24 @@ const CheckoutPage = () => {
           </button>
         </div>
       </div>
+
+      {/* ✅ Blink Animation CSS */}
+      <style jsx>{`
+        @keyframes blink {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+          50% { box-shadow: 0 0 0 4px rgba(212, 175, 55, 0); }
+        }
+        .blink-error {
+          animation: blink 1.5s ease-in-out 2;
+          position: relative;
+        }
+        .blink-target input {
+          transition: all 0.2s ease;
+        }
+        .blink-target.blink-error input {
+          transform: scale(1.02);
+        }
+      `}</style>
     </div>
   );
 };
