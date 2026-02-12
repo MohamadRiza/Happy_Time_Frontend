@@ -71,7 +71,7 @@ const Footer = () => {
                   </svg>
                 </div>
                 <div>
-                  <p className="font-medium text-white mb-1">Our Locations</p>
+                  <p className="font-medium text-white mb-1">Our Main Branches</p>
                   {locations.map((loc, idx) => (
                     <a
                       key={idx}
@@ -86,31 +86,43 @@ const Footer = () => {
                 </div>
               </div>
 
+              
               {/* Phone */}
-              <div className="flex items-center gap-3">
-                <div className="text-gold hover:text-white transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.74 21 3 14.26 3 6V5z" />
-                  </svg>
+              <div className='space-y-4 text-sm'>
+                {/* ✅ ADDED: Brand logo next to Contact Us heading */}
+                <div className="flex items-center gap-2 mb-2">
+                  <img 
+                    src="/Logo_ORG.png" 
+                    alt="Happy Time" 
+                    className="h-5 w-auto opacity-90" 
+                  />
+                  <Link to="/about" className="text-white font-medium hover:text-gold transition-colors ">Contact Us</Link>
                 </div>
-                <div>
-                  <a href="tel:+94755775565" className="block hover:text-gold transition-colors">+94 75 577 5565</a>
-                  <a href="tel:+94757575565 " className="block hover:text-gold transition-colors mt-1">+94 75 757 5565</a>
+                <div className="flex items-center gap-3">
+                  <div className="text-gold hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.74 21 3 14.26 3 6V5z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <a href="tel:+94755775565" className="block hover:text-gold transition-colors">+94 75 577 5565</a>
+                    <a href="tel:+94757575565" className="block hover:text-gold transition-colors mt-1">+94 75 757 5565</a>
+                  </div>
                 </div>
-              </div>
 
-              {/* Email */}
-              <div className="flex items-center gap-3">
-                <div className="text-gold hover:text-white transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
+                {/* Email */}
+                <div className="flex items-center gap-3">
+                  <div className="text-gold hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <a href="mailto:happytime143b@gmail.com" className="hover:text-gold transition-colors">
+                    happytime143b@gmail.com
+                  </a>
                 </div>
-                <a href="mailto:info@happytime.lk" className="hover:text-gold transition-colors">
-                  happytime143b@gmail.com
-                </a>
               </div>
-            </div>
+          </div>
           </div>
 
           {/* Column 2: Quick Links */}

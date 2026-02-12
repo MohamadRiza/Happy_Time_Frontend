@@ -50,6 +50,7 @@ import CheckoutPage from "./pages/Checkoutpage";
 import InventoryManagement from "./pages/AdminPages/InventoryManagement";
 import Snowfall from "./components/Snowfall";
 import { isChristmasSeason } from "./utils/dateUtils";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 
 function App() {
 
@@ -90,6 +91,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterStep1 />} />
             <Route path="/register/step2" element={<RegisterStep2 />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route
               path="/account"
               element={
