@@ -18,7 +18,7 @@ const branches = [
   },
   {
     id: 2,
-    name: 'Online Branch - Pettah 143',
+    name: 'Online Branch - Pettah 143 (Wholesale & Retail)',
     address: 'No 143, 2nd Cross Street, Pettah, Colombo 11, Sri Lanka',
     phone: '+94 75 757 5565',
     email: 'happytime143b@gmail.com',
@@ -36,7 +36,7 @@ const branches = [
   },
   {
     id: 4,
-    name: 'Kandy Branch',
+    name: 'Kandy Branch (Wholesale)',
     address: 'No 57, Yatinuwara Lane (Alimudukkuwa), Kandy, Sri Lanka',
     phone: '+94 77 345 2456',
     email: 'happytime143b@gmail.com',
@@ -45,7 +45,7 @@ const branches = [
   },
   {
     id: 5,
-    name: 'Kandy City Center Branch (KCC) - Winsor (Wholesale)',
+    name: 'Kandy City Center Branch (KCC) - Winsor (Retail)',
     address: 'Level 3, Kandy City Center, Kandy, Sri Lanka',
     phone: '+94 77 977 9666',
     email: 'happytime143b@gmail.com',

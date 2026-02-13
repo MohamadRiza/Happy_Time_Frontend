@@ -34,9 +34,9 @@ const TrustSection = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      title: '28+ Years',
+      title: '30+ Years',
       subtitle: 'Horological Expertise',
-      description: 'Backed by decades of experience and trusted by collectors across Sri Lanka.'
+      description: 'Serving Sri Lanka and the UAE with authentic timepieces since 1996.'
     },
     {
       icon: (
@@ -45,9 +45,9 @@ const TrustSection = () => {
         </svg>
       ),
       title: '7-Day Returns',
-      subtitle: 'Hassle-Free Policy',
-      description: 'Not satisfied? Return any timepiece within 7 days for a full refund.',
-      link: null
+      subtitle: 'Conditional Policy',
+      description: 'Eligible returns accepted within 7 days if unused, with original packaging. Some watches are non-returnable - please confirm before purchase.',
+      link: { text: 'View Return Policy', to: '/return-policy' }
     },
     {
       icon: (
@@ -57,7 +57,7 @@ const TrustSection = () => {
       ),
       title: 'Wholesale & Retail',
       subtitle: 'Flexible Solutions',
-      description: 'We serve both individual collectors and retail partners.',
+      description: 'We serve individual customers, retailers, and wholesale partners across Sri Lanka and the UAE.',
       link: { text: 'Contact for Wholesale', to: '/contact' }
     }
   ];
@@ -168,11 +168,11 @@ const TrustSection = () => {
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <h3 className="text-2xl md:text-3xl lg:text-4xl font-light text-white leading-tight">
-            Your Trusted Partner in Luxury Timekeeping
+            Your Trusted Partner in Timekeeping Excellence
           </h3>
           
           <p className="text-gray-400 text-base md:text-lg leading-relaxed font-light">
-            From purchase to after-sales service, we stand by every watch we sell.
+            From selection to after-sales support, we ensure every watch meets our standard of authenticity and service.
           </p>
 
           {/* Decorative divider */}

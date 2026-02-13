@@ -678,7 +678,7 @@ const ProductManager = () => {
             </div>
             {/* Colors */}
             <div className="mb-4">
-              <label className="block text-gray-400 mb-2 text-sm">Color Combinations *</label>
+              <label className="block text-gray-400 mb-2 text-sm">Color Combinations and Color Code *</label>
               <div className="space-y-3">
                 {formData.colors.map((color, index) => (
                   <div key={index} className="flex gap-3">
@@ -686,7 +686,7 @@ const ProductManager = () => {
                       type="text"
                       value={color.name}
                       onChange={(e) => handleColorChange(index, 'name', e.target.value)}
-                      placeholder="e.g., Gold - Black"
+                      placeholder="e.g., Gold - Black | #FFD700 - #000000"
                       className="flex-1 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
                     />
                     <input

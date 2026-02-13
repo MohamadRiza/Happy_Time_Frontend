@@ -74,11 +74,10 @@ const AboutSection = () => {
           }`}
         >
           <div className="relative rounded-sm overflow-hidden border border-gray-800/50 group">
-            {/* Image with subtle zoom on hover */}
             <div className="relative overflow-hidden">
               <img
                 src="./interior.jpg"
-                alt="Happy Time Boutique - Luxury Watch Store in Colombo"
+                alt="Happy Time Pvt Ltd - Watch Retailer in Pettah, Colombo since 1996"
                 className="w-full h-auto object-cover transition-transform duration-700 
                          group-hover:scale-105"
                 onError={(e) => {
@@ -86,22 +85,18 @@ const AboutSection = () => {
                 }}
               />
               
-              {/* Gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-tr from-black/40 via-transparent to-gold/10 
                             opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
             </div>
             
-            {/* Gold accent line */}
             <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-gold via-gold/50 to-transparent" />
             
-            {/* Floating year badge */}
             <div className="absolute top-6 right-6 bg-black/60 backdrop-blur-md border border-gold/30 
                           rounded-full px-5 py-2.5">
               <span className="text-gold font-light text-sm tracking-wider">Est. 1996</span>
             </div>
           </div>
 
-          {/* Decorative corner elements */}
           <div className="absolute -top-4 -left-4 w-16 h-16 border-l-2 border-t-2 border-gold/20" />
           <div className="absolute -bottom-4 -right-4 w-16 h-16 border-r-2 border-b-2 border-gold/20" />
         </div>
@@ -112,35 +107,31 @@ const AboutSection = () => {
             isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
           }`}
         >
-          {/* Subtitle */}
           <div className="inline-block">
             <span className="text-xs md:text-sm tracking-[0.3em] text-gold/70 uppercase font-light">
               Our Heritage
             </span>
           </div>
 
-          {/* Main Heading */}
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-light leading-tight">
-            Crafted for <span className="text-gold font-normal">Connoisseurs</span>
+            Built on <span className="text-gold font-normal">Trust & Craftsmanship</span>
           </h2>
 
           <div className="w-16 h-[1px] bg-gold" />
 
-          {/* Body Text */}
           <div className="space-y-5">
             <p className="text-gray-300 leading-relaxed text-base font-light">
-              Since <span className="text-gold font-normal">1996</span>, Happy Time Pvt Ltd has been 
-              Sri Lanka's most trusted destination for luxury timepieces. Located in the heart of 
-              Pettah, Colombo, we offer an exclusive collection of the world's finest watchmakers.
+              Since <span className="text-gold font-normal">1996</span>, Happy Time Pvt Ltd has served 
+              Sri Lanka with authentic timepieces from our own distinguished brands: 
+              <span className="text-gold font-normal"> Winsor, Orix, and Arial</span>.
             </p>
 
             <p className="text-gray-400 leading-relaxed text-base font-light">
-              With nearly three decades of horological expertise, we don't just sell watches — 
-              we share passion, heritage, and timeless value.
+              With over <span className="text-gold">30 years</span> of expertise in watch retail and distribution, 
+              we combine quality, value, and personalized service for both retail and wholesale customers.
             </p>
           </div>
 
-          {/* CTA Link */}
           <div className="pt-4">
             <Link
               to="/about"
@@ -160,10 +151,12 @@ const AboutSection = () => {
             </Link>
           </div>
 
-          {/* Stats/Badge Section */}
-          <div className="pt-8 flex flex-wrap gap-6">
+          {/* Stats — MOBILE SIDE-BY-SIDE */}
+          <div className="pt-8 flex flex-col sm:flex-row sm:gap-4 justify-start">
+            {/* Stat 1: 30+ Years */}
             <div className="flex items-center gap-4 px-6 py-3 rounded-sm 
-                          border border-gold/20 bg-black/40 backdrop-blur-sm">
+                          border border-gold/20 bg-black/40 backdrop-blur-sm 
+                          w-full sm:w-[48%] mb-3 sm:mb-0">
               <div className="text-gold">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -175,23 +168,24 @@ const AboutSection = () => {
               </div>
             </div>
 
+            {/* Stat 2: 99% Authentic Brands */}
             <div className="flex items-center gap-4 px-6 py-3 rounded-sm 
-                          border border-gold/20 bg-black/40 backdrop-blur-sm">
+                          border border-gold/20 bg-black/40 backdrop-blur-sm 
+                          w-full sm:w-[48%]">
               <div className="text-gold">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <div className="text-white font-light text-lg">100%</div>
-                <div className="text-gray-400 text-xs tracking-wider uppercase">Authentic</div>
+                <div className="text-white font-light text-lg">99%</div>
+                <div className="text-gray-400 text-xs tracking-wider uppercase">Authentic Brands</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* CSS for smooth parallax */}
       <style jsx>{`
         @media (prefers-reduced-motion: reduce) {
           * {

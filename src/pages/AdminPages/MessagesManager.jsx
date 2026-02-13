@@ -37,10 +37,19 @@ const MessagesManager = () => {
     fetchMessages();
   }, []);
 
-  // ✅ Filter messages by branch
+  // Filter messages by branch
   const filteredMessages = branchFilter === 'all' 
     ? messages 
     : messages.filter(msg => msg.branch === branchFilter);
+
+  // Unique branches for filter dropdown
+  const uniqueBranches = [...new Set(messages.map(msg => msg.branch))].sort();
+
+  // Stats calculations
+  const totalMessages = messages.length;
+  const unreadCount = messages.filter(m => m.status === 'unread').length;
+  const readCount = messages.filter(m => m.status === 'read').length;
+  const activeBranches = uniqueBranches.length;
 
   const closeModal = () => {
     setSelectedMessage(null);
@@ -143,42 +152,58 @@ const MessagesManager = () => {
     return msg.substring(0, maxLength) + '...';
   };
 
-  // ✅ Get unique branches for filter
-  const uniqueBranches = [...new Set(messages.map(msg => msg.branch))].sort();
-
   return (
     <AdminLayout title="Messages Inbox">
-      {/* Header with Filter */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h2 className="text-2xl font-bold text-white">Customer Messages</h2>
-        
-        <div className="flex items-center gap-4">
-          {/* Branch Filter */}
-          <div className="flex items-center gap-2">
-            <label className="text-gray-400 text-sm whitespace-nowrap">Filter by Branch:</label>
-            <select
-              value={branchFilter}
-              onChange={(e) => setBranchFilter(e.target.value)}
-              className="bg-black border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-gold"
-            >
-              <option value="all">All Branches</option>
-              {uniqueBranches.map(branch => (
-                <option key={branch} value={branch}>{branch}</option>
-              ))}
-            </select>
-          </div>
+      {/* Page Title */}
+      <h2 className="text-2xl font-bold text-white mb-6">Customer Messages</h2>
 
-          {/* Bulk Delete Button */}
-          {selectedIds.length > 0 && (
-            <button
-              onClick={bulkDelete}
-              disabled={deleting}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors disabled:opacity-60 text-sm"
-            >
-              {deleting ? 'Deleting...' : `Delete (${selectedIds.length})`}
-            </button>
-          )}
+      {/* Stats Cards - like Customer Management */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
+          <p className="text-gray-400 text-sm">Total Messages</p>
+          <p className="text-2xl font-bold text-white">{totalMessages}</p>
         </div>
+        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
+          <p className="text-gray-400 text-sm">Unread Messages</p>
+          <p className="text-2xl font-bold text-white">{unreadCount}</p>
+        </div>
+        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
+          <p className="text-gray-400 text-sm">Read Messages</p>
+          <p className="text-2xl font-bold text-white">{readCount}</p>
+        </div>
+        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
+          <p className="text-gray-400 text-sm">Active Messages Branch</p>
+          <p className="text-2xl font-bold text-white">{activeBranches}</p>
+        </div>
+      </div>
+
+      {/* Filter and Bulk Delete Row */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        {/* Branch Filter */}
+        <div className="flex items-center gap-2">
+          <label className="text-gray-400 text-sm whitespace-nowrap">Filter by Branch:</label>
+          <select
+            value={branchFilter}
+            onChange={(e) => setBranchFilter(e.target.value)}
+            className="bg-black border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-gold"
+          >
+            <option value="all">All Branches</option>
+            {uniqueBranches.map(branch => (
+              <option key={branch} value={branch}>{branch}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Bulk Delete Button */}
+        {selectedIds.length > 0 && (
+          <button
+            onClick={bulkDelete}
+            disabled={deleting}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors disabled:opacity-60 text-sm"
+          >
+            {deleting ? 'Deleting...' : `Delete (${selectedIds.length})`}
+          </button>
+        )}
       </div>
 
       {error && <p className="text-red-400 mb-4">{error}</p>}
@@ -221,20 +246,19 @@ const MessagesManager = () => {
                 className={`p-4 hover:bg-gray-800/30 transition-colors cursor-pointer ${
                   msg.status === 'unread' ? 'bg-gold/5 border-l-2 border-gold' : ''
                 }`}
-                // ✅ ONLY open modal when clicking non-checkbox area
                 onClick={() => setSelectedMessage(msg)}
               >
                 <div className="grid grid-cols-[40px,180px,180px,1fr,120px] gap-4 items-start">
-                  {/* Checkbox - STOP PROPAGATION */}
+                  {/* Checkbox */}
                   <div className="flex items-center justify-center">
                     <input
                       type="checkbox"
                       checked={selectedIds.includes(msg._id)}
                       onChange={(e) => {
-                        e.stopPropagation(); // ✅ Prevents opening modal
+                        e.stopPropagation();
                         toggleSelect(msg._id);
                       }}
-                      onClick={(e) => e.stopPropagation()} // ✅ Also stop click
+                      onClick={(e) => e.stopPropagation()}
                       className="w-4 h-4 text-gold bg-gray-700 border-gray-600 rounded focus:ring-gold"
                     />
                   </div>
