@@ -5,7 +5,7 @@ const TopInfoBar = () => {
   return (
     <div className="bg-black/80 backdrop-blur-sm border-b border-gold/20 text-gold text-xs py-2.5 px-4 hidden sm:flex items-center overflow-hidden">
       {/* Contact Info Marquee */}
-      <div className="flex items-center gap-6 whitespace-nowrap animate-marquee">
+      <div className="flex items-center gap-6 whitespace-nowrap animate-marque">
         <span className="flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />

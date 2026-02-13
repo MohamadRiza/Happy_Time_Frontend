@@ -8,6 +8,7 @@ import {
   getCustomerToken 
 } from '../utils/auth';
 import Loading from '../components/Loading';
+import GuestPrompt from '../components/GuestPrompt';
 
 const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
@@ -349,6 +350,7 @@ const ProductDetailPage = () => {
 
   return (
     <div className="bg-black text-white min-h-screen relative">
+      <GuestPrompt>
       <ScrollToTop />
       
       <ToastContainer 
@@ -882,6 +884,7 @@ const ProductDetailPage = () => {
           </div>
         )}
       </div>
+        </GuestPrompt>
     </div>
   );
 };
