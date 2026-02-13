@@ -1,20 +1,32 @@
 // src/components/GuestPrompt.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAuthType } from '../utils/auth';
 
 const GuestPrompt = ({ children, featureName = "premium features" }) => {
   const authType = getAuthType();
-  const [showPrompt, setShowPrompt] = useState(true); // controls overlay visibility
+  const [showPrompt, setShowPrompt] = useState(false); // initially false, we'll set after checking sessionStorage
 
-  // Only show prompt for guest users AND if not dismissed
-  if (authType !== 'guest' || !showPrompt) {
-    return <>{children}</>;
-  }
+  // Check sessionStorage on mount to see if the user already dismissed the prompt in this session
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem('guestPromptDismissed') === 'true';
+    // Only show if user is guest AND not dismissed
+    if (authType === 'guest' && !dismissed) {
+      setShowPrompt(true);
+    } else {
+      setShowPrompt(false);
+    }
+  }, [authType]);
 
   const handleDismiss = () => {
+    sessionStorage.setItem('guestPromptDismissed', 'true');
     setShowPrompt(false);
   };
+
+  // If not guest or prompt dismissed, just render children
+  if (!showPrompt) {
+    return <>{children}</>;
+  }
 
   return (
     <>
