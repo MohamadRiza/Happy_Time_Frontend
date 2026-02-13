@@ -76,7 +76,7 @@ const AboutSection = () => {
           <div className="relative rounded-sm overflow-hidden border border-gray-800/50 group">
             <div className="relative overflow-hidden">
               <img
-                src="./interior.jpg"
+                src="./DubaiBranch1.jpeg"
                 alt="Happy Time Pvt Ltd - Watch Retailer in Pettah, Colombo since 1996"
                 className="w-full h-auto object-cover transition-transform duration-700 
                          group-hover:scale-105"

@@ -8,6 +8,7 @@ import CategorySection from '../components/HomeSections/CategorySection';
 import TrustSection from '../components/HomeSections/TrustSection';
 import AboutSection from '../components/HomeSections/AboutSection';
 import ScrollToTop from '../components/ScrollToTop';
+import BrandsMarquee from '../components/HomeSections/BrandsMarquee';
 
 const Home = () => {
   return (
@@ -39,6 +40,7 @@ const Home = () => {
         <CategorySection />
         <AboutSection />
         <TrustSection />
+        <BrandsMarquee />
       </div>
     </>
   );
