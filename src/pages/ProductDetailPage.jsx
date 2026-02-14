@@ -1,3 +1,4 @@
+//https://chat.qwen.ai/c/7d6c0f8e-38cd-4481-a62b-623987138c8e  (USE Slug Based URLS for better SEO)
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
