@@ -8,6 +8,7 @@ import Loading from '../components/Loading';
 import CustomerDashboard from '../components/CustomerAccountSec/CustomerDashboard';
 import ProfileSection from '../components/CustomerAccountSec/ProfileSection';
 import SupportSection from '../components/CustomerAccountSec/SupportSection';
+import { Helmet } from 'react-helmet';
 
 const CustomerAccount = () => {
   const [customer, setCustomer] = useState(null);
@@ -96,6 +97,28 @@ const CustomerAccount = () => {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Toast Container for notifications */}
+
+      <Helmet>
+        <title>My Account – Happy Time</title>
+        <meta name="description" content="Manage your Happy Time account: view orders, update profile, and get support." />
+        <meta name="robots" content="noindex, nofollow" /> {/* private page */}
+        <link rel="canonical" href="https://yourdomain.com/account" />
+
+        {/* Open Graph */}
+        <meta property="og:title" content="My Account – Happy Time" />
+        <meta property="og:description" content="Manage your Happy Time account." />
+        <meta property="og:url" content="https://yourdomain.com/account" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://yourdomain.com/images/og-image.jpg" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="My Account – Happy Time" />
+        <meta name="twitter:description" content="Manage your Happy Time account." />
+        <meta name="twitter:image" content="https://yourdomain.com/images/og-image.jpg" />
+      </Helmet>
+
+
       <ToastContainer
         position="top-right"
         autoClose={3000}

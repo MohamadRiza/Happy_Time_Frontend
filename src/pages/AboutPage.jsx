@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ScrollToTop from '../components/ScrollToTop';
+import SEO from '../components/SEO/SEO';
 
 const branches = [
   {
@@ -58,16 +59,35 @@ const AboutPage = () => {
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
+  const seoData = {
+    title: "About Happy Time | Sri Lanka's Trusted Watch Retailer Since 1996",
+    description: "Happy Time Pvt Ltd is Sri Lanka's leading watch distribution and retail company. We offer luxury watches from our exclusive brands Winsor, Orix, and Arial. Visit our branches in Colombo, Kandy, and Dubai.",
+    keywords: "luxury watches Sri Lanka, watch shop Colombo, Winsor watches, Orix watches, Arial wall clocks, High Copy Watches, original watches, watch retailer Kandy, Dubai watch store, wholesale watches, premium timepieces, Pettah watch shop, Watch Wholesaleler Sri Lanka, watch distributor Sri Lanka, Happy Time watches, watch brands Sri Lanka",
+    canonicalUrl: "/about"
+  }
+
   return (
     <div className="bg-black text-white min-h-screen">
+
+      <SEO
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+        canonicalUrl={seoData.canonicalUrl}
+        ogImage="/watchFTR.jpg"
+      />
+
       <ScrollToTop />
       
       {/* HERO */}
-      <div className="relative h-[60vh] md:h-[70vh]">
+      <div className="relative h-[60vh] md:h-[70vh]" role="banner">
         <img
           src="/watchFTR.jpg"
-          alt="Happy Time Luxury Watches"
+          alt="Happy Time Luxury Watches - Premium Timepieces Collection"
           className="w-full h-full object-cover"
+          loading='eager'
+          width="1920" 
+          height="1080"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
@@ -84,10 +104,10 @@ const AboutPage = () => {
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
 
         {/* INTRODUCTION */}
-        <section className="mb-24">
+        <section className="mb-24" aria-labelledby='intro-heading'>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6" id='intro-heading'>
                 Sri Lanka's Trusted <span className="text-gold">Watch Destination</span>
               </h2>
               <div className="w-16 h-1 bg-gold mb-6" />
@@ -113,16 +133,19 @@ const AboutPage = () => {
               <div className="absolute inset-0 bg-gradient-to-tr from-gold/10 via-transparent to-gold/5 transition-opacity duration-300 group-hover:from-gold/20 group-hover:to-gold/10" />
               <img
                 src="/DubaiBranch1.jpeg"
-                alt="Happy Time Boutique"
+                alt="Happy Time Dubai Branch - Luxury Watch Boutique"
                 className="w-full h-full object-cover relative z-10 transition-transform duration-500 group-hover:scale-105"
+                loading='lazy'
+                width="800"
+                height="600"
               />
             </div>
           </div>
         </section>
 
         {/* VISION & MISSION */}
-        <section className="mb-24">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+        <section className="mb-24" aria-labelledby='philosophy-heading'>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12" id='philosophy-heading'>
             Our Philosophy
           </h2>
 
@@ -170,19 +193,27 @@ const AboutPage = () => {
         </section>
 
         {/* OUR BRANDS */}
-        <section className="mb-24">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gold">
+        <section className="mb-24" aria-labelledby='brands-heading'>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gold" id='brands-heading'>
             Our Exclusive Brands
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Winsor */}
-            <div className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300 group hover:scale-105">
+            <div 
+              className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300 group hover:scale-105"
+              itemScope 
+              itemType="https://schema.org/Brand"
+            >
+              <meta itemProp="name" content="Winsor" />
+              <meta itemProp="description" content="Classic wrist watches with timeless elegance and traditional craftsmanship" />
               <div className="flex justify-center mb-6 h-32 items-center">
                 <img
                   src="/winsor.png"
-                  alt="Winsor Logo"
+                  alt="Winsor Watch Brand Logo - Classic Wrist Watches"
                   className="h-24 w-auto object-contain filter rounded-lg transition-all duration-300"
+                  width="200"
+                  height="200"
                   onError={(e) => {
                     e.target.style.display = 'none';
                     const span = document.createElement('span');
@@ -206,12 +237,20 @@ const AboutPage = () => {
             </div>
 
             {/* Orix */}
-            <div className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300 group hover:scale-105">
+            <div 
+              className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300 group hover:scale-105"
+              itemScope 
+              itemType="https://schema.org/Brand"
+            >
+              <meta itemProp="name" content="Orix" />
+              <meta itemProp="description" content="Precision wrist watches with contemporary design and engineering" />
               <div className="flex justify-center mb-6 h-32 items-center">
                 <img
                   src="/OrixBrand.webp"
-                  alt="Orix Logo"
+                  alt="Orix Watch Brand Logo - Precision Wrist Watches"
                   className="h-24 w-auto object-contain filter rounded-lg transition-all duration-300"
+                  width="200"
+                  height="200"
                   onError={(e) => {
                     e.target.style.display = 'none';
                     const span = document.createElement('span');
@@ -235,12 +274,20 @@ const AboutPage = () => {
             </div>
 
             {/* Arial */}
-            <div className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300 group hover:scale-105">
+            <div 
+              className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300 group hover:scale-105"
+              itemScope 
+              itemType="https://schema.org/Brand"
+            >
+              <meta itemProp="name" content="Arial" />
+              <meta itemProp="description" content="Premium wall clocks combining functional design with artistic craftsmanship" />
               <div className="flex justify-center mb-6 h-32 items-center">
                 <img
                   src="/ArielBrand.webp"
-                  alt="Arial Logo"
+                  alt="Arial Wall Clock Brand Logo - Premium Wall Clocks"
                   className="h-24 w-auto object-contain filter rounded-lg transition-all duration-300"
+                  width="200"
+                  height="200"
                   onError={(e) => {
                     e.target.style.display = 'none';
                     const span = document.createElement('span');
@@ -266,8 +313,8 @@ const AboutPage = () => {
         </section>
 
         {/* BRANCHES */}
-        <section className="mb-24">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+        <section className="mb-24" aria-labelledby='branches-heading'>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12" id='branches-heading'>
             Visit Our Locations
           </h2>
 
@@ -280,16 +327,20 @@ const AboutPage = () => {
                   setMapLoaded(false);
                 }}
                 className="bg-gray-900/50 border border-gray-800 rounded-2xl overflow-hidden hover:border-gold/50 transition-all duration-300 group text-left"
+                aria-label={`View map for ${branch.name} - ${branch.address}`}
               >
                 <div className="h-48 overflow-hidden">
                   {branch.image ? (
                     <img
                       src={branch.image}
-                      alt={branch.name}
+                      alt={`${branch.name} - Happy Time Watch Store Branch in ${branch.address}`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                      width="400"
+                      height="300"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                    <div className="w-full h-full bg-gray-800 flex items-center justify-center" aria-hidden="true">
                       <div className="text-gray-600 text-4xl">🏢</div>
                     </div>
                   )}
@@ -300,7 +351,7 @@ const AboutPage = () => {
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-start">
-                      <div className="text-gold mr-2 mt-0.5 flex-shrink-0">
+                      <div className="text-gold mr-2 mt-0.5 flex-shrink-0" aria-hidden="true">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -309,7 +360,7 @@ const AboutPage = () => {
                       <span className="text-gray-400">{branch.address}</span>
                     </div>
                     <div className="flex items-center">
-                      <div className="text-gold mr-2 flex-shrink-0">
+                      <div className="text-gold mr-2 flex-shrink-0" aria-hidden="true">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
@@ -331,7 +382,7 @@ const AboutPage = () => {
 
         {/* MODAL FOR MAP */}
         {selectedBranch && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="map-modal-title">
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden relative">
               <button
                 onClick={() => setSelectedBranch(null)}
@@ -340,7 +391,7 @@ const AboutPage = () => {
               >
                 ×
               </button>
-              <h3 className="text-xl md:text-2xl font-bold text-gold mb-4 text-center">
+              <h3 id="map-modal-title" className="text-xl md:text-2xl font-bold text-gold mb-4 text-center">
                 {selectedBranch.name}
               </h3>
               <div className="w-full h-[70vh] md:h-[60vh] relative rounded-xl overflow-hidden border border-gray-800">
@@ -360,7 +411,7 @@ const AboutPage = () => {
                   allowFullScreen
                   loading="lazy"
                   onLoad={() => setMapLoaded(true)}
-                  title={selectedBranch.name}
+                  title={`Map location for ${selectedBranch.name}`}
                   referrerPolicy="no-referrer-when-downgrade"
                 ></iframe>
               </div>
@@ -369,16 +420,169 @@ const AboutPage = () => {
         )}
 
         {/* CTA */}
-        <section className="text-center">
+        <section className="text-center" aria-labelledby='cta-heading'>
+          <h3 id='cta-heading' className="sr-only">Contact Happy Time</h3>
           <Link
             to="/contact"
             className="inline-block bg-gold text-black font-bold px-12 py-4 rounded-xl hover:bg-gold/90 transition-all duration-300 text-lg"
+            aria-label="Book your appointment with Happy Time Watches"
           >
             Book Your Appointment
           </Link>
         </section>
 
       </div>
+      
+      {/* Additional Structured Data for Local Business */}
+      <script type="application/ld+json">
+        {JSON.stringify([
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Happy Time Pvt Ltd",
+      "url": "https://www.happytime.lk",
+      "logo": "https://www.happytime.lk/logo.png",
+      "image": "https://www.happytime.lk/watchFTR.jpg",
+      "description": "Sri Lanka's leading watch distribution and retail company serving customers across Sri Lanka and UAE",
+      "telephone": "+94 76 300 9123",
+      "email": "happytime143b@gmail.com",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "No 49A, Keyzer Street, Pettah",
+        "addressLocality": "Colombo 11",
+        "postalCode": "11",
+        "addressCountry": "LK"
+      },
+      "sameAs": [
+        "https://www.facebook.com/happytime",
+        "https://www.instagram.com/happytime"
+      ]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      "name": "Happy Time - Colombo Head Office",
+      "image": "https://www.happytime.lk/inside.jpg",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "No 49A, Keyzer Street, Pettah",
+        "addressLocality": "Colombo 11",
+        "postalCode": "11",
+        "addressCountry": "LK"
+      },
+      "telephone": "+94 76 300 9123",
+      "priceRange": "$$",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        "opens": "09:00",
+        "closes": "19:00"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      "name": "Happy Time - Online Branch 143",
+      "image": "https://www.happytime.lk/143_OnlineBranch.jpeg",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "No 143, 2nd Cross Street, Pettah",
+        "addressLocality": "Colombo 11",
+        "postalCode": "11",
+        "addressCountry": "LK"
+      },
+      "telephone": "+94 75 757 5565",
+      "priceRange": "$$",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        "opens": "09:00",
+        "closes": "19:00"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      "name": "Happy Time - 84 Branch Wholesale",
+      "image": "https://www.happytime.lk/2nd_CS_86.jpeg",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "No 84, 2nd Cross Street, Pettah",
+        "addressLocality": "Colombo 11",
+        "postalCode": "11",
+        "addressCountry": "LK"
+      },
+      "telephone": "+94 75 577 5565",
+      "priceRange": "$$",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        "opens": "09:00",
+        "closes": "18:00"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      "name": "Happy Time - Kandy Branch",
+      "image": "https://www.happytime.lk/interior.jpg",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "No 57, Yatinuwara Lane (Alimudukkuwa)",
+        "addressLocality": "Kandy",
+        "addressCountry": "LK"
+      },
+      "telephone": "+94 77 345 2456",
+      "priceRange": "$$",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        "opens": "09:00",
+        "closes": "19:00"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      "name": "Happy Time - Kandy City Center (KCC)",
+      "image": "https://www.happytime.lk/KCC.webp",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Level 3, Kandy City Center, No 01",
+        "addressLocality": "Kandy",
+        "addressCountry": "LK"
+      },
+      "telephone": "+94 77 977 9666",
+      "priceRange": "$$",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        "opens": "10:00",
+        "closes": "21:00"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      "name": "Happy Time - Dubai UAE Branch",
+      "image": "https://www.happytime.lk/DubaiBranch1.jpeg",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "No. 102, Al-Buteen (Opposite to Dubai Wholesale Plaza), Murshid Bazar, Deira",
+        "addressLocality": "Dubai",
+        "addressCountry": "AE"
+      },
+      "telephone": "+971 58 667 7143",
+      "priceRange": "$$$",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "09:00",
+        "closes": "22:00"
+      }
+    }
+  ])}
+      </script>
     </div>
   );
 };

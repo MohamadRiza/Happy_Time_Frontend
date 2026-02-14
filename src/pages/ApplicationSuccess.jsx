@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ScrollToTop from '../components/ScrollToTop';
+import { Helmet } from 'react-helmet';
 
 const ApplicationSuccess = () => {
   const [copied, setCopied] = useState(false);
@@ -24,6 +25,12 @@ const ApplicationSuccess = () => {
 
   return (
     <div className="bg-black text-white min-h-screen">
+
+      <Helmet>
+        <title>Application Submitted Successfully | Happy Time Careers</title>
+        <meta name="description" content="Your application has been submitted successfully! Save your application code and check your status with Happy Time's career portal." />
+      </Helmet>
+
       <ScrollToTop />
       
       <div className="max-w-4xl mx-auto py-24 px-4 text-center">

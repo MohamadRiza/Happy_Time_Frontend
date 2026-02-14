@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { customerLogin } from '../utils/auth';
 import ScrollToTop from '../components/ScrollToTop';
+import { Helmet } from 'react-helmet';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -56,6 +57,25 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white flex items-center justify-center p-4 relative overflow-hidden">
       {/* Optional subtle background pattern or texture */}
+            <Helmet>
+        <title>Customer Login – Happy Time</title>
+        <meta name="description" content="Login to your Happy Time customer account to manage orders, track shipments, and access your profile." />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://yourdomain.com/login" />
+
+        {/* Open Graph */}
+        <meta property="og:title" content="Customer Login – Happy Time" />
+        <meta property="og:description" content="Login to your Happy Time customer account." />
+        <meta property="og:url" content="https://yourdomain.com/login" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://yourdomain.com/images/og-image.jpg" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Customer Login – Happy Time" />
+        <meta name="twitter:description" content="Login to your Happy Time customer account." />
+        <meta name="twitter:image" content="https://yourdomain.com/images/og-image.jpg" />
+      </Helmet>
       <ScrollToTop />
       <div 
         className="absolute inset-0 opacity-10"

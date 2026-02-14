@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ScrollToTop from '../components/ScrollToTop';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Helmet } from 'react-helmet';
 
 const ApplicationStatusCheck = () => {
   const [formData, setFormData] = useState({
@@ -109,6 +110,27 @@ const ApplicationStatusCheck = () => {
 
   return ( 
     <div className="relative min-h-screen text-white overflow-hidden">
+      
+      <Helmet>
+  <title>Check Application Status – Happy Time</title>
+  <meta name="description" content="Track your job application status with Happy Time. Enter your application code and email to see if you've been shortlisted, hired, or receive updates." />
+  <meta name="keywords" content="job application status, Happy Time careers, track application, hiring status" />
+  <link rel="canonical" href="https://yourdomain.com/application-status" />
+
+  {/* Open Graph */}
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/application-status" />
+  <meta property="og:title" content="Check Application Status – Happy Time" />
+  <meta property="og:description" content="Track your job application status with Happy Time. Enter your application code and email to see updates." />
+  <meta property="og:image" content="https://yourdomain.com/images/og-careers.jpg" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Check Application Status – Happy Time" />
+  <meta name="twitter:description" content="Track your job application status with Happy Time." />
+  <meta name="twitter:image" content="https://yourdomain.com/images/og-careers.jpg" />
+</Helmet>
+
       {/* Background */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-black"></div>

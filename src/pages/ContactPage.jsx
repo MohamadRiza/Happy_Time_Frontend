@@ -4,6 +4,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ScrollToTop from '../components/ScrollToTop';
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import SEO from '../components/SEO/SEO'; // ✅ Added SEO component
 
 // ✅ UPDATED with REAL branch information
 const branches = [
@@ -229,6 +230,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
           placeholder="Full Name *"
           value={formData.name}
           onChange={handleChange}
+          aria-label="Your full name"
           className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm transition-colors"
         />
         <input
@@ -237,6 +239,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
           placeholder="Email *"
           value={formData.email}
           onChange={handleChange}
+          aria-label="Your email address"
           className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm transition-colors"
         />
         
@@ -248,6 +251,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
               name="countryCode"
               value={formData.countryCode}
               onChange={handleChange}
+              aria-label="Select country code"
               className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm transition-colors"
             >
               {countryCodes.map((country) => (
@@ -266,6 +270,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
               value={formData.phone}
               onChange={handleChange}
               maxLength="10"
+              aria-label="Your phone number"
               className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm transition-colors"
             />
           </div>
@@ -277,6 +282,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
           placeholder="Your Message *"
           value={formData.message}
           onChange={handleChange}
+          aria-label="Your message"
           className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold shadow-sm resize-none transition-colors"
         ></textarea>
         
@@ -296,6 +302,7 @@ const ContactFormWithRecaptcha = ({ selectedBranchId, branches }) => {
         <button
           type="submit"
           disabled={submitting}
+          aria-label="Send your message"
           className="w-full bg-gold text-black font-bold py-3 rounded-xl hover:bg-gold/90 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {submitting ? 'Sending...' : 'Send Message'}
@@ -318,11 +325,28 @@ const ContactPage = () => {
 
   const selectedBranch = getSelectedBranch();
 
+  // ✅ SEO Data
+  const seoData = {
+    title: "Contact Happy Time | Watch Retailer/Wholesaler Sri Lanka & UAE - over 6 Branch Locations",
+    description: "Contact Happy Time Pvt Ltd - Sri Lanka's trusted watch retailer with over 6 branch locations in Colombo, Kandy & Dubai. Call +94 76 300 9123 or email happytime143b@gmail.com for wholesale & retail inquiries.",
+    keywords: "contact Happy Time, watch shop Colombo, watch retailer Sri Lanka, wholesale watches, retail watches, Colombo watch store, Kandy watch shop, Dubai watch store, Pettah watch shop, watch distributor Sri Lanka, +94 76 300 9123",
+    canonicalUrl: "/contact"
+  };
+
   return (
     <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
       <div className="bg-black text-white min-h-screen font-sans">
         <ScrollToTop />
         
+        {/* ✅ SEO Meta Tags */}
+        <SEO
+          title={seoData.title}
+          description={seoData.description}
+          keywords={seoData.keywords}
+          canonicalUrl={seoData.canonicalUrl}
+          ogImage="/MainBranchPettah.jpeg"
+        />
+
         <ToastContainer 
           position="top-right"
           autoClose={5000}
@@ -337,11 +361,14 @@ const ContactPage = () => {
         />
         
         {/* HERO */}
-        <div className="relative h-[60vh] md:h-[70vh]">
+        <div className="relative h-[60vh] md:h-[70vh]" role="banner">
           <img
             src="/MainBranchPettah.jpeg"
-            alt="Happy Time Contact"
+            alt="Happy Time Watch Store - Contact Us for Luxury Watches in Sri Lanka & UAE"
             className="w-full h-full object-cover"
+            loading="eager"
+            width="1920"
+            height="1080"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black" />
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-4 text-center">
@@ -368,6 +395,7 @@ const ContactPage = () => {
                     setSelectedBranchId(val ? Number(val) : null);
                     setMapLoaded(false);
                   }}
+                  aria-label="Select a branch to contact"
                   className="w-full bg-black border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gold shadow-sm transition-colors"
                 >
                   <option value="">— Select a branch —</option>
@@ -396,15 +424,17 @@ const ContactPage = () => {
                     <a 
                       href={`tel:${selectedBranch.phone}`}
                       className="text-gray-300 flex items-center gap-2 mb-2 hover:text-gold transition-colors group"
+                      aria-label={`Call ${selectedBranch.name} at ${selectedBranch.phone}`}
                     >
-                      <span className="text-gold group-hover:scale-110 transition-transform">📞</span>
+                      <span className="text-gold group-hover:scale-110 transition-transform" aria-hidden="true">📞</span>
                       <span className="group-hover:underline">{selectedBranch.phone}</span>
                     </a>
                     <a 
                       href={`mailto:${selectedBranch.email}`}
                       className="text-gray-300 flex items-center gap-2 hover:text-gold transition-colors group"
+                      aria-label={`Email ${selectedBranch.name}`}
                     >
-                      <span className="text-gold group-hover:scale-110 transition-transform">✉️</span>
+                      <span className="text-gold group-hover:scale-110 transition-transform" aria-hidden="true">✉️</span>
                       <span className="group-hover:underline">{selectedBranch.email}</span>
                     </a>
                   </div>
@@ -447,7 +477,7 @@ const ContactPage = () => {
                   allowFullScreen
                   loading="lazy"
                   onLoad={() => setMapLoaded(true)}
-                  title={selectedBranch.name}
+                  title={`Map location for ${selectedBranch.name}`}
                   referrerPolicy="no-referrer-when-downgrade"
                 ></iframe>
               ) : (
@@ -463,6 +493,216 @@ const ContactPage = () => {
             </div>
           </div>
         </div>
+
+        {/* ✅ Structured Data - Organization & ContactPage */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ContactPage",
+            "name": "Contact Happy Time Watches",
+            "description": "Contact Happy Time Pvt Ltd - Sri Lanka's trusted watch retailer/wholesaler with branches in Colombo, Kandy & Dubai",
+            "url": "https://www.happytime.lk/contact",
+            "publisher": {
+              "@type": "Organization",
+              "name": "Happy Time Pvt Ltd",
+              "url": "https://www.happytime.lk",
+              "logo": "https://www.happytime.lk/logo.png",
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+94 76 300 9123",
+                "contactType": "customer service",
+                "email": "happytime143b@gmail.com",
+                "areaServed": ["LK", "AE"],
+                "availableLanguage": ["English", "Sinhala", "Tamil"]
+              }
+            }
+          })}
+        </script>
+
+        {/* ✅ Structured Data - Multiple Branch Locations */}
+        <script type="application/ld+json">
+          {JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Happy Time Pvt Ltd",
+              "url": "https://www.happytime.lk",
+              "logo": "https://www.happytime.lk/logo.png",
+              "image": "https://www.happytime.lk/MainBranchPettah.jpeg",
+              "description": "Sri Lanka's leading watch distribution and retail company serving customers across Sri Lanka and UAE",
+              "telephone": "+94 76 300 9123",
+              "email": "happytime143b@gmail.com",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "No 49A, Keyzer Street, Pettah",
+                "addressLocality": "Colombo 11",
+                "postalCode": "11",
+                "addressCountry": "LK"
+              },
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+94 76 300 9123",
+                "contactType": "customer service",
+                "email": "happytime143b@gmail.com",
+                "areaServed": ["LK", "AE"],
+                "availableLanguage": ["English", "Sinhala", "Tamil"]
+              },
+              "sameAs": [
+                "https://www.facebook.com/happytime",
+                "https://www.instagram.com/happytime"
+              ]
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "Store",
+              "name": "Happy Time - Colombo Head Office",
+              "image": "https://www.happytime.lk/MainBranchPettah.jpeg",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "No 49A, Keyzer Street, Pettah",
+                "addressLocality": "Colombo 11",
+                "postalCode": "11",
+                "addressCountry": "LK"
+              },
+              "telephone": "+94 76 300 9123",
+              "email": "happytime143b@gmail.com",
+              "priceRange": "$$",
+              "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                "opens": "09:00",
+                "closes": "19:00"
+              }
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "Store",
+              "name": "Happy Time - Online Branch 143",
+              "image": "https://www.happytime.lk/143_OnlineBranch.jpeg",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "No 143, 2nd Cross Street, Pettah",
+                "addressLocality": "Colombo 11",
+                "postalCode": "11",
+                "addressCountry": "LK"
+              },
+              "telephone": "+94 75 757 5565",
+              "email": "happytime143b@gmail.com",
+              "priceRange": "$$",
+              "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                "opens": "09:00",
+                "closes": "19:00"
+              }
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "Store",
+              "name": "Happy Time - 84 Branch Wholesale",
+              "image": "https://www.happytime.lk/2nd_CS_86.jpeg",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "No 84, 2nd Cross Street, Pettah",
+                "addressLocality": "Colombo 11",
+                "postalCode": "11",
+                "addressCountry": "LK"
+              },
+              "telephone": "+94 75 577 5565",
+              "email": "happytime143b@gmail.com",
+              "priceRange": "$$",
+              "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                "opens": "09:00",
+                "closes": "18:00"
+              }
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "Store",
+              "name": "Happy Time - Kandy Branch",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "No 57, Yatinuwara Lane (Alimudukkuwa)",
+                "addressLocality": "Kandy",
+                "addressCountry": "LK"
+              },
+              "telephone": "+94 77 345 2456",
+              "email": "happytime143b@gmail.com",
+              "priceRange": "$$",
+              "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                "opens": "09:00",
+                "closes": "19:00"
+              }
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "Store",
+              "name": "Happy Time - Kandy City Center (KCC)",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Level 3, Kandy City Center",
+                "addressLocality": "Kandy",
+                "addressCountry": "LK"
+              },
+              "telephone": "+94 77 977 9666",
+              "email": "happytime143b@gmail.com",
+              "priceRange": "$$",
+              "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                "opens": "10:00",
+                "closes": "21:00"
+              }
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "Store",
+              "name": "Happy Time - Dubai UAE Branch",
+              "image": "https://www.happytime.lk/DubaiBranch1.jpeg",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "No. 102, Al-Buteen (Opposite to Dubai Wholesale Plaza), Murshid Bazar, Deira",
+                "addressLocality": "Dubai",
+                "addressCountry": "AE"
+              },
+              "telephone": "+971 58 667 7143",
+              "email": "happytime143b@gmail.com",
+              "priceRange": "$$$",
+              "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "opens": "09:00",
+                "closes": "22:00"
+              }
+            }
+          ])}
+        </script>
+
+        {/* ✅ Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://www.happytime.lk"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Contact Us",
+                "item": "https://www.happytime.lk/contact"
+              }
+            ]
+          })}
+        </script>
       </div>
     </GoogleReCaptchaProvider>
   );

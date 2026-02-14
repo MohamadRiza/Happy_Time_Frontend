@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { customerLogin } from '../utils/auth';
+import { Helmet } from 'react-helmet';
 
 const RegisterStep2 = () => {
   const [businessDetails, setBusinessDetails] = useState({
@@ -105,6 +106,25 @@ const RegisterStep2 = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white flex items-center justify-center p-4 py-8 md:py-12 relative overflow-hidden">
       {/* Subtle gold radial accents */}
+            <Helmet>
+        <title>Business Details – Happy Time Registration</title>
+        <meta name="description" content="Complete your wholesale registration with Happy Time by providing your business details. Join our network of watch retailers and dealers." />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://yourdomain.com/register/step2" />
+
+        {/* Open Graph */}
+        <meta property="og:title" content="Business Details – Happy Time Registration" />
+        <meta property="og:description" content="Complete your wholesale registration with Happy Time." />
+        <meta property="og:url" content="https://yourdomain.com/register/step2" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://yourdomain.com/images/og-image.jpg" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Business Details – Happy Time Registration" />
+        <meta name="twitter:description" content="Complete your wholesale registration with Happy Time." />
+        <meta name="twitter:image" content="https://yourdomain.com/images/og-image.jpg" />
+      </Helmet>
       <div
         className="absolute inset-0 opacity-5"
         style={{

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ScrollToTop from '../components/ScrollToTop';
 import Loading from '../components/Loading';
+import { Helmet } from 'react-helmet';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -89,6 +90,30 @@ const CareersPage = () => {
 
   return (
     <div className="bg-black text-white min-h-screen">
+
+      <Helmet>
+        <title>Careers at Happy Time – Join Our Team</title>
+        <meta name="description" content="Explore career opportunities at Happy Time. Find open positions in Colombo, Kandy, Dubai, and more. Apply online and start your journey with Sri Lanka's trusted watch retailer." />
+        <meta name="keywords" content="Happy Time careers, jobs in Sri Lanka, watch retailer jobs, Colombo jobs, Kandy jobs, Dubai jobs, retail careers" />
+        <link rel="canonical" href="https://yourdomain.com/careers" />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://yourdomain.com/careers" />
+        <meta property="og:title" content="Careers at Happy Time – Join Our Team" />
+        <meta property="og:description" content="Explore career opportunities at Happy Time. Find open positions in Colombo, Kandy, Dubai, and more." />
+        <meta property="og:image" content="https://yourdomain.com/images/og-careers.jpg" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Careers at Happy Time – Join Our Team" />
+        <meta name="twitter:description" content="Explore career opportunities at Happy Time. Find open positions in Colombo, Kandy, Dubai, and more." />
+        <meta name="twitter:image" content="https://yourdomain.com/images/og-careers.jpg" />
+
+        {/* Robots */}
+        <meta name="robots" content="index, follow" />
+      </Helmet>
+
       {/* Hero Banner - Updated to match About page */}
       <div className="relative h-[60vh] md:h-[70vh]">
         <img

@@ -8,6 +8,7 @@ import {
   customerLogout,
 } from "../utils/auth";
 import Loading from "../components/Loading";
+import { Helmet } from "react-helmet";
 
 const CustomerOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -218,6 +219,28 @@ const CustomerOrders = () => {
 
   return (
     <div className="bg-black text-white min-h-screen">
+
+      <Helmet>
+        <title>My Orders – Happy Time</title>
+        <meta name="description" content="View and track your orders from Happy Time. Check order status, payment verification, and delivery progress." />
+        <meta name="robots" content="noindex, nofollow" /> {/* private page */}
+        <link rel="canonical" href="https://yourdomain.com/orders" />
+
+        {/* Open Graph */}
+        <meta property="og:title" content="My Orders – Happy Time" />
+        <meta property="og:description" content="View and track your orders from Happy Time." />
+        <meta property="og:url" content="https://yourdomain.com/orders" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://yourdomain.com/images/og-image.jpg" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="My Orders – Happy Time" />
+        <meta name="twitter:description" content="View and track your orders from Happy Time." />
+        <meta name="twitter:image" content="https://yourdomain.com/images/og-image.jpg" />
+      </Helmet>
+
+
       <ScrollToTop />
 
       <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
@@ -557,6 +580,7 @@ const CustomerOrders = () => {
                             src="/Delivery_Truck.webp"
                             alt="truck icon"
                             className="h-8 w-8 sm:h-10 sm:w-10"
+                            loading="eager"
                           />
                         </div>
                       </div>

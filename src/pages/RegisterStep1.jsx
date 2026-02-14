@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { customerLogin } from '../utils/auth';
+import { Helmet } from 'react-helmet';
 
 const RegisterStep1 = () => {
   const [formData, setFormData] = useState({
@@ -242,6 +243,27 @@ const RegisterStep1 = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white flex items-center justify-center p-4 py-8 md:py-12 relative overflow-hidden">
+      
+            <Helmet>
+        <title>Create Account – Happy Time</title>
+        <meta name="description" content="Register for a Happy Time customer account. Choose retail or wholesale and enjoy premium timepieces with easy order tracking." />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://yourdomain.com/register" />
+
+        {/* Open Graph */}
+        <meta property="og:title" content="Create Account – Happy Time" />
+        <meta property="og:description" content="Register for a Happy Time customer account." />
+        <meta property="og:url" content="https://yourdomain.com/register" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://yourdomain.com/images/og-image.jpg" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Create Account – Happy Time" />
+        <meta name="twitter:description" content="Register for a Happy Time customer account." />
+        <meta name="twitter:image" content="https://yourdomain.com/images/og-image.jpg" />
+      </Helmet>
+
       <div 
         className="absolute inset-0 opacity-5"
         style={{

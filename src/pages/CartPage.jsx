@@ -10,6 +10,7 @@ import {
   customerLogout
 } from '../utils/auth';
 import Loading from '../components/Loading';
+import { Helmet } from 'react-helmet';
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -253,6 +254,23 @@ const CartPage = () => {
 
   return (
     <div className="bg-black text-white min-h-screen pb-24 md:pb-8">
+
+      <Helmet>
+  <title>Shopping Cart – Happy Time</title>
+  <meta name="description" content="Review your selected items and proceed to checkout securely at Happy Time." />
+  <meta name="robots" content="noindex, nofollow" /> {/* user-specific page, not for indexing */}
+  <link rel="canonical" href="https://yourdomain.com/cart" />
+  <meta property="og:title" content="Shopping Cart – Happy Time" />
+  <meta property="og:description" content="Review your selected items and proceed to checkout." />
+  <meta property="og:url" content="https://yourdomain.com/cart" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://yourdomain.com/images/og-image.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Shopping Cart – Happy Time" />
+  <meta name="twitter:description" content="Review your selected items and proceed to checkout." />
+  <meta name="twitter:image" content="https://yourdomain.com/images/og-image.jpg" />
+      </Helmet>
+
       <ScrollToTop />
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* Header */}
