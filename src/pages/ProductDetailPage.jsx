@@ -351,7 +351,7 @@ const ProductDetailPage = () => {
 
   return (
     <div className="bg-black text-white min-h-screen relative">
-      <GuestPrompt>
+      {/* <GuestPrompt> */}
       <ScrollToTop />
       
       <ToastContainer 
@@ -885,7 +885,7 @@ const ProductDetailPage = () => {
           </div>
         )}
       </div>
-        </GuestPrompt>
+        {/* </GuestPrompt> */}
     </div>
   );
 };

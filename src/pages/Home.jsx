@@ -32,14 +32,14 @@ const Home = () => {
 
       <ScrollToTop />
       <div className="relative">
-        <GuestPrompt>
+        {/* <GuestPrompt> */}
           <HeroSection />
           <FeaturedWatches />
           <CategorySection />
           <AboutSection />
           <TrustSection />
           <BrandsMarquee />
-        </GuestPrompt>
+        {/* </GuestPrompt> */}
       </div>
 
       {/* Structured Data - Organization & Website */}
