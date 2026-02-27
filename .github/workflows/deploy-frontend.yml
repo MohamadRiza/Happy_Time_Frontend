@@ -37,13 +37,13 @@ jobs:
 
     - name: Copy Build to VPS
       run: |
-        echo "📦 Starting file transfer to ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}..."
-        scp -o StrictHostKeyChecking=no -r dist/* ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:/home/webdep/frontend/dist/
+        echo "📦 Starting file transfer to ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}..."
+        scp -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -r dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/webdep/frontend/dist/
         echo "✅ Files copied successfully!"
 
     - name: Reload Nginx
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no -o IdentitiesOnly=yes ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
         echo "🔄 Testing Nginx config..."
         sudo nginx -t
         echo "🔄 Reloading Nginx..."
