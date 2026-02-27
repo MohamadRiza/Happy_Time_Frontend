@@ -30,6 +30,28 @@ jobs:
         echo "=== Dist Folder Contents ==="
         ls -la dist/ 2>/dev/null || echo "⚠️ dist folder NOT found!"
 
+    - name: Debug - Verify Secrets
+      run: |
+        echo "🔍 Checking secrets..."
+        if [ -z "${{ secrets.SSH_HOST }}" ]; then
+          echo "❌ ERROR: SSH_HOST is EMPTY!"
+          exit 1
+        else
+          echo "✅ SSH_HOST is set"
+        fi
+        if [ -z "${{ secrets.SSH_USERNAME }}" ]; then
+          echo "❌ ERROR: SSH_USERNAME is EMPTY!"
+          exit 1
+        else
+          echo "✅ SSH_USERNAME is set"
+        fi
+        if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
+          echo "❌ ERROR: SSH_PRIVATE_KEY is EMPTY!"
+          exit 1
+        else
+          echo "✅ SSH_PRIVATE_KEY is set"
+        fi
+
     - name: Setup SSH Key
       uses: webfactory/ssh-agent@v0.5.3
       with:
