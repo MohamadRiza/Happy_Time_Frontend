@@ -33,17 +33,17 @@ jobs:
     - name: Debug - Verify Secrets
       run: |
         echo "🔍 Checking secrets..."
-        if [ -z "${{ secrets.SSH_HOST }}" ]; then
-          echo "❌ ERROR: SSH_HOST is EMPTY!"
+        if [ -z "${{ secrets.VPS_HOST }}" ]; then
+          echo "❌ ERROR: VPS_HOST is EMPTY!"
           exit 1
         else
-          echo "✅ SSH_HOST is set"
+          echo "✅ VPS_HOST is set"
         fi
-        if [ -z "${{ secrets.SSH_USERNAME }}" ]; then
-          echo "❌ ERROR: SSH_USERNAME is EMPTY!"
+        if [ -z "${{ secrets.VPS_USERNAME }}" ]; then
+          echo "❌ ERROR: VPS_USERNAME is EMPTY!"
           exit 1
         else
-          echo "✅ SSH_USERNAME is set"
+          echo "✅ VPS_USERNAME is set"
         fi
         if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
           echo "❌ ERROR: SSH_PRIVATE_KEY is EMPTY!"
@@ -59,13 +59,13 @@ jobs:
 
     - name: Copy Build to VPS
       run: |
-        echo "📦 Starting file transfer to ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}..."
-        scp -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -r dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/webdep/frontend/dist/
+        echo "📦 Starting file transfer to ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}..."
+        scp -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -r dist/* ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:/home/webdep/frontend/dist/
         echo "✅ Files copied successfully!"
 
     - name: Reload Nginx
       run: |
-        ssh -o StrictHostKeyChecking=no -o IdentitiesOnly=yes ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no -o IdentitiesOnly=yes ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} << 'EOF'
         echo "🔄 Testing Nginx config..."
         sudo nginx -t
         echo "🔄 Reloading Nginx..."
