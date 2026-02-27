@@ -15,13 +15,21 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '20' # Using Node 20 LTS...
+        node-version: '20'
 
     - name: Install Dependencies
       run: npm install
 
     - name: Build Project
       run: npm run build
+
+    # DEBUG: Verify build output
+    - name: Debug - List Files
+      run: |
+        echo "=== Root Directory ==="
+        ls -la
+        echo "=== Dist Folder Contents ==="
+        ls -la dist/ 2>/dev/null || echo "⚠️ dist folder NOT found!"
 
     - name: Setup SSH Key
       uses: webfactory/ssh-agent@v0.5.3
@@ -30,13 +38,17 @@ jobs:
 
     - name: Copy Build to VPS
       run: |
-        scp -o StrictHostKeyChecking=no -r dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/var/webdep/happytimeonline.com
-        # NOTE: Replace happytimeonline.com with the actual folder name used in Nginx config
+        echo "📦 Starting file transfer..."
+        # Copy ONLY the contents of dist/ to the EXACT nginx root folder
+        scp -o StrictHostKeyChecking=no -r dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/webdep/frontend/dist/
+        echo "✅ Files copied successfully!"
 
     - name: Reload Nginx
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+        echo "🔄 Testing Nginx config..."
         sudo nginx -t
+        echo "🔄 Reloading Nginx..."
         sudo systemctl reload nginx
-        echo "Frontend Deployed Successfully!"
+        echo "✅ Frontend Deployed Successfully!"
         EOF
