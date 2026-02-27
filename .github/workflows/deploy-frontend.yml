@@ -30,7 +30,7 @@ jobs:
 
     - name: Copy Build to VPS
       run: |
-        scp -o StrictHostKeyChecking=no -r build/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/var/www/happytimeonline.com
+        scp -o StrictHostKeyChecking=no -r dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/var/www/happytimeonline.com
         # NOTE: Replace happytimeonline.com with the actual folder name used in Nginx config
 
     - name: Reload Nginx
