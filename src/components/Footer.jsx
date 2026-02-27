@@ -243,7 +243,7 @@ const Footer = () => {
           </p> 
 
           <p className="mt-2 text-gray-400 text-sm max-w-2xl mx-auto">
-            A trusted luxury watch retailer and wholesaler in Sri Lanka and the UAE since 1996. TESTING
+            A trusted luxury watch retailer and wholesaler in Sri Lanka and the UAE since 1996. TESting
           </p>
 
           <div className="mt-4">
