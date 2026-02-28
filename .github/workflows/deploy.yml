@@ -28,10 +28,8 @@ jobs:
       run: |
         echo "📦 Build output:"
         ls -la dist/ | head -20
-        echo "📄 index.html preview:"
-        head -n 5 dist/index.html
 
-    # Step 1: Copy files to VPS using scp
+    # Step 1: Copy files to VPS (FIXED PATHS)
     - name: Copy Files to VPS
       uses: appleboy/scp-action@master
       with:
@@ -40,13 +38,12 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         source: "dist/"
-        target: "/home/webdep/frontend/"
-        strip_components: 1
+        target: "/home/webdep/frontend/dist"  # ✅ Copy INTO dist folder
         overwrite: true
-        rm: true
+        rm: true  # ✅ Clear old files first
 
-    # Step 2: Run commands on VPS (fix permissions, reload nginx)
-    - name: Reload Nginx on VPS
+    # Step 2: Run commands on VPS (FIXED PATH)
+    - name: Finalize Deployment on VPS
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.VPS_HOST }}
@@ -57,11 +54,11 @@ jobs:
           set -e
           echo "🔄 Finalizing deployment at $(date)..."
           
-          # Fix permissions
+          # Fix permissions (correct path)
           chown -R webdep:webdep /home/webdep/frontend/dist
           chmod -R 755 /home/webdep/frontend/dist
           
-          # Verify files
+          # Verify files exist
           echo "📁 Deployed files:"
           ls -la /home/webdep/frontend/dist/ | head -10
           
