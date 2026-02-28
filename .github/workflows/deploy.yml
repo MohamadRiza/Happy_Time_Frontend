@@ -1,6 +1,5 @@
 name: Frontend CI/CD
 
-# Trigger pipeline when pushing to main branch
 on:
   push:
     branches:
@@ -11,34 +10,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the repo
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # Step 2: Setup Node.js
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
 
-    # Step 3: Install dependencies
-    - name: Install dependencies
-      run: npm install
-      working-directory: ./frontend
+      - name: Install dependencies
+        run: npm install
 
-    # Step 4: Build frontend
-    - name: Build project
-      run: npm run build
-      working-directory: ./frontend
+      - name: Build project
+        run: npm run build
 
-    # Step 5: Deploy to VPS via SSH
-    - name: Deploy to VPS
-      uses: appleboy/ssh-action@v0.1.7
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_KEY }}
-        port: 22
-        source: "frontend/dist/*"
-        target: "/var/www/Happy_Time_Frontend/dist"
-        rm: true
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          port: 22
+          source: "dist/*"
+          target: "/var/www/Happy_Time_Frontend/dist"
+          rm: true
