@@ -239,7 +239,7 @@ const Footer = () => {
         <div className="border-t border-gray-800/70 pt-8 pb-11 text-center">
           <p className="text-gray-400 text-sm">
             &copy; {new Date().getFullYear()}{' '}
-            <span className="text-white font-medium"><Link to="/admin/login">Happy Time Pvt Ltd</Link></span>. All Rights Reserved.
+            <span className="text-white font-medium"><Link to="/about">Happy Time Pvt Ltd</Link></span>. All Rights Reserved.
           </p> 
 
           <p className="mt-2 text-gray-400 text-sm max-w-2xl mx-auto">
