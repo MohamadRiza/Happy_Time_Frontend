@@ -23,13 +23,13 @@ jobs:
     - name: Build Project
       run: npm run build
 
-    # DEBUG: Verify dist folder exists
-    - name: Debug - Verify Build Output
+    # DEBUG: Verify build
+    - name: Debug - Show Build Output
       run: |
         echo "📦 Build output:"
         ls -la dist/ | head -20
 
-    # Step 1: Copy files to VPS (FIXED PATHS)
+    # ✅ FIXED: Copy dist/ INTO frontend/ (creates frontend/dist/)
     - name: Copy Files to VPS
       uses: appleboy/scp-action@master
       with:
@@ -38,12 +38,12 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         source: "dist/"
-        target: "/home/webdep/frontend/dist"  # ✅ Copy INTO dist folder
+        target: "/home/webdep/frontend"  # ✅ NOT "/frontend/dist"
         overwrite: true
-        rm: true  # ✅ Clear old files first
+        rm: false  # We cleaned manually; scp handles overwriting files
 
-    # Step 2: Run commands on VPS (FIXED PATH)
-    - name: Finalize Deployment on VPS
+    # ✅ FIXED: Correct path for permissions + nginx reload
+    - name: Finalize on VPS
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.VPS_HOST }}
@@ -52,17 +52,20 @@ jobs:
         port: 22
         script: |
           set -e
-          echo "🔄 Finalizing deployment at $(date)..."
+          echo "🔄 Finalizing at $(date)..."
           
-          # Fix permissions (correct path)
-          chown -R webdep:webdep /home/webdep/frontend/dist
-          chmod -R 755 /home/webdep/frontend/dist
-          
-          # Verify files exist
-          echo "📁 Deployed files:"
+          # Verify files landed in correct place
+          echo "📁 Checking /home/webdep/frontend/dist/:"
           ls -la /home/webdep/frontend/dist/ | head -10
           
-          # Test and reload nginx
-          sudo nginx -t && sudo systemctl reload nginx
+          # Fix permissions (nginx runs as www-data on Ubuntu)
+          sudo chown -R www-www-data /home/webdep/frontend/dist
+          sudo chmod -R 755 /home/webdep/frontend/dist
           
-          echo "✅ Frontend deployed at $(date)!"
+          # Test nginx config
+          sudo nginx -t
+          
+          # Reload nginx
+          sudo systemctl reload nginx
+          
+          echo "✅ Deployed at $(date)!"
