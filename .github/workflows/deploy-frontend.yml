@@ -23,52 +23,18 @@ jobs:
     - name: Build Project
       run: npm run build
 
-    - name: Debug - List Files
-      run: |
-        echo "=== Root Directory ==="
-        ls -la
-        echo "=== Dist Folder Contents ==="
-        ls -la dist/ 2>/dev/null || echo "⚠️ dist folder NOT found!"
-
-    - name: Debug - Verify Secrets
-      run: |
-        echo "🔍 Checking secrets..."
-        if [ -z "${{ secrets.VPS_HOST }}" ]; then
-          echo "❌ ERROR: VPS_HOST is EMPTY!"
-          exit 1
-        else
-          echo "✅ VPS_HOST is set"
-        fi
-        if [ -z "${{ secrets.VPS_USERNAME }}" ]; then
-          echo "❌ ERROR: VPS_USERNAME is EMPTY!"
-          exit 1
-        else
-          echo "✅ VPS_USERNAME is set"
-        fi
-        if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
-          echo "❌ ERROR: SSH_PRIVATE_KEY is EMPTY!"
-          exit 1
-        else
-          echo "✅ SSH_PRIVATE_KEY is set"
-        fi
-
-    - name: Setup SSH Key
-      uses: webfactory/ssh-agent@v0.5.3
+    - name: Deploy via SSH (appleboy)
+      uses: appleboy/ssh-action@master
       with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Copy Build to VPS
-      run: |
-        echo "📦 Starting file transfer to ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}..."
-        scp -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -r dist/* ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:/home/webdep/frontend/dist/
-        echo "✅ Files copied successfully!"
-
-    - name: Reload Nginx
-      run: |
-        ssh -o StrictHostKeyChecking=no -o IdentitiesOnly=yes ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} << 'EOF'
-        echo "🔄 Testing Nginx config..."
-        sudo nginx -t
-        echo "🔄 Reloading Nginx..."
-        sudo systemctl reload nginx
-        echo "✅ Frontend Deployed Successfully!"
-        EOF
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          echo "🔄 Starting frontend deployment..."
+          # Copy build files to nginx root
+          cp -r /github/workspace/dist/* /home/webdep/frontend/dist/
+          # Test and reload nginx
+          sudo nginx -t
+          sudo systemctl reload nginx
+          echo "✅ Frontend deployed successfully!"
