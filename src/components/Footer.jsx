@@ -235,7 +235,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Divider */}
+        {/* Bottom Dividerr */}
         <div className="border-t border-gray-800/70 pt-8 pb-11 text-center">
           <p className="text-gray-400 text-sm">
             &copy; {new Date().getFullYear()}{' '}
