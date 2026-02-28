@@ -23,16 +23,29 @@ jobs:
     - name: Build Project
       run: npm run build
 
-    # DEBUG: Verify build output exists
+    # DEBUG: Verify build
     - name: Debug - Show Build Output
       run: |
         echo "📦 Build output:"
         ls -la dist/ | head -20
-        echo "📄 index.html preview:"
-        head -n 5 dist/index.html
 
-    # Copy build files to VPS
-    # source: "dist/" + target: "/home/webdep/frontend" → creates /home/webdep/frontend/dist/
+    # ✅ STEP 1: Clear old files on VPS BEFORE copying (as webdep user)
+    - name: Clear Old Files on VPS
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          set -e
+          echo "🧹 Clearing old build files..."
+          # webdep owns /home/webdep/frontend, so can delete contents of dist/
+          rm -rf /home/webdep/frontend/dist/*
+          rm -rf /home/webdep/frontend/dist/.[!.]* 2>/dev/null || true
+          echo "✅ Old files cleared"
+
+    # ✅ STEP 2: Copy new build files (now folder is empty, no permission conflict)
     - name: Copy Files to VPS
       uses: appleboy/scp-action@master
       with:
@@ -45,7 +58,7 @@ jobs:
         overwrite: true
         rm: false
 
-    # Finalize deployment: fix permissions, reload nginx
+    # ✅ STEP 3: Fix permissions AFTER copy (now files are owned by webdep, chown to www-data)
     - name: Finalize on VPS
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -57,25 +70,22 @@ jobs:
           set -e
           echo "🔄 Finalizing deployment at $(date)..."
           
-          # Verify files landed in correct place
-          echo "📁 Checking /home/webdep/frontend/dist/:"
+          # Verify files landed
+          echo "📁 Files in /home/webdep/frontend/dist/:"
           ls -la /home/webdep/frontend/dist/ | head -10
           
-          # ✅ Fix permissions - CORRECT USERNAME: www-data (not www-www-data)
-          # Using sudo -n to fail fast if passwordless sudo isn't configured
-          sudo -n chown -R www-data:www-data /home/webdep/frontend/dist
+          # ✅ Fix permissions - CORRECT: www-data (not www-www-data)
+          sudo -n chown -R www-www-data /home/webdep/frontend/dist
           sudo -n chmod -R 755 /home/webdep/frontend/dist
           
-          # Verify ownership changed
-          echo "🔐 Verifying ownership:"
+          # Verify ownership
+          echo "🔐 Ownership after chown:"
           ls -la /home/webdep/frontend/dist/ | head -5
           
-          # Test nginx config before reloading
-          echo "🔄 Testing nginx config..."
+          # Test and reload nginx
+          echo "🔄 Testing nginx..."
           sudo -n nginx -t
-          
-          # Reload nginx to serve new files
           echo "🔄 Reloading nginx..."
           sudo -n systemctl reload nginx
           
-          echo "✅ Frontend deployed successfully at $(date)!"
+          echo "✅ Frontend deployed at $(date)!"
