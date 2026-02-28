@@ -49,7 +49,7 @@ jobs:
           echo "❌ ERROR: SSH_PRIVATE_KEY is EMPTY!"
           exit 1
         else
-          echo "✅ SSH_PRIVATE_KEY is set"
+          echo "✅ SSH_PRIVATE_KEY is - set"
         fi
 
     - name: Setup SSH Key
