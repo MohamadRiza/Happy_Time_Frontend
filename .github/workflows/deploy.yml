@@ -23,13 +23,16 @@ jobs:
     - name: Build Project
       run: npm run build
 
-    # DEBUG: Verify build
+    # DEBUG: Verify build output exists
     - name: Debug - Show Build Output
       run: |
         echo "📦 Build output:"
         ls -la dist/ | head -20
+        echo "📄 index.html preview:"
+        head -n 5 dist/index.html
 
-    # ✅ FIXED: Copy dist/ INTO frontend/ (creates frontend/dist/)
+    # Copy build files to VPS
+    # source: "dist/" + target: "/home/webdep/frontend" → creates /home/webdep/frontend/dist/
     - name: Copy Files to VPS
       uses: appleboy/scp-action@master
       with:
@@ -38,11 +41,11 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         source: "dist/"
-        target: "/home/webdep/frontend"  # ✅ NOT "/frontend/dist"
+        target: "/home/webdep/frontend"
         overwrite: true
-        rm: false  # We cleaned manually; scp handles overwriting files
+        rm: false
 
-    # ✅ FIXED: Correct path for permissions + nginx reload
+    # Finalize deployment: fix permissions, reload nginx
     - name: Finalize on VPS
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -52,20 +55,27 @@ jobs:
         port: 22
         script: |
           set -e
-          echo "🔄 Finalizing at $(date)..."
+          echo "🔄 Finalizing deployment at $(date)..."
           
           # Verify files landed in correct place
           echo "📁 Checking /home/webdep/frontend/dist/:"
           ls -la /home/webdep/frontend/dist/ | head -10
           
-          # Fix permissions (nginx runs as www-data on Ubuntu)
-          sudo chown -R www-www-data /home/webdep/frontend/dist
-          sudo chmod -R 755 /home/webdep/frontend/dist
+          # ✅ Fix permissions - CORRECT USERNAME: www-data (not www-www-data)
+          # Using sudo -n to fail fast if passwordless sudo isn't configured
+          sudo -n chown -R www-data:www-data /home/webdep/frontend/dist
+          sudo -n chmod -R 755 /home/webdep/frontend/dist
           
-          # Test nginx config
-          sudo nginx -t
+          # Verify ownership changed
+          echo "🔐 Verifying ownership:"
+          ls -la /home/webdep/frontend/dist/ | head -5
           
-          # Reload nginx
-          sudo systemctl reload nginx
+          # Test nginx config before reloading
+          echo "🔄 Testing nginx config..."
+          sudo -n nginx -t
           
-          echo "✅ Deployed at $(date)!"
+          # Reload nginx to serve new files
+          echo "🔄 Reloading nginx..."
+          sudo -n systemctl reload nginx
+          
+          echo "✅ Frontend deployed successfully at $(date)!"
