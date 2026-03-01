@@ -61,20 +61,20 @@ const LoginPage = () => {
         <title>Customer Login – Happy Time</title>
         <meta name="description" content="Login to your Happy Time customer account to manage orders, track shipments, and access your profile." />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://yourdomain.com/login" />
+        <link rel="canonical" href="https://happytimeonline.com/login" />
 
         {/* Open Graph */}
         <meta property="og:title" content="Customer Login – Happy Time" />
         <meta property="og:description" content="Login to your Happy Time customer account." />
-        <meta property="og:url" content="https://yourdomain.com/login" />
+        <meta property="og:url" content="https://happytimeonline.com/login" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://yourdomain.com/images/og-image.jpg" />
+        <meta property="og:image" content="https://happytimeonline.com/ogimage.png" />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Customer Login – Happy Time" />
         <meta name="twitter:description" content="Login to your Happy Time customer account." />
-        <meta name="twitter:image" content="https://yourdomain.com/images/og-image.jpg" />
+        <meta name="twitter:image" content="https://happytimeonline.com/ogimage.png" />
       </Helmet>
       <ScrollToTop />
       <div 

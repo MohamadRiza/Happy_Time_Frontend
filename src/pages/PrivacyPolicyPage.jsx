@@ -149,11 +149,11 @@ const PrivacyPolicyPage = () => {
           "@type": "PrivacyPolicy",
           "name": "Happy Time Pvt Ltd Privacy Policy",
           "description": "Privacy policy explaining how Happy Time collects, uses, and protects customer personal information and data security measures",
-          "url": "https://www.happytime.lk/privacy",
+          "url": "https://www.happytimeonline.com/privacy",
           "creator": {
             "@type": "Organization",
             "name": "Happy Time Pvt Ltd",
-            "url": "https://www.happytime.lk"
+            "url": "https://www.happytimeonline.com"
           },
           "dateCreated": "2026-02-01",
           "dateModified": "2026-02-14",
@@ -177,7 +177,7 @@ const PrivacyPolicyPage = () => {
           "about": {
             "@type": "WebSite",
             "name": "Happy Time Watches",
-            "url": "https://www.happytime.lk"
+            "url": "https://www.happytimeonline.com"
           },
           "mainEntity": {
             "@type": "ItemList",
@@ -217,13 +217,13 @@ const PrivacyPolicyPage = () => {
               "@type": "ListItem",
               "position": 1,
               "name": "Home",
-              "item": "https://www.happytime.lk"
+              "item": "https://www.happytimeonline.com"
             },
             {
               "@type": "ListItem",
               "position": 2,
               "name": "Privacy Policy",
-              "item": "https://www.happytime.lk/privacy"
+              "item": "https://www.happytimeonline.com/privacy"
             }
           ]
         })}

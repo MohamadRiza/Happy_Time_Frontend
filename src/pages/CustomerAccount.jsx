@@ -102,20 +102,20 @@ const CustomerAccount = () => {
         <title>My Account – Happy Time</title>
         <meta name="description" content="Manage your Happy Time account: view orders, update profile, and get support." />
         <meta name="robots" content="noindex, nofollow" /> {/* private page */}
-        <link rel="canonical" href="https://yourdomain.com/account" />
+        <link rel="canonical" href="https://happytimeonline.com/account" />
 
         {/* Open Graph */}
         <meta property="og:title" content="My Account – Happy Time" />
         <meta property="og:description" content="Manage your Happy Time account." />
-        <meta property="og:url" content="https://yourdomain.com/account" />
+        <meta property="og:url" content="https://happytimeonline.com/account" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://yourdomain.com/images/og-image.jpg" />
+        <meta property="og:image" content="https://happytimeonline.com/ogimage.png" />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="My Account – Happy Time" />
         <meta name="twitter:description" content="Manage your Happy Time account." />
-        <meta name="twitter:image" content="https://yourdomain.com/images/og-image.jpg" />
+        <meta name="twitter:image" content="https://happytimeonline.com/ogimage.png" />
       </Helmet>
 
 

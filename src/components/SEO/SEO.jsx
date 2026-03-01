@@ -5,10 +5,10 @@ const SEO = ({
   description, 
   keywords, 
   canonicalUrl,
-  ogImage = '/watchFTR.jpg',
+  ogImage = '/ogimage.png',
   ogType = 'website'
 }) => {
-  const baseUrl = 'https://www.happytime.lk';
+  const baseUrl = 'https://happytimeonline.com';
   const fullUrl = canonicalUrl ? `${baseUrl}${canonicalUrl}` : baseUrl;
 
   return (
@@ -52,7 +52,7 @@ const SEO = ({
           "@type": "Organization",
           "name": "Happy Time Pvt Ltd",
           "url": baseUrl,
-          "logo": `${baseUrl}/logo.png`,
+          "logo": `${baseUrl}/logo1.png`,
           "image": `${baseUrl}${ogImage}`,
           "description": "Sri Lanka's trusted watch distribution and retail company serving customers across Sri Lanka and abroad including UAE",
           "telephone": "+94 76 300 9123",

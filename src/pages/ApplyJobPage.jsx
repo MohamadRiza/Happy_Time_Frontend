@@ -304,20 +304,20 @@ const ApplyJobPage = () => {
         <title>Apply for a Job – Happy Time Careers</title>
         <meta name="description" content="Apply for a job at Happy Time. Submit your application online and become part of our luxury timepiece team." />
         <meta name="keywords" content="Happy Time jobs, apply online, career application, job application form" />
-        <link rel="canonical" href="https://yourdomain.com/apply" />
+        <link rel="canonical" href="https://happytimeonline.com/apply" />
 
         {/* Open Graph */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://yourdomain.com/apply" />
+        <meta property="og:url" content="https://happytimeonline.com/apply" />
         <meta property="og:title" content="Apply for a Job – Happy Time Careers" />
         <meta property="og:description" content="Apply for a job at Happy Time. Submit your application online and become part of our luxury timepiece team." />
-        <meta property="og:image" content="https://yourdomain.com/images/og-careers.jpg" />
+        <meta property="og:image" content="https://happytimeonline.com/ogimage.png" />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Apply for a Job – Happy Time Careers" />
         <meta name="twitter:description" content="Apply for a job at Happy Time. Submit your application online and become part of our luxury timepiece team." />
-        <meta name="twitter:image" content="https://yourdomain.com/images/og-careers.jpg" />
+        <meta name="twitter:image" content="https://happytimeonline.com/ogimage.png" />
 
         {/* Robots - allow indexing */}
         <meta name="robots" content="index, follow" />

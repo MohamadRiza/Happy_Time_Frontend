@@ -27,7 +27,7 @@ const Home = () => {
         description={seoData.description}
         keywords={seoData.keywords}
         canonicalUrl={seoData.canonicalUrl}
-        ogImage="/watchFTR.jpg"
+        ogImage="/ogimage.png"
       />
 
       <ScrollToTop />
@@ -48,9 +48,9 @@ const Home = () => {
           "@context": "https://schema.org",
           "@type": "Organization",
           "name": "Happy Time Pvt Ltd",
-          "url": "https://www.happytime.lk",
-          "logo": "https://www.happytime.lk/logo.png",
-          "image": "https://www.happytime.lk/watchFTR.jpg",
+          "url": "https://www.happytimeonline.com",
+          "logo": "https://www.happytimeonline.com/logo1.png",
+          "image": "https://www.happytimeonline.com/ogimage.png",
           "description": "Sri Lanka's leading watch distribution and retail company serving customers across Sri Lanka and UAE",
           "telephone": "+94 76 300 9123",
           "email": "happytime143b@gmail.com",
@@ -77,7 +77,7 @@ const Home = () => {
           "@context": "https://schema.org",
           "@type": "WebSite",
           "name": "Happy Time Watches",
-          "url": "https://www.happytime.lk",
+          "url": "https://www.happytimeonline.com",
           "description": "Premium watch collection in Sri Lanka - Luxury watches from Winsor, Orix & Arial brands",
           "publisher": {
             "@type": "Organization",
@@ -85,7 +85,7 @@ const Home = () => {
           },
           "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://www.happytime.lk/shop?q={search_term_string}",
+            "target": "https://www.happytimeonline.com/shop?q={search_term_string}",
             "query-input": "required name=search_term_string"
           }
         })}
@@ -98,8 +98,8 @@ const Home = () => {
           "@type": "CollectionPage",
           "name": "Happy Time Watch Collection",
           "description": "Explore our exclusive collection of luxury watches from Winsor, Orix and Arial brands",
-          "url": "https://www.happytime.lk",
-          "image": "https://www.happytime.lk/watchFTR.jpg",
+          "url": "https://www.happytimeonline.com",
+          "image": "https://www.happytime.lk/ogimage.png",
           "mainEntity": {
             "@type": "ItemList",
             "itemListElement": [

@@ -224,20 +224,20 @@ const CustomerOrders = () => {
         <title>My Orders – Happy Time</title>
         <meta name="description" content="View and track your orders from Happy Time. Check order status, payment verification, and delivery progress." />
         <meta name="robots" content="noindex, nofollow" /> {/* private page */}
-        <link rel="canonical" href="https://yourdomain.com/orders" />
+        <link rel="canonical" href="https://happytimeonline.com/orders" />
 
         {/* Open Graph */}
         <meta property="og:title" content="My Orders – Happy Time" />
         <meta property="og:description" content="View and track your orders from Happy Time." />
-        <meta property="og:url" content="https://yourdomain.com/orders" />
+        <meta property="og:url" content="https://happytimeonline.com/orders" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://yourdomain.com/images/og-image.jpg" />
+        <meta property="og:image" content="https://happytimeonline.com/ogimage.png" />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="My Orders – Happy Time" />
         <meta name="twitter:description" content="View and track your orders from Happy Time." />
-        <meta name="twitter:image" content="https://yourdomain.com/images/og-image.jpg" />
+        <meta name="twitter:image" content="https://happytimeonline.com/ogimage.png" />
       </Helmet>
 
 

@@ -74,7 +74,7 @@ const AboutPage = () => {
         description={seoData.description}
         keywords={seoData.keywords}
         canonicalUrl={seoData.canonicalUrl}
-        ogImage="/watchFTR.jpg"
+        ogImage="/ogimage.png"
       />
 
       <ScrollToTop />
@@ -440,9 +440,9 @@ const AboutPage = () => {
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "Happy Time Pvt Ltd",
-      "url": "https://www.happytime.lk",
-      "logo": "https://www.happytime.lk/logo.png",
-      "image": "https://www.happytime.lk/watchFTR.jpg",
+      "url": "https://happytimeonline.com",
+      "logo": "https://happytimeonline.com/logo1.png",
+      "image": "https://happytimeonline.com/ogimage.png",
       "description": "Sri Lanka's leading watch distribution and retail company serving customers across Sri Lanka and UAE",
       "telephone": "+94 76 300 9123",
       "email": "happytime143b@gmail.com",
@@ -462,7 +462,7 @@ const AboutPage = () => {
       "@context": "https://schema.org",
       "@type": "Store",
       "name": "Happy Time - Colombo Head Office",
-      "image": "https://www.happytime.lk/inside.jpg",
+      "image": "https://happytimeonline.com/inside.jpg",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "No 49A, Keyzer Street, Pettah",
@@ -483,7 +483,7 @@ const AboutPage = () => {
       "@context": "https://schema.org",
       "@type": "Store",
       "name": "Happy Time - Online Branch 143",
-      "image": "https://www.happytime.lk/143_OnlineBranch.jpeg",
+      "image": "https://happytimeonline.com/143_OnlineBranch.jpeg",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "No 143, 2nd Cross Street, Pettah",
@@ -504,7 +504,7 @@ const AboutPage = () => {
       "@context": "https://schema.org",
       "@type": "Store",
       "name": "Happy Time - 84 Branch Wholesale",
-      "image": "https://www.happytime.lk/2nd_CS_86.jpeg",
+      "image": "https://happytimeonline.com/2nd_CS_86.jpeg",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "No 84, 2nd Cross Street, Pettah",
@@ -525,7 +525,7 @@ const AboutPage = () => {
       "@context": "https://schema.org",
       "@type": "Store",
       "name": "Happy Time - Kandy Branch",
-      "image": "https://www.happytime.lk/interior.jpg",
+      "image": "https://happytimeonline.com/interior.jpg",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "No 57, Yatinuwara Lane (Alimudukkuwa)",
@@ -545,7 +545,7 @@ const AboutPage = () => {
       "@context": "https://schema.org",
       "@type": "Store",
       "name": "Happy Time - Kandy City Center (KCC)",
-      "image": "https://www.happytime.lk/KCC.webp",
+      "image": "https://happytimeonline.com/KCC.webp",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Level 3, Kandy City Center, No 01",
@@ -565,7 +565,7 @@ const AboutPage = () => {
       "@context": "https://schema.org",
       "@type": "Store",
       "name": "Happy Time - Dubai UAE Branch",
-      "image": "https://www.happytime.lk/DubaiBranch1.jpeg",
+      "image": "https://happytimeonline.com/DubaiBranch1.jpeg",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "No. 102, Al-Buteen (Opposite to Dubai Wholesale Plaza), Murshid Bazar, Deira",

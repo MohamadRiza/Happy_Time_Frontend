@@ -501,12 +501,12 @@ const ContactPage = () => {
             "@type": "ContactPage",
             "name": "Contact Happy Time Watches",
             "description": "Contact Happy Time Pvt Ltd - Sri Lanka's trusted watch retailer/wholesaler with branches in Colombo, Kandy & Dubai",
-            "url": "https://www.happytime.lk/contact",
+            "url": "https://happytimeonline.com/contact",
             "publisher": {
               "@type": "Organization",
               "name": "Happy Time Pvt Ltd",
-              "url": "https://www.happytime.lk",
-              "logo": "https://www.happytime.lk/logo.png",
+              "url": "https://happytimeonline.com",
+              "logo": "https://happytimeonline.com/logo.png",
               "contactPoint": {
                 "@type": "ContactPoint",
                 "telephone": "+94 76 300 9123",
@@ -526,8 +526,8 @@ const ContactPage = () => {
               "@context": "https://schema.org",
               "@type": "Organization",
               "name": "Happy Time Pvt Ltd",
-              "url": "https://www.happytime.lk",
-              "logo": "https://www.happytime.lk/logo.png",
+              "url": "https://happytimeonline.com",
+              "logo": "https://happytimeonline.com/logo1.png",
               "image": "https://www.happytime.lk/MainBranchPettah.jpeg",
               "description": "Sri Lanka's leading watch distribution and retail company serving customers across Sri Lanka and UAE",
               "telephone": "+94 76 300 9123",
@@ -556,7 +556,7 @@ const ContactPage = () => {
               "@context": "https://schema.org",
               "@type": "Store",
               "name": "Happy Time - Colombo Head Office",
-              "image": "https://www.happytime.lk/MainBranchPettah.jpeg",
+              "image": "https://happytimeonline.com/MainBranchPettah.jpeg",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "No 49A, Keyzer Street, Pettah",
@@ -578,7 +578,7 @@ const ContactPage = () => {
               "@context": "https://schema.org",
               "@type": "Store",
               "name": "Happy Time - Online Branch 143",
-              "image": "https://www.happytime.lk/143_OnlineBranch.jpeg",
+              "image": "https://happytimeonline.com/143_OnlineBranch.jpeg",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "No 143, 2nd Cross Street, Pettah",
@@ -600,7 +600,7 @@ const ContactPage = () => {
               "@context": "https://schema.org",
               "@type": "Store",
               "name": "Happy Time - 84 Branch Wholesale",
-              "image": "https://www.happytime.lk/2nd_CS_86.jpeg",
+              "image": "https://happytimeonline.com/2nd_CS_86.jpeg",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "No 84, 2nd Cross Street, Pettah",
@@ -662,7 +662,7 @@ const ContactPage = () => {
               "@context": "https://schema.org",
               "@type": "Store",
               "name": "Happy Time - Dubai UAE Branch",
-              "image": "https://www.happytime.lk/DubaiBranch1.jpeg",
+              "image": "https://happytimeonline.com/DubaiBranch1.jpeg",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "No. 102, Al-Buteen (Opposite to Dubai Wholesale Plaza), Murshid Bazar, Deira",
@@ -692,13 +692,13 @@ const ContactPage = () => {
                 "@type": "ListItem",
                 "position": 1,
                 "name": "Home",
-                "item": "https://www.happytime.lk"
+                "item": "https://happytimeonline.com"
               },
               {
                 "@type": "ListItem",
                 "position": 2,
                 "name": "Contact Us",
-                "item": "https://www.happytime.lk/contact"
+                "item": "https://happytimeonline.com/contact"
               }
             ]
           })}

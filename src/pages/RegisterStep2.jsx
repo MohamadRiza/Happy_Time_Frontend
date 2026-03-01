@@ -110,20 +110,20 @@ const RegisterStep2 = () => {
         <title>Business Details – Happy Time Registration</title>
         <meta name="description" content="Complete your wholesale registration with Happy Time by providing your business details. Join our network of watch retailers and dealers." />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://yourdomain.com/register/step2" />
+        <link rel="canonical" href="https://happytimeonline.com/register/step2" />
 
         {/* Open Graph */}
         <meta property="og:title" content="Business Details – Happy Time Registration" />
         <meta property="og:description" content="Complete your wholesale registration with Happy Time." />
-        <meta property="og:url" content="https://yourdomain.com/register/step2" />
+        <meta property="og:url" content="https://happytimeonline.com/register/step2" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://yourdomain.com/images/og-image.jpg" />
+        <meta property="og:image" content="https://happytimeonline.com/ogimage.png" />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Business Details – Happy Time Registration" />
         <meta name="twitter:description" content="Complete your wholesale registration with Happy Time." />
-        <meta name="twitter:image" content="https://yourdomain.com/images/og-image.jpg" />
+        <meta name="twitter:image" content="https://happytimeonline.com/ogimage.png" />
       </Helmet>
       <div
         className="absolute inset-0 opacity-5"

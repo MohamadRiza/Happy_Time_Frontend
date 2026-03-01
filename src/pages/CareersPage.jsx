@@ -95,20 +95,20 @@ const CareersPage = () => {
         <title>Careers at Happy Time – Join Our Team</title>
         <meta name="description" content="Explore career opportunities at Happy Time. Find open positions in Colombo, Kandy, Dubai, and more. Apply online and start your journey with Sri Lanka's trusted watch retailer." />
         <meta name="keywords" content="Happy Time careers, jobs in Sri Lanka, watch retailer jobs, Colombo jobs, Kandy jobs, Dubai jobs, retail careers" />
-        <link rel="canonical" href="https://yourdomain.com/careers" />
+        <link rel="canonical" href="https://happytimeonline.com/careers" />
 
         {/* Open Graph */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://yourdomain.com/careers" />
+        <meta property="og:url" content="https://happytimeonline.com/careers" />
         <meta property="og:title" content="Careers at Happy Time – Join Our Team" />
         <meta property="og:description" content="Explore career opportunities at Happy Time. Find open positions in Colombo, Kandy, Dubai, and more." />
-        <meta property="og:image" content="https://yourdomain.com/images/og-careers.jpg" />
+        <meta property="og:image" content="https://happytimeonline.com/ogimage.png" />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Careers at Happy Time – Join Our Team" />
         <meta name="twitter:description" content="Explore career opportunities at Happy Time. Find open positions in Colombo, Kandy, Dubai, and more." />
-        <meta name="twitter:image" content="https://yourdomain.com/images/og-careers.jpg" />
+        <meta name="twitter:image" content="https://happytimeonline.com/ogimage.png" />
 
         {/* Robots */}
         <meta name="robots" content="index, follow" />
