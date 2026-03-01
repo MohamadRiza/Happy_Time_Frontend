@@ -588,7 +588,7 @@ const OrdersList = () => {
                         Payment Receipt
                       </h3>
                       <a
-                        href={`${API_URL}/${selectedOrder.receipt}`}
+                        href={`/${selectedOrder.receipt}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 text-gold hover:text-yellow-300 font-medium"
