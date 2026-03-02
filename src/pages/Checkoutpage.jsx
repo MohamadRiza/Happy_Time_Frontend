@@ -75,10 +75,10 @@ const CheckoutPage = () => {
   
   // Bank account info
   const bankInfo = {
-    accountNumber: '1234567890',
-    accountName: 'Happy Time PVT LTD',
-    bankName: 'Commercial Bank',
-    branch: 'Colombo 01'
+    accountNumber: '0010501838001',
+    accountName: 'Happy Time (PVT) LTD',
+    bankName: 'Amana Bank',
+    branch: 'Pettah Branch'
   };
 
   // ✅ Refs for scroll targets
