@@ -178,6 +178,15 @@ const Footer = () => {
                   </div>
                 </div>
               </li>
+              <li>
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 w-2 h-2 bg-gold rounded-full"></div>
+                  <div>
+                    <p className="font-medium text-white">Happylex</p>
+                    <p className="text-gray-400 text-sm">Quality electrical and home appliances including gas cookers, fans, and more</p>
+                  </div>
+                </div>
+              </li>
             </ul>
           </div>
 
