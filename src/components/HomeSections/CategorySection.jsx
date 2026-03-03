@@ -7,25 +7,25 @@ const categories = [
     id: 'men',
     name: 'Men',
     description: 'Timeless elegance for the modern gentleman',
-    image: '/watch1.png',
+    image: '/WinsorGents.webp',
   },
   {
     id: 'women',
     name: 'Women',
     description: 'Graceful sophistication for every moment',
-    image: '/Watch2.png',
+    image: '/WinsorLadies.webp',
   },
   {
     id: 'kids',
     name: 'Kids',
     description: 'Fun, durable watches for young explorers',
-    image: '/Watch3.png',
+    image: '/WinsorKids.webp',
   },
   {
     id: 'wall_clock',
     name: 'Wall Clocks',
     description: 'Statement timepieces for home & office',
-    image: '/WC1.png',
+    image: '/WallClockA.webp',
   }
 ];
 
