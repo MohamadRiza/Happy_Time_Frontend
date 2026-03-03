@@ -90,7 +90,7 @@ const CategorySection = () => {
                         src={category.image}
                         alt={`${category.name} Collection`}
                         className="max-h-56 max-w-full object-contain drop-shadow-2xl"
-                        loading="lazy"
+                        loading="eager"
                       />
                     </div>
                   </div>
