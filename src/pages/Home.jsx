@@ -49,7 +49,7 @@ const Home = () => {
           "@type": "Organization",
           "name": "Happy Time Pvt Ltd",
           "url": "https://www.happytimeonline.com",
-          "logo": "https://www.happytimeonline.com/logo1.png",
+          "logo": "https://happytimeonline.com/logo1.png",
           "image": "https://www.happytimeonline.com/ogimage.png",
           "description": "Sri Lanka's leading watch distribution and retail company serving customers across Sri Lanka and UAE",
           "telephone": "+94 76 300 9123",
