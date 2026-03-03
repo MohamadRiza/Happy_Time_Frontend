@@ -191,6 +191,7 @@ const Navbar = () => {
               src="/logo.png"
               alt="Happy Time Logo"
               className="h-14 w-auto object-contain transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
+              loading="eager"
             />
             <div className="leading-tight">
               <p className="glass-gold-text font-semibold text-lg tracking-wide transition-all duration-300 group-hover:tracking-widest">
