@@ -22,15 +22,18 @@ const ProductManager = () => {
     productType: 'watch',
     colors: [{ name: '', quantity: '' }],
     featured: false,
-    specifications: [{ key: '', value: '' }]
+    specifications: [{ key: '', value: '' }],
+    // ✅ NEW: Warranty fields
+    warranty: {
+      duration: 'nowarranty',
+      description: ''
+    }
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [videoFiles, setVideoFiles] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
   const [previewVideos, setPreviewVideos] = useState([]);
   const [uploading, setUploading] = useState(false);
-
-  // ✅ NEW: Track which image is the thumbnail (index)
   const [thumbnailIndex, setThumbnailIndex] = useState(0);
 
   const [viewMode, setViewMode] = useState('grid');
@@ -72,6 +75,14 @@ const ProductManager = () => {
     { value: 'true', label: 'Featured Only' },
     { value: 'false', label: 'Non-Featured' }
   ];
+  // ✅ NEW: Warranty duration options
+  const warrantyDurations = [
+    { value: 'nowarranty', label: 'No Warranty' },
+    { value: '3months', label: '3 Months' },
+    { value: '6months', label: '6 Months' },
+    { value: '1year', label: '1 Year' },
+    { value: '2years', label: '2 Years' }
+  ];
 
   const countWords = (str) => {
     if (!str?.trim()) return 0;
@@ -103,6 +114,7 @@ const ProductManager = () => {
     fetchProducts();
   }, []);
 
+  // Filtering logic
   useEffect(() => {
     let result = [...products];
     if (searchFilters.search) {
@@ -136,6 +148,29 @@ const ProductManager = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
+  };
+
+  // ✅ NEW: Handlers for warranty fields
+  const handleWarrantyDurationChange = (e) => {
+    const duration = e.target.value;
+    setFormData({
+      ...formData,
+      warranty: {
+        ...formData.warranty,
+        duration,
+        description: duration === 'nowarranty' ? '' : formData.warranty.description
+      }
+    });
+  };
+
+  const handleWarrantyDescriptionChange = (e) => {
+    setFormData({
+      ...formData,
+      warranty: {
+        ...formData.warranty,
+        description: e.target.value
+      }
+    });
   };
 
   const handleProductTypeChange = (e) => {
@@ -196,7 +231,7 @@ const ProductManager = () => {
     setImageFiles(selectedFiles);
     const previews = selectedFiles.map(file => URL.createObjectURL(file));
     setPreviewImages(previews);
-    setThumbnailIndex(0); // Reset to first when new images uploaded
+    setThumbnailIndex(0);
   };
 
   const handleVideoChange = (e) => {
@@ -236,7 +271,7 @@ const ProductManager = () => {
   };
 
   const validateForm = () => {
-    const { title, description, brand, customBrand, price, modelNumber, productType, gender } = formData;
+    const { title, description, brand, customBrand, price, modelNumber, productType, gender, warranty } = formData;
     const finalBrand = brand === 'Other' ? customBrand.trim() : brand;
 
     if (!title?.trim()) { toast.error('Title is required'); return false; }
@@ -256,6 +291,12 @@ const ProductManager = () => {
 
     const validColors = formData.colors.filter(color => color.name.trim());
     if (validColors.length === 0) { toast.error('At least one color combination is required'); return false; }
+
+    // ✅ Optional: Add validation for warranty description length
+    if (warranty.description.length > 200) {
+      toast.error('Warranty description cannot exceed 200 characters');
+      return false;
+    }
 
     return true;
   };
@@ -279,6 +320,10 @@ const ProductManager = () => {
     formDataToSend.append('modelNumber', formData.modelNumber.trim() || 'N/A');
     formDataToSend.append('watchShape', formData.watchShape);
 
+    // ✅ NEW: Append warranty fields
+    formDataToSend.append('warrantyDuration', formData.warranty.duration);
+    formDataToSend.append('warrantyDescription', formData.warranty.description.trim());
+
     validColors.forEach((color, index) => {
       formDataToSend.append(`colors[${index}][name]`, color.name.trim());
       if (color.quantity && !isNaN(color.quantity)) {
@@ -293,7 +338,7 @@ const ProductManager = () => {
       }
     });
 
-    // ✅ REORDER IMAGES: move selected thumbnail to index 0
+    // Reorder images for thumbnail
     const reorderedImageFiles = [...imageFiles];
     if (thumbnailIndex !== 0) {
       const temp = reorderedImageFiles[0];
@@ -342,7 +387,12 @@ const ProductManager = () => {
       productType: 'watch',
       colors: [{ name: '', quantity: '' }],
       featured: false,
-      specifications: [{ key: '', value: '' }]
+      specifications: [{ key: '', value: '' }],
+      // ✅ NEW: Reset warranty to default
+      warranty: {
+        duration: 'nowarranty',
+        description: ''
+      }
     });
     setImageFiles([]);
     setVideoFiles([]);
@@ -368,6 +418,9 @@ const ProductManager = () => {
       ? product.specifications.map(s => ({ key: s.key || '', value: s.value || '' }))
       : [{ key: '', value: '' }];
 
+    // ✅ NEW: Extract warranty, with fallback to default
+    const warranty = product.warranty || { duration: 'nowarranty', description: '' };
+
     setFormData({
       title: product.title,
       description: product.description,
@@ -380,12 +433,16 @@ const ProductManager = () => {
       productType: product.productType || 'watch',
       colors,
       featured: product.featured || false,
-      specifications: specs
+      specifications: specs,
+      warranty: {
+        duration: warranty.duration,
+        description: warranty.description || ''
+      }
     });
 
     setPreviewImages(product.images || []);
     setPreviewVideos(product.videos || []);
-    setThumbnailIndex(0); // On edit, first image is assumed thumbnail (matches backend)
+    setThumbnailIndex(0);
     setEditingId(product._id);
     setShowForm(true);
   };
@@ -445,7 +502,6 @@ const ProductManager = () => {
     });
   };
 
-  // ✅ Set as thumbnail handler
   const handleSetAsThumbnail = (index) => {
     setThumbnailIndex(index);
   };
@@ -593,6 +649,7 @@ const ProductManager = () => {
             {editingId ? 'Edit Product' : 'Add New Product'}
           </h3>
           <form onSubmit={handleSubmit}>
+            {/* Title */}
             <div className="mb-4">
               <label className="block text-gray-400 mb-2 text-sm">Title *</label>
               <input
@@ -605,6 +662,8 @@ const ProductManager = () => {
                 placeholder="Rolex Submariner"
               />
             </div>
+
+            {/* Brand and Product Type */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">Brand *</label>
@@ -644,6 +703,8 @@ const ProductManager = () => {
                 </select>
               </div>
             </div>
+
+            {/* Watch Shape and Gender */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">Watch Shape *</label>
@@ -676,6 +737,7 @@ const ProductManager = () => {
                 </div>
               )}
             </div>
+
             {/* Colors */}
             <div className="mb-4">
               <label className="block text-gray-400 mb-2 text-sm">Color Combinations and Color Code *</label>
@@ -717,6 +779,8 @@ const ProductManager = () => {
                 </button>
               </div>
             </div>
+
+            {/* Price and Model Number */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">Price (LKR)</label>
@@ -745,6 +809,8 @@ const ProductManager = () => {
                 />
               </div>
             </div>
+
+            {/* Description */}
             <div className="mb-4">
               <label className="block text-gray-400 mb-2 text-sm">Description *</label>
               <textarea
@@ -757,6 +823,40 @@ const ProductManager = () => {
                 placeholder="Describe the watch features, materials, and specifications..."
               />
             </div>
+
+            {/* ✅ NEW: Warranty Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">Warranty Duration</label>
+                <select
+                  value={formData.warranty.duration}
+                  onChange={handleWarrantyDurationChange}
+                  className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+                >
+                  {warrantyDurations.map(opt => (
+                    <option key={opt.value} value={opt.value} className="bg-gray-800 text-white">{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              {formData.warranty.duration !== 'nowarranty' && (
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">Warranty Description</label>
+                  <input
+                    type="text"
+                    value={formData.warranty.description}
+                    onChange={handleWarrantyDescriptionChange}
+                    placeholder="e.g., Full warranty, Machine warranty, etc."
+                    maxLength="200"
+                    className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
+                  />
+                  <p className="text-gray-500 text-xs mt-1">
+                    Max 200 characters
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Specifications */}
             <div className="mb-4">
               <label className="block text-gray-400 mb-2 text-sm">Specifications</label>
@@ -797,6 +897,8 @@ const ProductManager = () => {
                 </button>
               </div>
             </div>
+
+            {/* Featured */}
             <div className="mb-4">
               <label className="flex items-center cursor-pointer">
                 <input
@@ -812,7 +914,8 @@ const ProductManager = () => {
                 Featured products appear in the homepage showcase (max 4)
               </p>
             </div>
-            {/* Images with Thumbnail Selection */}
+
+            {/* Images with thumbnail selection */}
             <div className="mb-4">
               <label className="block text-gray-400 mb-2 text-sm">
                 Product Images * (Max 15, max 6MB each)
@@ -852,6 +955,7 @@ const ProductManager = () => {
                 </div>
               )}
             </div>
+
             {/* Videos */}
             <div className="mb-6">
               <label className="block text-gray-400 mb-2 text-sm">
@@ -892,6 +996,8 @@ const ProductManager = () => {
                 </div>
               )}
             </div>
+
+            {/* Form Buttons */}
             <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
               <button
                 type="button"

@@ -38,7 +38,11 @@ const CartPage = () => {
         setCartItems(items);
         // Auto-select all in-stock items
         const inStockIds = items
-          .filter(item => getMaxAvailableQuantity(item.productId._id, item.selectedColor) > 0)
+          .filter(item => {
+            // ✅ Guard: skip items with missing product
+            if (!item.productId) return false;
+            return getMaxAvailableQuantity(item.productId._id, item.selectedColor) > 0;
+          })
           .map(item => item._id);
         setSelectedItems(new Set(inStockIds));
       } else {
@@ -58,8 +62,11 @@ const CartPage = () => {
   }, []);
 
   const getMaxAvailableQuantity = (productId, selectedColor) => {
+    // ✅ Guard: if productId is null/undefined, return 0
+    if (!productId) return 0;
+
     const item = cartItems.find(item =>
-      item.productId._id === productId && item.selectedColor === selectedColor
+      item.productId?._id === productId && item.selectedColor === selectedColor
     );
     
     if (!item || !item.productId) return 0;
@@ -76,7 +83,10 @@ const CartPage = () => {
     if (qty < 1) return;
 
     const item = cartItems.find(i => i._id === itemId);
-    if (!item) return;
+    if (!item || !item.productId) {
+      toast.error('Item is no longer available');
+      return;
+    }
 
     const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
     
@@ -153,6 +163,11 @@ const CartPage = () => {
 
   const toggleSelectItem = (itemId) => {
     const item = cartItems.find(i => i._id === itemId);
+    if (!item || !item.productId) {
+      toast.error('Item is no longer available');
+      return;
+    }
+
     const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
     if (maxAvailable === 0) {
       toast.error('Cannot select out of stock items');
@@ -172,7 +187,7 @@ const CartPage = () => {
 
   const toggleSelectAll = () => {
     const inStockItems = cartItems.filter(item =>
-      getMaxAvailableQuantity(item.productId._id, item.selectedColor) > 0
+      item.productId && getMaxAvailableQuantity(item.productId._id, item.selectedColor) > 0
     );
     if (selectedItems.size === inStockItems.length) {
       setSelectedItems(new Set());
@@ -190,6 +205,10 @@ const CartPage = () => {
     // Validate selected items stock
     const selectedCartItems = cartItems.filter(item => selectedItems.has(item._id));
     for (const item of selectedCartItems) {
+      if (!item.productId) {
+        toast.error('Some items are no longer available');
+        return;
+      }
       const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
       if (maxAvailable !== Infinity && item.quantity > maxAvailable) {
         toast.error(`Insufficient stock for ${item.productId.title}`);
@@ -206,14 +225,12 @@ const CartPage = () => {
     });
   };
 
-  // ✅ Handle quantity input change
   const handleQuantityInputChange = (itemId, value) => {
     const item = cartItems.find(i => i._id === itemId);
-    if (!item) return;
+    if (!item || !item.productId) return;
     
     const numValue = parseInt(value, 10);
     if (isNaN(numValue)) {
-      // If empty or invalid, set to 1
       if (value === '') {
         updateQuantity(itemId, 1);
       }
@@ -225,7 +242,6 @@ const CartPage = () => {
     updateQuantity(itemId, clampedValue);
   };
 
-  // ✅ Handle quantity input focus (select all text)
   const handleQuantityInputFocus = (e) => {
     e.target.select();
   };
@@ -249,26 +265,26 @@ const CartPage = () => {
   }
 
   const inStockCount = cartItems.filter(item =>
-    getMaxAvailableQuantity(item.productId._id, item.selectedColor) > 0
+    item.productId && getMaxAvailableQuantity(item.productId._id, item.selectedColor) > 0
   ).length;
 
   return (
     <div className="bg-black text-white min-h-screen pb-24 md:pb-8">
 
       <Helmet>
-  <title>Shopping Cart – Happy Time</title>
-  <meta name="description" content="Review your selected items and proceed to checkout securely at Happy Time." />
-  <meta name="robots" content="noindex, nofollow" /> {/* user-specific page, not for indexing */}
-  <link rel="canonical" href="https://happytimeonline.com/cart" />
-  <meta property="og:title" content="Shopping Cart – Happy Time" />
-  <meta property="og:description" content="Review your selected items and proceed to checkout." />
-  <meta property="og:url" content="https://happytimeonline.com/cart" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://happytimeonline.com/ogimage.png" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Shopping Cart – Happy Time" />
-  <meta name="twitter:description" content="Review your selected items and proceed to checkout." />
-  <meta name="twitter:image" content="https://happytimeonline.com/ogimage.png" />
+        <title>Shopping Cart – Happy Time</title>
+        <meta name="description" content="Review your selected items and proceed to checkout securely at Happy Time." />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://happytimeonline.com/cart" />
+        <meta property="og:title" content="Shopping Cart – Happy Time" />
+        <meta property="og:description" content="Review your selected items and proceed to checkout." />
+        <meta property="og:url" content="https://happytimeonline.com/cart" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://happytimeonline.com/ogimage.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Shopping Cart – Happy Time" />
+        <meta name="twitter:description" content="Review your selected items and proceed to checkout." />
+        <meta name="twitter:image" content="https://happytimeonline.com/ogimage.png" />
       </Helmet>
 
       <ScrollToTop />
@@ -325,6 +341,28 @@ const CartPage = () => {
             {/* Cart Items */}
             <div className="space-y-3 mb-4">
               {cartItems.map(item => {
+                // ✅ Guard: skip rendering if product is missing
+                if (!item.productId) {
+                  return (
+                    <div
+                      key={item._id}
+                      className="bg-gray-900/60 border border-red-800 rounded-xl p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="text-red-400 text-sm">
+                          This item is no longer available.
+                        </div>
+                        <button
+                          onClick={() => removeItem(item._id)}
+                          className="text-red-400 hover:text-red-300 text-xs font-medium underline"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
+
                 const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
                 const isOutOfStock = maxAvailable === 0;
                 const canIncrease = maxAvailable === Infinity || item.quantity < maxAvailable;
@@ -352,17 +390,17 @@ const CartPage = () => {
                       
                       {/* Product Image */}
                       <img
-                        src={item.productId?.images?.[0]}
-                        alt={item.productId?.title}
+                        src={item.productId.images?.[0]}
+                        alt={item.productId.title}
                         className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover flex-shrink-0"
                       />
                       
                       {/* Product Details */}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm sm:text-base mb-0.5 truncate">
-                          {item.productId?.title}
+                          {item.productId.title}
                         </h3>
-                        <p className="text-gold text-xs mb-1">{item.productId?.brand}</p>
+                        <p className="text-gold text-xs mb-1">{item.productId.brand}</p>
                         <p className="text-gray-400 text-xs mb-1">
                           Color: {item.selectedColor}
                         </p>
@@ -388,7 +426,6 @@ const CartPage = () => {
                             >
                               −
                             </button>
-                            {/* ✅ QUANTITY INPUT FIELD */}
                             <input
                               type="number"
                               min="1"
@@ -412,7 +449,7 @@ const CartPage = () => {
                           </div>
                           <div className="text-right">
                             <span className="font-bold text-sm sm:text-base block">
-                              {formatPrice(item.productId?.price)}
+                              {formatPrice(item.productId.price)}
                             </span>
                             <button
                               onClick={() => removeItem(item._id)}
@@ -460,7 +497,7 @@ const CartPage = () => {
         )}
       </div>
 
-      {/* Mobile Sticky Bottom Bar - FIXED */}
+      {/* Mobile Sticky Bottom Bar */}
       {cartItems.length > 0 && (
         <div className="md:hidden fixed bottom-16 left-0 right-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-800 safe-area-bottom p-3 z-50">
           <div className="flex items-center justify-between">

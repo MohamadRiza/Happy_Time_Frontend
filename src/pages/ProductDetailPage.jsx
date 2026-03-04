@@ -1,4 +1,4 @@
-//https://chat.qwen.ai/c/7d6c0f8e-38cd-4481-a62b-623987138c8e  (USE Slug Based URLS for better SEO)
+// https://chat.qwen.ai/c/7d6c0f8e-38cd-4481-a62b-623987138c8e  (USE Slug Based URLS for better SEO)
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
@@ -245,6 +245,18 @@ const ProductDetailPage = () => {
       case 'unisex': return 'bg-gray-800 text-gray-300';
       default: return 'bg-gray-800 text-gray-300';
     }
+  };
+
+  // ✅ Helper to format warranty duration
+  const getWarrantyLabel = (duration) => {
+    const map = {
+      '1year': '1 Year',
+      '3months': '3 Months',
+      '6months': '6 Months',
+      '2years': '2 Years',
+      'nowarranty': 'No Warranty'
+    };
+    return map[duration] || duration;
   };
 
   const handleBackToShop = () => {
@@ -581,7 +593,7 @@ const ProductDetailPage = () => {
               {product.price === null || product.price === undefined ? (
                 <div className="space-y-3">
                   <p className="text-gray-400 text-sm">
-                    Please contact our luxury specialists for pricing details and.
+                    Please contact our luxury specialists for pricing details.
                   </p>
                   <button
                     onClick={() => navigate('/contact')}
@@ -792,7 +804,29 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            {/* Return & Warranty */}
+            {/* ✅ NEW: Warranty Section (moved before Returns) */}
+            {product.warranty && product.warranty.duration !== 'nowarranty' && (
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-white mb-2">Warranty</h2>
+                <div className="bg-black/40 border border-gray-800 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-gray-700 p-2 rounded-full">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-white font-medium">{getWarrantyLabel(product.warranty.duration)}</p>
+                      {product.warranty.description && (
+                        <p className="text-gray-400 text-sm mt-1">{product.warranty.description}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Return & Privacy */}
             <div className="pt-4 border-t border-gray-800/50 mt-auto">
               <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 <div className="flex items-center gap-2 bg-black/40 border border-gray-800 rounded-lg px-4 py-2.5">
