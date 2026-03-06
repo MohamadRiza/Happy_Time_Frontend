@@ -20,10 +20,9 @@ const ProductManager = () => {
     watchShape: 'Round',
     gender: 'men',
     productType: 'watch',
-    colors: [{ name: '', quantity: '' }],
+    colors: [{ name: '', quantity: '', colorImageFile: null, colorImagePreview: null, colorImageUrl: null }],
     featured: false,
     specifications: [{ key: '', value: '' }],
-    // ✅ NEW: Warranty fields
     warranty: {
       duration: 'nowarranty',
       description: ''
@@ -75,7 +74,6 @@ const ProductManager = () => {
     { value: 'true', label: 'Featured Only' },
     { value: 'false', label: 'Non-Featured' }
   ];
-  // ✅ NEW: Warranty duration options
   const warrantyDurations = [
     { value: 'nowarranty', label: 'No Warranty' },
     { value: '3months', label: '3 Months' },
@@ -150,7 +148,6 @@ const ProductManager = () => {
     setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
   };
 
-  // ✅ NEW: Handlers for warranty fields
   const handleWarrantyDurationChange = (e) => {
     const duration = e.target.value;
     setFormData({
@@ -186,14 +183,51 @@ const ProductManager = () => {
     setFormData(prev => ({ ...prev, brand, customBrand: brand === 'Other' ? '' : prev.customBrand }));
   };
 
+  // ── COLOR HANDLERS ──────────────────────────────────────────────────────────
+
   const handleColorChange = (index, field, value) => {
     const newColors = [...formData.colors];
-    newColors[index][field] = value;
+    newColors[index] = { ...newColors[index], [field]: value };
+    setFormData({ ...formData, colors: newColors });
+  };
+
+  // Handle per-color image file selection
+  const handleColorImageChange = (index, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 6 * 1024 * 1024) {
+      toast.error('Color image too large! Maximum size: 6MB.');
+      e.target.value = '';
+      return;
+    }
+    const preview = URL.createObjectURL(file);
+    const newColors = [...formData.colors];
+    newColors[index] = {
+      ...newColors[index],
+      colorImageFile: file,
+      colorImagePreview: preview,
+      colorImageUrl: null // clear existing URL when new file chosen
+    };
+    setFormData({ ...formData, colors: newColors });
+  };
+
+  // Remove per-color image
+  const removeColorImage = (index) => {
+    const newColors = [...formData.colors];
+    newColors[index] = {
+      ...newColors[index],
+      colorImageFile: null,
+      colorImagePreview: null,
+      colorImageUrl: null
+    };
     setFormData({ ...formData, colors: newColors });
   };
 
   const addColor = () => {
-    setFormData({ ...formData, colors: [...formData.colors, { name: '', quantity: '' }] });
+    setFormData({
+      ...formData,
+      colors: [...formData.colors, { name: '', quantity: '', colorImageFile: null, colorImagePreview: null, colorImageUrl: null }]
+    });
   };
 
   const removeColor = (index) => {
@@ -202,6 +236,8 @@ const ProductManager = () => {
       setFormData({ ...formData, colors: newColors });
     }
   };
+
+  // ── SPEC HANDLERS ───────────────────────────────────────────────────────────
 
   const handleSpecChange = (index, field, value) => {
     const newSpecs = [...formData.specifications];
@@ -219,6 +255,8 @@ const ProductManager = () => {
       setFormData({ ...formData, specifications: newSpecs });
     }
   };
+
+  // ── IMAGE / VIDEO HANDLERS ──────────────────────────────────────────────────
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -244,7 +282,6 @@ const ProductManager = () => {
         return;
       }
     }
-    const validVideos = [];
     const checkDuration = (file) => {
       return new Promise((resolve) => {
         const video = document.createElement('video');
@@ -270,6 +307,8 @@ const ProductManager = () => {
     });
   };
 
+  // ── VALIDATION ──────────────────────────────────────────────────────────────
+
   const validateForm = () => {
     const { title, description, brand, customBrand, price, modelNumber, productType, gender, warranty } = formData;
     const finalBrand = brand === 'Other' ? customBrand.trim() : brand;
@@ -292,7 +331,6 @@ const ProductManager = () => {
     const validColors = formData.colors.filter(color => color.name.trim());
     if (validColors.length === 0) { toast.error('At least one color combination is required'); return false; }
 
-    // ✅ Optional: Add validation for warranty description length
     if (warranty.description.length > 200) {
       toast.error('Warranty description cannot exceed 200 characters');
       return false;
@@ -300,6 +338,8 @@ const ProductManager = () => {
 
     return true;
   };
+
+  // ── SUBMIT ──────────────────────────────────────────────────────────────────
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -320,17 +360,26 @@ const ProductManager = () => {
     formDataToSend.append('modelNumber', formData.modelNumber.trim() || 'N/A');
     formDataToSend.append('watchShape', formData.watchShape);
 
-    // ✅ NEW: Append warranty fields
+    // Warranty
     formDataToSend.append('warrantyDuration', formData.warranty.duration);
     formDataToSend.append('warrantyDescription', formData.warranty.description.trim());
 
+    // Colors (name, quantity) + per-color image as separate named fields
     validColors.forEach((color, index) => {
       formDataToSend.append(`colors[${index}][name]`, color.name.trim());
       if (color.quantity && !isNaN(color.quantity)) {
         formDataToSend.append(`colors[${index}][quantity]`, color.quantity.toString());
       }
+      // New file: use flat field name "colorImage_{index}" — no bracket notation
+      if (color.colorImageFile) {
+        formDataToSend.append(`colorImage_${index}`, color.colorImageFile);
+      } else if (color.colorImageUrl) {
+        // Existing URL — send as plain text field "colorImageUrl_{index}"
+        formDataToSend.append(`colorImageUrl_${index}`, color.colorImageUrl);
+      }
     });
 
+    // Specs
     formData.specifications.forEach((spec, index) => {
       if (spec.key.trim() && spec.value.trim()) {
         formDataToSend.append(`specifications[${index}][key]`, spec.key.trim());
@@ -340,7 +389,7 @@ const ProductManager = () => {
 
     // Reorder images for thumbnail
     const reorderedImageFiles = [...imageFiles];
-    if (thumbnailIndex !== 0) {
+    if (thumbnailIndex !== 0 && reorderedImageFiles.length > 1) {
       const temp = reorderedImageFiles[0];
       reorderedImageFiles[0] = reorderedImageFiles[thumbnailIndex];
       reorderedImageFiles[thumbnailIndex] = temp;
@@ -374,6 +423,8 @@ const ProductManager = () => {
     }
   };
 
+  // ── RESET ───────────────────────────────────────────────────────────────────
+
   const resetForm = () => {
     setFormData({
       title: '',
@@ -385,10 +436,9 @@ const ProductManager = () => {
       watchShape: 'Round',
       gender: 'men',
       productType: 'watch',
-      colors: [{ name: '', quantity: '' }],
+      colors: [{ name: '', quantity: '', colorImageFile: null, colorImagePreview: null, colorImageUrl: null }],
       featured: false,
       specifications: [{ key: '', value: '' }],
-      // ✅ NEW: Reset warranty to default
       warranty: {
         duration: 'nowarranty',
         description: ''
@@ -403,6 +453,8 @@ const ProductManager = () => {
     setEditingId(null);
   };
 
+  // ── EDIT ────────────────────────────────────────────────────────────────────
+
   const handleEdit = (product) => {
     const isCustomBrand = !formBrands.includes(product.brand) || product.brand === 'Other';
     const brand = isCustomBrand ? 'Other' : product.brand;
@@ -411,14 +463,19 @@ const ProductManager = () => {
     if (genderValue === 'boy' || genderValue === 'girl') genderValue = 'kids';
 
     const colors = product.colors?.length > 0
-      ? product.colors.map(c => ({ name: c.name || '', quantity: c.quantity != null ? c.quantity.toString() : '' }))
-      : [{ name: '', quantity: '' }];
+      ? product.colors.map(c => ({
+          name: c.name || '',
+          quantity: c.quantity != null ? c.quantity.toString() : '',
+          colorImageFile: null,
+          colorImagePreview: c.colorImage || null,
+          colorImageUrl: c.colorImage || null // existing URL from DB
+        }))
+      : [{ name: '', quantity: '', colorImageFile: null, colorImagePreview: null, colorImageUrl: null }];
 
     const specs = product.specifications?.length > 0
       ? product.specifications.map(s => ({ key: s.key || '', value: s.value || '' }))
       : [{ key: '', value: '' }];
 
-    // ✅ NEW: Extract warranty, with fallback to default
     const warranty = product.warranty || { duration: 'nowarranty', description: '' };
 
     setFormData({
@@ -447,6 +504,8 @@ const ProductManager = () => {
     setShowForm(true);
   };
 
+  // ── DELETE ───────────────────────────────────────────────────────────────────
+
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this product?')) return;
     try {
@@ -465,6 +524,8 @@ const ProductManager = () => {
       toast.error('Network error');
     }
   };
+
+  // ── HELPERS ──────────────────────────────────────────────────────────────────
 
   const getProductCategory = (product) => {
     if (product.productType === 'wall_clock') return 'Wall Clock';
@@ -506,6 +567,16 @@ const ProductManager = () => {
     setThumbnailIndex(index);
   };
 
+  const selectStyle = {
+    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+    backgroundPosition: 'right 0.5rem center',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '1.5em 1.5em',
+    paddingRight: '2.5rem'
+  };
+
+  // ── RENDER ───────────────────────────────────────────────────────────────────
+
   return (
     <AdminLayout title="Product Management">
       {/* Header */}
@@ -531,10 +602,7 @@ const ProductManager = () => {
             </button>
           </div>
           <button
-            onClick={() => {
-              resetForm();
-              setShowForm(true);
-            }}
+            onClick={() => { resetForm(); setShowForm(true); }}
             className="bg-gold text-black px-4 py-2 rounded-lg font-medium hover:bg-gold/90 whitespace-nowrap"
           >
             + Add New
@@ -542,7 +610,7 @@ const ProductManager = () => {
         </div>
       </div>
 
-      {/* Filter Toggle Button */}
+      {/* Filter Toggle */}
       <div className="mb-4">
         <button
           onClick={() => setShowFilters(!showFilters)}
@@ -568,7 +636,7 @@ const ProductManager = () => {
 
       {/* Filters Panel */}
       {!showForm && showFilters && (
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4 mb-6 backdrop-blur-sm transition-all duration-300">
+        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4 mb-6 backdrop-blur-sm">
           <form onSubmit={(e) => e.preventDefault()} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             <div className="lg:col-span-2 xl:col-span-3">
               <label className="block text-gray-400 mb-1 text-xs">Search</label>
@@ -649,6 +717,7 @@ const ProductManager = () => {
             {editingId ? 'Edit Product' : 'Add New Product'}
           </h3>
           <form onSubmit={handleSubmit}>
+
             {/* Title */}
             <div className="mb-4">
               <label className="block text-gray-400 mb-2 text-sm">Title *</label>
@@ -671,7 +740,7 @@ const ProductManager = () => {
                   value={formData.brand}
                   onChange={handleBrandChange}
                   className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+                  style={selectStyle}
                 >
                   {formBrands.map(brand => (
                     <option key={brand} value={brand} className="bg-gray-800 text-white">{brand}</option>
@@ -695,7 +764,7 @@ const ProductManager = () => {
                   value={formData.productType}
                   onChange={handleProductTypeChange}
                   className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+                  style={selectStyle}
                 >
                   {productTypes.filter(t => t.value !== 'all').map(type => (
                     <option key={type.value} value={type.value} className="bg-gray-800 text-white">{type.label}</option>
@@ -713,7 +782,7 @@ const ProductManager = () => {
                   value={formData.watchShape}
                   onChange={handleChange}
                   className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+                  style={selectStyle}
                 >
                   {watchShapes.map(shape => (
                     <option key={shape} value={shape} className="bg-gray-800 text-white">{shape}</option>
@@ -728,7 +797,7 @@ const ProductManager = () => {
                     value={formData.gender}
                     onChange={handleChange}
                     className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-                    style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+                    style={selectStyle}
                   >
                     {wristWatchGenders.map(gender => (
                       <option key={gender.value} value={gender.value} className="bg-gray-800 text-white">{gender.label}</option>
@@ -738,36 +807,94 @@ const ProductManager = () => {
               )}
             </div>
 
-            {/* Colors */}
+            {/* ── COLORS SECTION (with per-color image) ── */}
             <div className="mb-4">
-              <label className="block text-gray-400 mb-2 text-sm">Color Combinations and Color Code *</label>
-              <div className="space-y-3">
+              <label className="block text-gray-400 mb-2 text-sm">Color Combinations *</label>
+              <div className="space-y-4">
                 {formData.colors.map((color, index) => (
-                  <div key={index} className="flex gap-3">
-                    <input
-                      type="text"
-                      value={color.name}
-                      onChange={(e) => handleColorChange(index, 'name', e.target.value)}
-                      placeholder="e.g., Gold - Black | #FFD700 - #000000"
-                      className="flex-1 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
-                    />
-                    <input
-                      type="number"
-                      value={color.quantity}
-                      onChange={(e) => handleColorChange(index, 'quantity', e.target.value)}
-                      placeholder="Qty (optional)"
-                      min="0"
-                      className="w-32 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
-                    />
-                    {formData.colors.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeColor(index)}
-                        className="bg-red-900/30 text-red-300 px-3 rounded-lg hover:bg-red-800 transition"
-                      >
-                        ×
-                      </button>
-                    )}
+                  <div key={index} className="bg-black/20 border border-gray-700/50 rounded-xl p-4">
+                    {/* Row 1: name + qty + remove */}
+                    <div className="flex gap-3 mb-3">
+                      <input
+                        type="text"
+                        value={color.name}
+                        onChange={(e) => handleColorChange(index, 'name', e.target.value)}
+                        placeholder="e.g., Gold - Black | #FFD700 - #000000"
+                        className="flex-1 bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold text-sm"
+                      />
+                      <input
+                        type="number"
+                        value={color.quantity}
+                        onChange={(e) => handleColorChange(index, 'quantity', e.target.value)}
+                        placeholder="Qty (optional)"
+                        min="0"
+                        className="w-28 bg-black/30 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold text-sm"
+                      />
+                      {formData.colors.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeColor(index)}
+                          className="bg-red-900/30 text-red-300 px-3 rounded-lg hover:bg-red-800 transition text-sm"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Row 2: per-color image */}
+                    <div className="flex items-start gap-4">
+                      <div className="flex-1">
+                        <p className="text-gray-500 text-xs mb-1.5">
+                          Color Image <span className="text-gray-600">(optional — shown when customer selects this color)</span>
+                        </p>
+                        {!color.colorImagePreview && !color.colorImageUrl ? (
+                          <label className="flex items-center gap-2 cursor-pointer w-fit">
+                            <div className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 border border-dashed border-gray-600 hover:border-gold rounded-lg px-3 py-2 transition">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              <span className="text-gray-400 text-xs">Upload color image</span>
+                            </div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => handleColorImageChange(index, e)}
+                            />
+                          </label>
+                        ) : (
+                          <div className="flex items-center gap-3">
+                            <div className="relative w-16 h-16 flex-shrink-0">
+                              <img
+                                src={color.colorImagePreview || color.colorImageUrl}
+                                alt={`Color ${index + 1}`}
+                                className="w-full h-full object-cover rounded-lg border border-gray-600"
+                              />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                              <label className="flex items-center gap-1.5 cursor-pointer">
+                                <div className="bg-gray-700 hover:bg-gray-600 rounded px-2 py-1 text-xs text-gray-300 transition">
+                                  Change image
+                                </div>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleColorImageChange(index, e)}
+                                />
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => removeColorImage(index)}
+                                className="bg-red-900/30 hover:bg-red-800/50 rounded px-2 py-1 text-xs text-red-400 transition text-left"
+                              >
+                                Remove image
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ))}
                 <button
@@ -793,9 +920,7 @@ const ProductManager = () => {
                   className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
                   placeholder="145000"
                 />
-                <p className="text-gray-500 text-xs mt-1">
-                  Leave empty for "Contact for Price"
-                </p>
+                <p className="text-gray-500 text-xs mt-1">Leave empty for "Contact for Price"</p>
               </div>
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">Model Number</label>
@@ -824,7 +949,7 @@ const ProductManager = () => {
               />
             </div>
 
-            {/* ✅ NEW: Warranty Section */}
+            {/* Warranty */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">Warranty Duration</label>
@@ -832,7 +957,7 @@ const ProductManager = () => {
                   value={formData.warranty.duration}
                   onChange={handleWarrantyDurationChange}
                   className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold appearance-none"
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+                  style={selectStyle}
                 >
                   {warrantyDurations.map(opt => (
                     <option key={opt.value} value={opt.value} className="bg-gray-800 text-white">{opt.label}</option>
@@ -850,9 +975,7 @@ const ProductManager = () => {
                     maxLength="200"
                     className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
                   />
-                  <p className="text-gray-500 text-xs mt-1">
-                    Max 200 characters
-                  </p>
+                  <p className="text-gray-500 text-xs mt-1">Max 200 characters</p>
                 </div>
               )}
             </div>
@@ -910,9 +1033,7 @@ const ProductManager = () => {
                 />
                 <span className="ml-2 text-white text-sm">Featured Product</span>
               </label>
-              <p className="text-gray-500 text-xs mt-1">
-                Featured products appear in the homepage showcase (max 4)
-              </p>
+              <p className="text-gray-500 text-xs mt-1">Featured products appear in the homepage showcase (max 4)</p>
             </div>
 
             {/* Images with thumbnail selection */}
@@ -1090,18 +1211,8 @@ const ProductManager = () => {
                         {product.price ? `LKR ${product.price.toLocaleString()}` : 'Contact'}
                       </span>
                       <div className="flex gap-1.5">
-                        <button
-                          onClick={() => handleEdit(product)}
-                          className="text-blue-400 hover:text-blue-300 text-[11px]"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(product._id)}
-                          className="text-red-400 hover:text-red-300 text-[11px]"
-                        >
-                          Delete
-                        </button>
+                        <button onClick={() => handleEdit(product)} className="text-blue-400 hover:text-blue-300 text-[11px]">Edit</button>
+                        <button onClick={() => handleDelete(product._id)} className="text-red-400 hover:text-red-300 text-[11px]">Delete</button>
                       </div>
                     </div>
                   </div>
@@ -1137,9 +1248,7 @@ const ProductManager = () => {
                       <div className="flex justify-between items-start mb-1">
                         <h3 className="text-sm font-semibold text-white">{product.title}</h3>
                         {product.featured && (
-                          <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                            FEATURED
-                          </span>
+                          <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">FEATURED</span>
                         )}
                       </div>
                       <p className="text-gray-400 text-xs mb-1">{product.brand}</p>
@@ -1157,18 +1266,8 @@ const ProductManager = () => {
                           {product.price ? `LKR ${product.price.toLocaleString()}` : 'Contact for Price'}
                         </span>
                         <div className="flex gap-2">
-                          <button
-                            onClick={() => handleEdit(product)}
-                            className="text-blue-400 hover:text-blue-300 text-xs"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(product._id)}
-                            className="text-red-400 hover:text-red-300 text-xs"
-                          >
-                            Delete
-                          </button>
+                          <button onClick={() => handleEdit(product)} className="text-blue-400 hover:text-blue-300 text-xs">Edit</button>
+                          <button onClick={() => handleDelete(product._id)} className="text-red-400 hover:text-red-300 text-xs">Delete</button>
                         </div>
                       </div>
                     </div>

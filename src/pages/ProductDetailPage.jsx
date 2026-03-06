@@ -24,6 +24,9 @@ const ProductDetailPage = () => {
   const [galleryCurrentIndex, setGalleryCurrentIndex] = useState(0);
   const [thumbnailStartIndex, setThumbnailStartIndex] = useState(0);
 
+  // Track if user manually dismissed the color image override
+  const [colorImageDismissed, setColorImageDismissed] = useState(false);
+
   // Touch refs
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
@@ -44,14 +47,12 @@ const ProductDetailPage = () => {
       if (typeof color === 'object' && color.name) {
         return {
           name: color.name,
-          quantity: color.quantity !== null && color.quantity !== undefined ? color.quantity : null
+          quantity: color.quantity !== null && color.quantity !== undefined ? color.quantity : null,
+          colorImage: color.colorImage || null // ✅ include per-color image
         };
       }
       if (typeof color === 'string') {
-        return {
-          name: color,
-          quantity: null
-        };
+        return { name: color, quantity: null, colorImage: null };
       }
       return null;
     }).filter(Boolean);
@@ -67,6 +68,7 @@ const ProductDetailPage = () => {
         if (colors.length > 0) {
           setSelectedColorObj(colors[0]);
           setQuantity(1);
+          setColorImageDismissed(false);
         }
       } else {
         setError('Product not found');
@@ -107,7 +109,13 @@ const ProductDetailPage = () => {
     }
   }, [selectedColorObj]);
 
-  // ✅ Swipe handlers (main image)
+  // Handle color selection — switching color resets the dismissed state
+  const handleColorSelect = (colorObj) => {
+    setSelectedColorObj(colorObj);
+    setColorImageDismissed(false); // always show the new color's image if it has one
+  };
+
+  // Swipe handlers (main image)
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -115,6 +123,11 @@ const ProductDetailPage = () => {
   const handleTouchEnd = (e) => {
     touchEndX.current = e.changedTouches[0].clientX;
     const diff = touchStartX.current - touchEndX.current;
+    // When override is active, swipe clears it and navigates gallery
+    if (selectedColorObj?.colorImage && !colorImageDismissed) {
+      if (Math.abs(diff) > 50) setColorImageDismissed(true);
+      return;
+    }
     const allMedia = [...(product.images || []), ...(product.videos || [])];
     if (allMedia.length <= 1) return;
     if (diff > 50) {
@@ -124,7 +137,7 @@ const ProductDetailPage = () => {
     }
   };
 
-  // ✅ Gallery swipe
+  // Gallery swipe
   const handleGalleryTouchStart = (e) => {
     galleryTouchStartX.current = e.touches[0].clientX;
   };
@@ -142,7 +155,11 @@ const ProductDetailPage = () => {
   };
 
   const openGallery = (index) => {
-    setGalleryCurrentIndex(index);
+    if (selectedColorObj?.colorImage && !colorImageDismissed) {
+      setGalleryCurrentIndex(-1);
+    } else {
+      setGalleryCurrentIndex(index);
+    }
     setGalleryOpen(true);
   };
 
@@ -151,6 +168,11 @@ const ProductDetailPage = () => {
   };
 
   const navigateGallery = (direction) => {
+    if (galleryCurrentIndex === -1) {
+      // Was showing color image; go to first product image
+      setGalleryCurrentIndex(0);
+      return;
+    }
     const allMedia = [...(product.images || []), ...(product.videos || [])];
     if (direction === 'next') {
       setGalleryCurrentIndex(prev => (prev + 1) % allMedia.length);
@@ -247,7 +269,6 @@ const ProductDetailPage = () => {
     }
   };
 
-  // ✅ Helper to format warranty duration
   const getWarrantyLabel = (duration) => {
     const map = {
       '1year': '1 Year',
@@ -265,10 +286,7 @@ const ProductDetailPage = () => {
 
   const handleQuantityInputChange = (e) => {
     const value = e.target.value;
-    if (value === '') {
-      setQuantity(1);
-      return;
-    }
+    if (value === '') { setQuantity(1); return; }
     const numValue = parseInt(value, 10);
     if (!isNaN(numValue)) {
       const maxQty = getMaxQuantity();
@@ -276,24 +294,19 @@ const ProductDetailPage = () => {
     }
   };
 
-  const handleQuantityInputFocus = (e) => {
-    e.target.select();
-  };
+  const handleQuantityInputFocus = (e) => { e.target.select(); };
 
   const handleQuantityChange = (newQty) => {
     if (!selectedColorObj) return;
     if (selectedColorObj.quantity !== null) {
-      const maxQty = selectedColorObj.quantity;
-      setQuantity(Math.max(1, Math.min(newQty, maxQty)));
+      setQuantity(Math.max(1, Math.min(newQty, selectedColorObj.quantity)));
     } else {
       setQuantity(Math.max(1, newQty));
     }
   };
 
   const getMaxQuantity = () => {
-    if (!selectedColorObj || selectedColorObj.quantity === null) {
-      return 999;
-    }
+    if (!selectedColorObj || selectedColorObj.quantity === null) return 999;
     return selectedColorObj.quantity;
   };
 
@@ -302,18 +315,7 @@ const ProductDetailPage = () => {
       <div className="bg-black text-white min-h-screen">
         <ScrollToTop />
         <Loading message="Loading product details..." size="large" />
-        <ToastContainer 
-          position="bottom-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="dark"
-        />
+        <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="dark" />
       </div>
     );
   }
@@ -326,25 +328,11 @@ const ProductDetailPage = () => {
           <div className="text-6xl mb-4">⌚</div>
           <h2 className="text-2xl font-bold text-white mb-2">Product Not Found</h2>
           <p className="text-gray-400 mb-6">{error}</p>
-          <button
-            onClick={handleBackToShop}
-            className="bg-gold text-black px-6 py-2 rounded-lg font-medium hover:bg-gold/90 transition"
-          >
+          <button onClick={handleBackToShop} className="bg-gold text-black px-6 py-2 rounded-lg font-medium hover:bg-gold/90 transition">
             Browse Collection
           </button>
         </div>
-        <ToastContainer 
-          position="bottom-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="dark"
-        />
+        <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="dark" />
       </div>
     );
   }
@@ -352,32 +340,21 @@ const ProductDetailPage = () => {
   if (!product) return null;
 
   const allMedia = [...(product.images || []), ...(product.videos || [])];
-  const isVideo = mainImageIndex >= (product.images?.length || 0);
-  const currentMediaUrl = allMedia[mainImageIndex];
+  // ✅ Derive color image directly from selectedColorObj — no separate state needed
+  const colorImageOverride = (!colorImageDismissed && selectedColorObj?.colorImage) ? selectedColorObj.colorImage : null;
+  const isVideo = !colorImageOverride && mainImageIndex >= (product.images?.length || 0);
+  // ✅ Main display URL: color override takes priority, then normal gallery
+  const currentMediaUrl = colorImageOverride || allMedia[mainImageIndex];
   const productColors = parseProductColors(product);
   const totalMedia = allMedia.length;
   const visibleThumbnails = 4;
-
-  // For thumbnail navigation
   const visibleMedia = allMedia.slice(thumbnailStartIndex, thumbnailStartIndex + visibleThumbnails);
 
   return (
     <div className="bg-black text-white min-h-screen relative">
-      {/* <GuestPrompt> */}
       <ScrollToTop />
       
-      <ToastContainer 
-        position="bottom-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
+      <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="dark" />
 
       {/* Gallery Modal */}
       {galleryOpen && (
@@ -393,24 +370,23 @@ const ProductDetailPage = () => {
               ✕
             </button>
             
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                navigateGallery('prev');
-              }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition"
-            >
-              ‹
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                navigateGallery('next');
-              }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition"
-            >
-              ›
-            </button>
+            {/* Show prev/next only for product gallery (not color override only) */}
+            {galleryCurrentIndex !== -1 && (
+              <>
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigateGallery('prev'); }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition"
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigateGallery('next'); }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition"
+                >
+                  ›
+                </button>
+              </>
+            )}
             
             <div 
               className="relative w-full h-full"
@@ -418,7 +394,17 @@ const ProductDetailPage = () => {
               onTouchEnd={handleGalleryTouchEnd}
               onClick={(e) => e.stopPropagation()}
             >
-              {galleryCurrentIndex >= (product.images?.length || 0) ? (
+              {/* Color image lightbox */}
+              {galleryCurrentIndex === -1 ? (
+                <div className="flex flex-col items-center">
+                  <img
+                    src={colorImageOverride}
+                    alt={`${selectedColorObj?.name} color`}
+                    className="w-full max-h-[75vh] object-contain"
+                  />
+                  <p className="text-gray-400 text-sm mt-3">{selectedColorObj?.name}</p>
+                </div>
+              ) : galleryCurrentIndex >= (product.images?.length || 0) ? (
                 <video
                   src={allMedia[galleryCurrentIndex]}
                   controls
@@ -435,9 +421,11 @@ const ProductDetailPage = () => {
               )}
             </div>
             
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
-              {galleryCurrentIndex + 1} / {totalMedia}
-            </div>
+            {galleryCurrentIndex !== -1 && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
+                {galleryCurrentIndex + 1} / {totalMedia}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -466,7 +454,30 @@ const ProductDetailPage = () => {
               onTouchEnd={isTouchDevice ? handleTouchEnd : undefined}
               onClick={() => openGallery(mainImageIndex)}
             >
-              {isVideo ? (
+              {/* ✅ Color image badge */}
+              {colorImageOverride && (
+                <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-black/60 backdrop-blur px-2.5 py-1 rounded-full">
+                  <div className="w-2 h-2 rounded-full bg-gold" />
+                  <span className="text-white text-xs font-medium">{selectedColorObj?.name}</span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setColorImageDismissed(true); }}
+                    className="ml-1 text-gray-400 hover:text-white transition text-xs"
+                    title="Show all product images"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              {colorImageOverride ? (
+                // Show color-specific image
+                <img
+                  src={colorImageOverride}
+                  alt={`${selectedColorObj?.name} variant`}
+                  className="max-h-[85%] max-w-[85%] object-contain transition-opacity duration-300"
+                  onError={(e) => e.target.style.display = 'none'}
+                />
+              ) : isVideo ? (
                 <video
                   src={currentMediaUrl}
                   className="w-full h-full object-contain"
@@ -486,7 +497,9 @@ const ProductDetailPage = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-white text-sm">View Gallery ({totalMedia})</span>
+                  <span className="text-white text-sm">
+                    {colorImageOverride ? 'View Fullscreen' : `View Gallery (${totalMedia})`}
+                  </span>
                 </div>
               </div>
             </div>
@@ -494,7 +507,6 @@ const ProductDetailPage = () => {
             {/* Thumbnail Strip */}
             {totalMedia > 0 && (
               <div className="relative">
-                {/* Navigation Arrows */}
                 {totalMedia > visibleThumbnails && (
                   <>
                     <button
@@ -518,7 +530,6 @@ const ProductDetailPage = () => {
                   </>
                 )}
 
-                {/* Thumbnails */}
                 <div className="flex gap-2 overflow-hidden">
                   {visibleMedia.map((media, idx) => {
                     const globalIndex = thumbnailStartIndex + idx;
@@ -528,10 +539,11 @@ const ProductDetailPage = () => {
                         key={globalIndex}
                         onClick={() => {
                           setMainImageIndex(globalIndex);
+                          setColorImageDismissed(true); // clear color override when user clicks gallery thumb
                           openGallery(globalIndex);
                         }}
                         className={`flex-shrink-0 bg-gray-900/40 backdrop-blur border rounded-lg overflow-hidden aspect-square flex items-center justify-center transition-all relative ${
-                          mainImageIndex === globalIndex
+                          !colorImageOverride && mainImageIndex === globalIndex
                             ? 'border-gold shadow-lg shadow-gold/20'
                             : 'border-gray-800 hover:border-gray-600'
                         }`}
@@ -539,12 +551,7 @@ const ProductDetailPage = () => {
                       >
                         {isThumbVideo ? (
                           <div className="relative w-full h-full">
-                            <video
-                              src={media}
-                              className="w-full h-full object-cover"
-                              muted
-                              playsInline
-                            />
+                            <video src={media} className="w-full h-full object-cover" muted playsInline />
                             <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none">
                               <div className="bg-gold/90 rounded-full p-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-black" fill="currentColor" viewBox="0 0 24 24">
@@ -612,17 +619,35 @@ const ProductDetailPage = () => {
                         {productColors.map((colorObj, idx) => (
                           <button
                             key={idx}
-                            onClick={() => setSelectedColorObj(colorObj)}
-                            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                            onClick={() => handleColorSelect(colorObj)} // ✅ use new handler
+                            className={`relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                               selectedColorObj?.name === colorObj.name
                                 ? 'bg-gold text-black shadow-md ring-2 ring-gold/50'
                                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
                             }`}
                           >
+                            {/* ✅ Show tiny color thumbnail if available */}
+                            {colorObj.colorImage && (
+                              <img
+                                src={colorObj.colorImage}
+                                alt={colorObj.name}
+                                className="w-5 h-5 rounded object-cover flex-shrink-0"
+                              />
+                            )}
                             {colorObj.name}
                           </button>
                         ))}
                       </div>
+
+                      {/* ✅ Color image hint */}
+                      {selectedColorObj?.colorImage && (
+                        <p className="text-gray-500 text-xs mt-2 flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Showing image for selected color
+                        </p>
+                      )}
                       
                       {selectedColorObj && selectedColorObj.quantity !== null && (
                         <div className="mt-3 flex items-center gap-2 text-sm">
@@ -640,9 +665,7 @@ const ProductDetailPage = () => {
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span className="text-blue-400 font-medium">
-                            Available
-                          </span>
+                          <span className="text-blue-400 font-medium">Available</span>
                         </div>
                       )}
                     </div>
@@ -679,9 +702,7 @@ const ProductDetailPage = () => {
                       </div>
                       
                       {selectedColorObj && selectedColorObj.quantity !== null && (
-                        <span className="text-gray-400 text-sm">
-                          Max: {selectedColorObj.quantity}
-                        </span>
+                        <span className="text-gray-400 text-sm">Max: {selectedColorObj.quantity}</span>
                       )}
                     </div>
                   </div>
@@ -756,9 +777,7 @@ const ProductDetailPage = () => {
             {/* Description */}
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-white mb-2">Description</h2>
-              <p className="text-gray-300 leading-relaxed text-sm">
-                {product.description}
-              </p>
+              <p className="text-gray-300 leading-relaxed text-sm">{product.description}</p>
             </div>
 
             {/* Specifications */}
@@ -804,7 +823,7 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            {/* ✅ NEW: Warranty Section (moved before Returns) */}
+            {/* Warranty Section */}
             {product.warranty && product.warranty.duration !== 'nowarranty' && (
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-white mb-2">Warranty</h2>
@@ -847,10 +866,7 @@ const ProductDetailPage = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </div>
-                  <Link 
-                    to="/privacy" 
-                    className="text-white text-sm font-medium hover:text-gold transition"
-                  >
+                  <Link to="/privacy" className="text-white text-sm font-medium hover:text-gold transition">
                     Privacy Policy
                   </Link>
                 </div>
@@ -898,20 +914,13 @@ const ProductDetailPage = () => {
                         onError={(e) => e.target.style.display = 'none'}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-600 text-sm">
-                        No Image
-                      </div>
+                      <div className="w-full h-full flex items-center justify-center text-gray-600 text-sm">No Image</div>
                     )}
                   </div>
-
                   <div className="text-center">
-                    <h3 className="text-white text-sm font-semibold line-clamp-1 mb-1">
-                      {relatedProduct.title}
-                    </h3>
+                    <h3 className="text-white text-sm font-semibold line-clamp-1 mb-1">{relatedProduct.title}</h3>
                     <p className="text-gray-400 text-xs mb-1">{relatedProduct.brand}</p>
-                    <p className="text-gold text-sm font-medium">
-                      {formatPrice(relatedProduct.price)}
-                    </p>
+                    <p className="text-gold text-sm font-medium">{formatPrice(relatedProduct.price)}</p>
                   </div>
                 </div>
               ))}
@@ -919,7 +928,6 @@ const ProductDetailPage = () => {
           </div>
         )}
       </div>
-        {/* </GuestPrompt> */}
     </div>
   );
 };
