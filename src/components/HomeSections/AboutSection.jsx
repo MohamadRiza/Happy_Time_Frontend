@@ -123,7 +123,7 @@ const AboutSection = () => {
             <p className="text-gray-300 leading-relaxed text-base font-light">
               Since <span className="text-gold font-normal">1996</span>, Happy Time Pvt Ltd has served 
               Sri Lanka with authentic timepieces from our own distinguished brands: 
-              <span className="text-gold font-normal"> Winsor, Orix, and Arial</span>.
+              <span className="text-gold font-normal"> Winsor, Orix, and Ariel</span>.
             </p>
 
             <p className="text-gray-400 leading-relaxed text-base font-light">

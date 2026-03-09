@@ -14,9 +14,9 @@ import GuestPrompt from '../components/GuestPrompt';
 const Home = () => {
   // SEO Meta Data
   const seoData = {
-    title: "Happy Time | Sri Lanka's Premium Watch Collection - Winsor, Orix, Arial, and more",
-    description: "Happy Time Pvt Ltd offers Sri Lanka's finest collection of luxury watches. Shop exclusive brands Winsor, Orix & Arial. Wholesale & retail available in Colombo, Kandy & Dubai.",
-    keywords: "luxury watches Sri Lanka, premium watches Colombo, Winsor watches, Orix watches, Arial wall clocks, watch shop Pettah, wholesale watches, retail watches, Kandy watch store, Dubai watch shop, Happy Time watches, affordable luxury watches, men's watches, women's watches, unisex watches, kids watches, Smart watches, couple watches, high copy watches, watch repair Sri Lanka, watch accessories, watch servicing, watch collection Sri Lanka",
+    title: "Happy Time | Sri Lanka's Premium Watch Collection - Winsor, Orix, Ariel, and more",
+    description: "Happy Time Pvt Ltd offers Sri Lanka's finest collection of luxury watches. Shop exclusive brands Winsor, Orix & Ariel. Wholesale & retail available in Colombo, Kandy & Dubai.",
+    keywords: "luxury watches Sri Lanka, premium watches Colombo, Winsor watches, Orix watches, Ariel wall clocks, watch shop Pettah, wholesale watches, retail watches, Kandy watch store, Dubai watch shop, Happy Time watches, affordable luxury watches, men's watches, women's watches, unisex watches, kids watches, Smart watches, couple watches, high copy watches, watch repair Sri Lanka, watch accessories, watch servicing, watch collection Sri Lanka",
     canonicalUrl: "/"
   };
 
@@ -63,7 +63,7 @@ const Home = () => {
           },
           "areaServed": ["LK", "AE"],
           "foundingYear": "1996",
-          "brand": ["Winsor", "Orix", "Arial", "High Copy"],
+          "brand": ["Winsor", "Orix", "Ariel", "High Copy"],
           "sameAs": [
             "https://www.facebook.com/happytime",
             "https://www.instagram.com/happytime"
@@ -78,7 +78,7 @@ const Home = () => {
           "@type": "WebSite",
           "name": "Happy Time Watches",
           "url": "https://www.happytimeonline.com",
-          "description": "Premium watch collection in Sri Lanka - Luxury watches from Winsor, Orix & Arial brands",
+          "description": "Premium watch collection in Sri Lanka - Luxury watches from Winsor, Orix & Ariel brands",
           "publisher": {
             "@type": "Organization",
             "name": "Happy Time Pvt Ltd"
@@ -97,7 +97,7 @@ const Home = () => {
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           "name": "Happy Time Watch Collection",
-          "description": "Explore our exclusive collection of luxury watches from Winsor, Orix and Arial brands",
+          "description": "Explore our exclusive collection of luxury watches from Winsor, Orix and Ariel brands",
           "url": "https://www.happytimeonline.com",
           "image": "https://www.happytime.lk/ogimage.png",
           "mainEntity": {
@@ -117,9 +117,9 @@ const Home = () => {
               },
               {
                 "@type": "Product",
-                "name": "Arial Wall Clocks",
+                "name": "Ariel Wall Clocks",
                 "description": "Premium wall clocks combining functional design with artistic craftsmanship",
-                "brand": "Arial"
+                "brand": "Ariel"
               }
             ]
           }

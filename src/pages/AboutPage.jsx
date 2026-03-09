@@ -61,8 +61,8 @@ const AboutPage = () => {
 
   const seoData = {
     title: "About Happy Time | Sri Lanka's Trusted Watch Retailer Since 1996",
-    description: "Happy Time Pvt Ltd is Sri Lanka's leading watch distribution and retail company. We offer luxury watches from our exclusive brands Winsor, Orix, and Arial. Visit our branches in Colombo, Kandy, and Dubai.",
-    keywords: "luxury watches Sri Lanka, watch shop Colombo, Winsor watches, Orix watches, Arial wall clocks, High Copy Watches, original watches, watch retailer Kandy, Dubai watch store, wholesale watches, premium timepieces, Pettah watch shop, Watch Wholesaleler Sri Lanka, watch distributor Sri Lanka, Happy Time watches, watch brands Sri Lanka",
+    description: "Happy Time Pvt Ltd is Sri Lanka's leading watch distribution and retail company. We offer luxury watches from our exclusive brands Winsor, Orix, and Ariel. Visit our branches in Colombo, Kandy, and Dubai.",
+    keywords: "luxury watches Sri Lanka, watch shop Colombo, Winsor watches, Orix watches, Ariel wall clocks, High Copy Watches, original watches, watch retailer Kandy, Dubai watch store, wholesale watches, premium timepieces, Pettah watch shop, Watch Wholesaleler Sri Lanka, watch distributor Sri Lanka, Happy Time watches, watch brands Sri Lanka",
     canonicalUrl: "/about"
   }
 
@@ -128,7 +128,7 @@ const AboutPage = () => {
                 proudly manage our own brands -{" "}
                 <span className="text-gold">Winsor and Orix</span> for wrist
                 watches, and
-                <span className="text-gold"> Arial</span> for wall clocks. Our
+                <span className="text-gold"> Ariel</span> for wall clocks. Our
                 goal is to offer timepieces that combine good design, quality,
                 and affordable pricing.
               </p>
@@ -229,7 +229,7 @@ const AboutPage = () => {
               <p className="text-gray-400 leading-relaxed text-sm">
                 We focus on: supplying stylish and durable watches, supporting
                 both wholesale and retail customers, growing our own brands like
-                Winsor, Orix, and Arial, and expanding step by step into new
+                Winsor, Orix, and Ariel, and expanding step by step into new
                 markets. We are committed to service, trust, and long-term
                 success.
               </p>
@@ -338,13 +338,13 @@ const AboutPage = () => {
               </div>
             </div>
 
-            {/* Arial */}
+            {/* Ariel */}
             <div
               className="bg-gradient-to-br from-gray-800/40 via-gray-900/30 to-gray-800/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-sm hover:border-gold/30 transition-all duration-300 group hover:scale-105"
               itemScope
               itemType="https://schema.org/Brand"
             >
-              <meta itemProp="name" content="Arial" />
+              <meta itemProp="name" content="Ariel" />
               <meta
                 itemProp="description"
                 content="Premium wall clocks combining functional design with artistic craftsmanship"
@@ -352,14 +352,14 @@ const AboutPage = () => {
               <div className="flex justify-center mb-6 h-32 items-center">
                 <img
                   src="/ArielBrand.webp"
-                  alt="Arial Wall Clock Brand Logo - Premium Wall Clocks"
+                  alt="Ariel Wall Clock Brand Logo - Premium Wall Clocks"
                   className="h-24 w-auto object-contain filter rounded-lg transition-all duration-300"
                   width="200"
                   height="200"
                   onError={(e) => {
                     e.target.style.display = "none";
                     const span = document.createElement("span");
-                    span.textContent = "ARIAL";
+                    span.textContent = "ARIEL";
                     span.className =
                       "text-white text-3xl font-bold tracking-wider";
                     e.target.parentNode.appendChild(span);
@@ -368,14 +368,14 @@ const AboutPage = () => {
               </div>
               <div className="text-center">
                 <h3 className="text-xl font-bold text-white mb-2 group-hover:text-gold transition-colors">
-                  Arial
+                  Ariel
                 </h3>
                 <h4 className="text-gold font-semibold mb-4 text-sm">
                   Wall Clocks
                 </h4>
                 <div className="w-12 h-0.5 bg-gold/30 mx-auto mb-4"></div>
                 <p className="text-gray-300 leading-relaxed text-sm text-justify">
-                  Arial brings elegance and precision to your living spaces with
+                  Ariel brings elegance and precision to your living spaces with
                   our premium wall clock collection. Combining functional design
                   with artistic craftsmanship, each piece serves as both a
                   timekeeper and a statement of style for your home or office.

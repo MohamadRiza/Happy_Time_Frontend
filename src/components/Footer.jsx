@@ -173,7 +173,7 @@ const Footer = () => {
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 w-2 h-2 bg-gold rounded-full"></div>
                   <div>
-                    <p className="font-medium text-white">Arial</p>
+                    <p className="font-medium text-white">Ariel</p>
                     <p className="text-gray-400 text-sm">Luxury wall clocks for home and office</p>
                   </div>
                 </div>

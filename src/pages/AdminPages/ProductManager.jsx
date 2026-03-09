@@ -49,7 +49,7 @@ const ProductManager = () => {
   const [availableBrands, setAvailableBrands] = useState([]);
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  const formBrands = ['Rolex', 'Omega', 'Citizen', 'Winsor', 'Arial', 'Patek Philippe', 'Audemars Piguet', 'TISSOT', 'TAG HEUER', 'Longines', 'Jacob & Co', 'Cartier', 'HUBLOT', 'CASIO', 'CASIO EDIFICE', 'RICHARD MILLE', 'RADO', 'VERSACE', 'FOSSIL', 'INVICTA', 'Other'];
+  const formBrands = ['Rolex', 'Omega', 'Citizen', 'Winsor', 'Ariel', 'Patek Philippe', 'Audemars Piguet', 'TISSOT', 'TAG HEUER', 'Longines', 'Jacob & Co', 'Cartier', 'HUBLOT', 'CASIO', 'CASIO EDIFICE', 'RICHARD MILLE', 'RADO', 'VERSACE', 'FOSSIL', 'INVICTA', 'Other'];
   const watchShapes = ['Round', 'Square', 'Rectangular', 'Oval', 'Tonneau', 'Other'];
   const wristWatchGenders = [
     { value: 'men', label: 'Men' },
