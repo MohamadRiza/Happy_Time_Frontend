@@ -36,6 +36,10 @@ const styles = `
     --radius: 14px;
     --radius-lg: 20px;
     --shadow-gold: 0 0 32px rgba(201,168,76,0.1);
+    /* Nav bar height — adjust if yours differs */
+    --nav-height: 56px;
+    /* Sticky checkout bar height */
+    --sticky-bar-height: 72px;
   }
 
   *, *::before, *::after { box-sizing: border-box; }
@@ -47,20 +51,22 @@ const styles = `
     font-family: 'Outfit', sans-serif;
     font-weight: 300;
     overflow-x: hidden;
-    /* Bottom padding for mobile sticky bar */
-    padding-bottom: 100px;
+    /* Reserve space so content isn't hidden behind sticky bar + nav on mobile */
+    padding-bottom: calc(var(--sticky-bar-height) + var(--nav-height) + 16px);
   }
-  @media(min-width:768px) { .cart-root { padding-bottom: 0; } }
+  @media(min-width:768px) {
+    .cart-root { padding-bottom: 0; }
+  }
 
   /* ── WRAPPER ── */
   .cart-wrapper {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 20px 14px 40px;
+    padding: 16px 12px 32px;
     width: 100%;
   }
-  @media(min-width:480px)  { .cart-wrapper { padding: 24px 18px 48px; } }
-  @media(min-width:640px)  { .cart-wrapper { padding: 32px 24px 56px; } }
+  @media(min-width:480px)  { .cart-wrapper { padding: 20px 16px 40px; } }
+  @media(min-width:640px)  { .cart-wrapper { padding: 28px 22px 48px; } }
   @media(min-width:1024px) { .cart-wrapper { padding: 44px 40px 72px; } }
 
   /* ── PAGE HEADER ── */
@@ -68,13 +74,12 @@ const styles = `
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    margin-bottom: 24px;
-    padding-bottom: 18px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
     border-bottom: 1px solid var(--border);
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
   }
-  .cart-header-left {}
   .cart-eyebrow {
     font-size: 9px;
     letter-spacing: 0.25em;
@@ -86,7 +91,7 @@ const styles = `
   }
   .cart-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(26px, 5vw, 40px);
+    font-size: clamp(24px, 5vw, 40px);
     font-weight: 400;
     line-height: 1.1;
     color: var(--text);
@@ -101,15 +106,22 @@ const styles = `
     align-self: flex-end;
   }
 
-  /* ── LAYOUT: 2-col on desktop ── */
+  /* ── LAYOUT: single col on mobile, 2-col on desktop ── */
   .cart-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    align-items: start;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
   @media(min-width:900px) {
-    .cart-layout { grid-template-columns: 1fr 340px; gap: 28px; }
+    .cart-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 28px;
+      align-items: start;
+    }
+  }
+  @media(min-width:1024px) {
+    .cart-layout { grid-template-columns: 1fr 340px; }
   }
 
   /* ── SELECT ALL BAR ── */
@@ -120,13 +132,13 @@ const styles = `
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 12px 16px;
-    margin-bottom: 12px;
+    padding: 11px 14px;
+    margin-bottom: 10px;
   }
   .select-all-label {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 9px;
     cursor: pointer;
     font-size: 13px;
     font-weight: 500;
@@ -135,8 +147,8 @@ const styles = `
     user-select: none;
   }
   .cart-checkbox {
-    width: 17px;
-    height: 17px;
+    width: 16px;
+    height: 16px;
     accent-color: var(--gold);
     cursor: pointer;
     flex-shrink: 0;
@@ -153,6 +165,7 @@ const styles = `
     padding: 4px 0;
     transition: opacity 0.2s;
     -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
   }
   .clear-btn:hover { opacity: 0.75; }
 
@@ -164,12 +177,14 @@ const styles = `
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 14px;
+    padding: 12px;
     transition: border-color 0.25s;
     position: relative;
     overflow: hidden;
   }
-  @media(min-width:480px) { .cart-item-card { padding: 16px; } }
+  @media(min-width:480px) { .cart-item-card { padding: 14px; } }
+  @media(min-width:640px) { .cart-item-card { padding: 16px; } }
+
   .cart-item-card.selected { border-color: var(--gold-border); }
   .cart-item-card.selected::before {
     content: '';
@@ -203,23 +218,24 @@ const styles = `
   /* Item inner layout */
   .cart-item-inner {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: flex-start;
   }
-  @media(min-width:480px) { .cart-item-inner { gap: 14px; } }
+  @media(min-width:480px) { .cart-item-inner { gap: 12px; } }
+  @media(min-width:640px) { .cart-item-inner { gap: 14px; } }
 
   /* Checkbox column */
   .item-check-col {
     display: flex;
     align-items: flex-start;
-    padding-top: 2px;
+    padding-top: 3px;
     flex-shrink: 0;
   }
 
   /* Image */
   .item-img-wrap {
-    width: 80px;
-    height: 80px;
+    width: 72px;
+    height: 72px;
     border-radius: 10px;
     overflow: hidden;
     background: var(--surface2);
@@ -228,7 +244,8 @@ const styles = `
     align-items: center;
     justify-content: center;
   }
-  @media(min-width:480px) { .item-img-wrap { width: 90px; height: 90px; } }
+  @media(min-width:400px) { .item-img-wrap { width: 80px; height: 80px; } }
+  @media(min-width:480px) { .item-img-wrap { width: 88px; height: 88px; } }
   @media(min-width:640px) { .item-img-wrap { width: 100px; height: 100px; } }
   .item-img {
     width: 100%;
@@ -249,7 +266,7 @@ const styles = `
     margin-bottom: 3px;
   }
   .item-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text);
     white-space: nowrap;
@@ -258,15 +275,17 @@ const styles = `
     margin-bottom: 4px;
     display: block;
   }
+  @media(min-width:400px) { .item-title { font-size: 13px; } }
   @media(min-width:480px) { .item-title { font-size: 14px; } }
+
   .item-color-row {
     display: flex;
     align-items: center;
     gap: 5px;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
   .item-color-dot {
-    width: 8px; height: 8px;
+    width: 7px; height: 7px;
     border-radius: 50%;
     background: var(--gold-border);
     border: 1px solid var(--gold-border);
@@ -285,13 +304,13 @@ const styles = `
   .item-stock.low-stock { color: var(--gold); }
   .item-stock.out  { color: var(--red); }
 
-  /* Bottom row: qty + price */
+  /* Bottom row: qty + price — stack on very small, row on larger */
   .item-bottom-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 8px;
+    flex-wrap: nowrap;
   }
 
   /* Quantity control */
@@ -302,13 +321,14 @@ const styles = `
     border: 1px solid var(--border);
     border-radius: 9px;
     overflow: hidden;
+    flex-shrink: 0;
   }
   .qty-btn {
-    width: 32px; height: 32px;
+    width: 30px; height: 30px;
     background: var(--surface3);
     border: none;
     color: var(--text);
-    font-size: 16px;
+    font-size: 15px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -319,11 +339,12 @@ const styles = `
     flex-shrink: 0;
     -webkit-tap-highlight-color: transparent;
   }
+  @media(min-width:400px) { .qty-btn { width: 32px; height: 32px; } }
   .qty-btn:hover:not(:disabled) { background: var(--gold-dim); color: var(--gold); }
   .qty-btn:active:not(:disabled) { background: rgba(201,168,76,0.2); }
   .qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
   .qty-input {
-    width: 36px; height: 32px;
+    width: 32px; height: 30px;
     background: var(--surface2);
     border: none;
     border-left: 1px solid var(--border);
@@ -331,11 +352,12 @@ const styles = `
     color: var(--text);
     text-align: center;
     font-family: 'Outfit', sans-serif;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     outline: none;
     -moz-appearance: textfield;
   }
+  @media(min-width:400px) { .qty-input { width: 34px; height: 32px; font-size: 13px; } }
   .qty-input::-webkit-inner-spin-button,
   .qty-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
@@ -349,12 +371,13 @@ const styles = `
   }
   .item-price {
     font-family: 'Outfit', sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--text);
     letter-spacing: -0.01em;
     white-space: nowrap;
   }
+  @media(min-width:400px) { .item-price { font-size: 14px; } }
   @media(min-width:480px) { .item-price { font-size: 15px; } }
   .item-remove {
     font-size: 10px;
@@ -368,6 +391,7 @@ const styles = `
     transition: opacity 0.2s;
     -webkit-tap-highlight-color: transparent;
     font-weight: 500;
+    white-space: nowrap;
   }
   .item-remove:hover { opacity: 0.7; }
 
@@ -383,24 +407,32 @@ const styles = `
     gap: 7px;
     font-size: 11px;
     color: var(--red);
+    line-height: 1.4;
   }
 
-  /* ── ORDER SUMMARY (sidebar) ── */
+  /* ── ORDER SUMMARY (sidebar / mobile inline) ── */
   .order-summary {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 20px;
-    position: sticky;
-    top: 20px;
+    padding: 18px;
+    /* On mobile: shown inline below items, no sticky */
   }
+  @media(min-width:900px) {
+    .order-summary {
+      padding: 20px;
+      position: sticky;
+      top: 20px;
+    }
+  }
+
   .summary-title {
     font-family: 'Cormorant Garamond', serif;
     font-size: 20px;
     font-weight: 400;
     color: var(--text);
-    margin-bottom: 16px;
-    padding-bottom: 14px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
     border-bottom: 1px solid var(--border);
   }
   .summary-row {
@@ -418,7 +450,7 @@ const styles = `
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
   .summary-total-label {
     font-size: 11px;
@@ -464,13 +496,20 @@ const styles = `
 
   /* Secondary buttons */
   .secondary-btns {
-    display: none;
+    display: flex;
     gap: 8px;
-    margin-top: 20px;
-    padding-top: 18px;
+    margin-top: 16px;
+    padding-top: 16px;
     border-top: 1px solid var(--border);
   }
-  @media(min-width:768px) { .secondary-btns { display: flex; } }
+  /* Hide the left-column secondary buttons on desktop (summary has its own) */
+  .items-col .secondary-btns {
+    display: none;
+  }
+  @media(min-width:900px) {
+    .items-col .secondary-btns { display: flex; }
+  }
+
   .btn-secondary {
     flex: 1;
     display: flex;
@@ -490,6 +529,7 @@ const styles = `
     cursor: pointer;
     transition: all 0.2s;
     -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
   }
   .btn-secondary:hover { border-color: var(--border-hover); color: var(--gold); background: var(--surface3); }
 
@@ -499,9 +539,9 @@ const styles = `
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 56px 24px;
+    padding: 48px 20px;
   }
-  .empty-icon { font-size: 56px; margin-bottom: 14px; }
+  .empty-icon { font-size: 52px; margin-bottom: 14px; }
   .empty-title {
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(22px, 4vw, 30px);
@@ -533,19 +573,27 @@ const styles = `
   .btn-browse:hover { background: var(--gold-light); box-shadow: 0 6px 24px rgba(201,168,76,0.3); }
 
   /* ── MOBILE STICKY BAR ── */
+  /*
+    Sits just above the bottom nav bar.
+    Uses var(--nav-height) so you only need to change it in one place.
+  */
   .mobile-sticky-bar {
     display: block;
     position: fixed;
-    bottom: 56px; /* above nav tab bar */
-    left: 0; right: 0;
-    background: rgba(10,10,10,0.96);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    bottom: var(--nav-height);
+    left: 0;
+    right: 0;
+    background: rgba(8,8,8,0.97);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-top: 1px solid var(--border);
     padding: 10px 14px;
-    z-index: 50;
+    z-index: 100;
+    /* Safe-area inset for notched phones — no effect on regular phones */
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   }
   @media(min-width:768px) { .mobile-sticky-bar { display: none; } }
+
   .sticky-bar-inner {
     display: flex;
     align-items: center;
@@ -554,8 +602,20 @@ const styles = `
     max-width: 600px;
     margin: 0 auto;
   }
-  .sticky-total-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2px; }
-  .sticky-total-val { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: var(--gold-light); letter-spacing: -0.01em; }
+  .sticky-total-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .sticky-total-val {
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gold-light);
+    letter-spacing: -0.01em;
+  }
   .btn-checkout-mobile {
     display: flex;
     align-items: center;
@@ -565,17 +625,18 @@ const styles = `
     color: #000;
     border: none;
     border-radius: 10px;
-    padding: 11px 20px;
+    padding: 12px 20px;
     font-family: 'Outfit', sans-serif;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.07em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.15s;
     white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
     box-shadow: 0 4px 16px rgba(201,168,76,0.28);
+    flex-shrink: 0;
   }
   .btn-checkout-mobile:hover:not(:disabled) { background: var(--gold-light); }
   .btn-checkout-mobile:active:not(:disabled) { transform: scale(0.97); }
@@ -584,11 +645,25 @@ const styles = `
   /* ── MISC ── */
   .error-msg { color: var(--red); font-size: 13px; margin-bottom: 14px; }
 
-  /* custom checkbox accent */
-  input[type="checkbox"].cart-checkbox {
-    cursor: pointer;
-    border-radius: 4px;
+  input[type="checkbox"].cart-checkbox { cursor: pointer; border-radius: 4px; }
+
+  /* Trust micro-badges */
+  .trust-badges {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
+  .trust-badge-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .trust-badge-item span:first-child { font-size: 13px; }
 `;
 
 const CartPage = () => {
@@ -634,7 +709,6 @@ const CartPage = () => {
 
   useEffect(() => { fetchCart(); }, []);
 
-  // Helper that accepts items array (to avoid stale closure in fetchCart)
   const getMaxAvailableQuantityFromItems = (items, productId, selectedColor) => {
     if (!productId) return 0;
     const item = items.find(i => i.productId?._id === productId && i.selectedColor === selectedColor);
@@ -775,6 +849,12 @@ const CartPage = () => {
     item.productId && getMaxAvailableQuantity(item.productId._id, item.selectedColor) > 0
   ).length;
 
+  const trustBadges = [
+    { icon: '🔒', text: 'Secure checkout' },
+    { icon: '↩️', text: '7-day hassle-free returns' },
+    { icon: '✓', text: 'Authentic products' },
+  ];
+
   return (
     <>
       <style>{styles}</style>
@@ -829,7 +909,7 @@ const CartPage = () => {
             <div className="cart-layout">
 
               {/* ── LEFT: ITEMS ── */}
-              <div>
+              <div className="items-col">
                 {/* Select all bar */}
                 <div className="select-all-bar">
                   <label className="select-all-label">
@@ -840,7 +920,7 @@ const CartPage = () => {
                       onChange={toggleSelectAll}
                     />
                     Select All
-                    <span style={{ color: 'var(--text-muted)', fontWeight: 300, fontSize: 12 }}>
+                    <span style={{ color: 'var(--text-muted)', fontWeight: 300, fontSize: 11 }}>
                       ({inStockCount} available)
                     </span>
                   </label>
@@ -852,7 +932,6 @@ const CartPage = () => {
                 {/* Items */}
                 <div className="cart-items-list">
                   {cartItems.map(item => {
-                    // Unavailable product
                     if (!item.productId) {
                       return (
                         <div key={item._id} className="cart-item-card unavailable">
@@ -959,7 +1038,7 @@ const CartPage = () => {
                   })}
                 </div>
 
-                {/* Desktop secondary buttons */}
+                {/* Desktop-only secondary buttons below items list */}
                 <div className="secondary-btns">
                   <button className="btn-secondary" onClick={() => navigate('/shop')}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -976,8 +1055,10 @@ const CartPage = () => {
                 </div>
               </div>
 
-              {/* ── RIGHT: ORDER SUMMARY (desktop) ── */}
-              <div className="order-summary" style={{ display: 'none' }} ref={el => { if (el) el.style.display = 'block'; }}>
+              {/* ── RIGHT / BOTTOM: ORDER SUMMARY ── */}
+              {/* On mobile this renders below the items list (normal flow).
+                  On desktop (≥900px) it becomes the sticky sidebar via grid. */}
+              <div className="order-summary">
                 <h2 className="summary-title">Order Summary</h2>
 
                 <div className="summary-row">
@@ -1000,6 +1081,7 @@ const CartPage = () => {
                   <span className="summary-total-val">{formatPrice(selectedTotal)}</span>
                 </div>
 
+                {/* Show checkout button inside summary only on desktop */}
                 <button
                   className="btn-checkout"
                   onClick={proceedToCheckout}
@@ -1011,7 +1093,7 @@ const CartPage = () => {
                   Proceed to Checkout
                 </button>
 
-                <div className="secondary-btns" style={{ display: 'flex', marginTop: 16, paddingTop: 16 }}>
+                <div className="secondary-btns">
                   <button className="btn-secondary" onClick={() => navigate('/shop')}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -1026,16 +1108,11 @@ const CartPage = () => {
                   </button>
                 </div>
 
-                {/* Trust micro-badges */}
-                <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {[
-                    { icon: '🔒', text: 'Secure checkout' },
-                    { icon: '↩️', text: '7-day hassle-free returns' },
-                    { icon: '✓', text: 'Authentic products' },
-                  ].map(({ icon, text }) => (
-                    <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--text-muted)' }}>
-                      <span style={{ fontSize: 13 }}>{icon}</span>
-                      {text}
+                <div className="trust-badges">
+                  {trustBadges.map(({ icon, text }) => (
+                    <div key={text} className="trust-badge-item">
+                      <span>{icon}</span>
+                      <span>{text}</span>
                     </div>
                   ))}
                 </div>
