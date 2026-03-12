@@ -1428,7 +1428,7 @@ const CheckoutPage = () => {
           </div>
         </div>
 
-        {/* ── MOBILE STICKY BAR ── */}
+        {/* ──- MOBILE STICKY BAR -── */}
         <div className="co-sticky-bar">
           <div className="co-sticky-inner">
             <div>
