@@ -1122,7 +1122,7 @@ const CartPage = () => {
           )}
         </div>
 
-        {/* ── MOBILE STICKY BOTTOM BAR ── */}
+        {/*  ── MOBILE STICKY BOTTOM BAR ──  */}
         {cartItems.length > 0 && (
           <div className="mobile-sticky-bar">
             <div className="sticky-bar-inner">
@@ -1145,7 +1145,7 @@ const CartPage = () => {
             </div>
           </div>
         )}
-      </div>
+      </div> 
     </>
   );
 };
