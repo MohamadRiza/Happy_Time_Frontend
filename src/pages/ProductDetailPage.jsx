@@ -163,14 +163,18 @@ const styles = `
   /* Desktop arrow buttons on main image */
   .gallery-nav-btn {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
-    width: 34px; height: 34px; background: rgba(8,8,8,0.72);
+    width: 38px; height: 38px; background: rgba(8,8,8,0.75);
     border: 1px solid var(--border); border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    color: var(--text); font-size: 18px; cursor: pointer; line-height: 1;
-    transition: opacity 0.2s, background 0.2s, border-color 0.2s;
+    color: var(--text); font-size: 20px; cursor: pointer; line-height: 1;
+    transition: opacity 0.2s, background 0.2s, border-color 0.2s, color 0.2s;
     opacity: 0;
+    pointer-events: none;
   }
-  .gallery-main:hover .gallery-nav-btn { opacity: 1; }
+  .gallery-main:hover .gallery-nav-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
   .gallery-nav-btn:hover { background: var(--gold-dim); border-color: var(--gold-border); color: var(--gold); }
   .gallery-nav-btn.prev { left: 10px; }
   .gallery-nav-btn.next { right: 10px; }
@@ -221,7 +225,6 @@ const styles = `
     scrollbar-width: none;
     padding-bottom: 4px;
     width: 100%;
-    /* Prevent accidental vertical scroll hijack */
     touch-action: pan-x;
   }
   .thumb-strip::-webkit-scrollbar { display: none; }
@@ -229,7 +232,6 @@ const styles = `
   .thumb-item {
     flex-shrink: 0;
     scroll-snap-align: start;
-    /* 4 visible with gaps on any screen */
     width: calc((100% - 24px) / 4);
     min-width: 54px;
     max-width: 90px;
@@ -343,6 +345,17 @@ const styles = `
   .color-swatch-btn.active { border-color: var(--gold); background: var(--gold-dim); color: var(--text); box-shadow: 0 0 0 2px rgba(201,168,76,0.15); }
   .color-swatch-thumb { width: 20px; height: 20px; border-radius: 5px; object-fit: cover; flex-shrink: 0; }
   .color-hint { display: flex; align-items: center; gap: 5px; color: var(--text-muted); font-size: 11px; margin-top: 4px; }
+
+  /* Color prompt nudge */
+  .color-prompt {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--gold); margin-top: 6px;
+    animation: colorPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes colorPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
 
   /* Stock */
   .stock-row { display: flex; align-items: center; gap: 7px; font-size: 12px; margin-top: 8px; }
@@ -625,11 +638,11 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // FIX 1: Default to null — no color pre-selected
   const [selectedColorObj, setSelectedColorObj] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryCurrentIndex, setGalleryCurrentIndex] = useState(0);
   const [thumbnailStartIndex, setThumbnailStartIndex] = useState(0);
@@ -638,18 +651,12 @@ const ProductDetailPage = () => {
   // Touch refs
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
-  const touchEndX = useRef(0);
   const galleryTouchStartX = useRef(0);
-  const galleryTouchEndX = useRef(0);
   const thumbStripRef = useRef(null);
 
   const { id } = useParams();
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-  useEffect(() => {
-    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
-  }, []);
 
   const parseProductColors = (product) => {
     if (!product?.colors || !Array.isArray(product.colors)) return [];
@@ -668,8 +675,10 @@ const ProductDetailPage = () => {
       const data = await res.json();
       if (data.success) {
         setProduct(data.product);
-        const colors = parseProductColors(data.product);
-        if (colors.length > 0) { setSelectedColorObj(colors[0]); setQuantity(1); setColorImageDismissed(false); }
+        // FIX 1: Do NOT auto-select first color — leave as null (unselected)
+        setSelectedColorObj(null);
+        setQuantity(1);
+        setColorImageDismissed(false);
       } else { setError('Product not found'); }
     } catch (err) { console.error('Fetch product error:', err); setError('Network error'); }
     finally { setLoading(false); }
@@ -688,7 +697,10 @@ const ProductDetailPage = () => {
   useEffect(() => { if (id) { fetchProduct(); fetchRelatedProducts(); } }, [id]);
   useEffect(() => { if (selectedColorObj) setQuantity(1); }, [selectedColorObj]);
 
-  const handleColorSelect = (colorObj) => { setSelectedColorObj(colorObj); setColorImageDismissed(false); };
+  const handleColorSelect = (colorObj) => {
+    setSelectedColorObj(colorObj);
+    setColorImageDismissed(false);
+  };
 
   // Main image swipe — distinguishes from vertical scroll
   const handleTouchStart = (e) => {
@@ -698,7 +710,6 @@ const ProductDetailPage = () => {
   const handleTouchEnd = (e) => {
     const diffX = touchStartX.current - e.changedTouches[0].clientX;
     const diffY = Math.abs(touchStartY.current - e.changedTouches[0].clientY);
-    // Ignore mostly-vertical movements
     if (Math.abs(diffX) < 35 || Math.abs(diffX) < diffY) return;
     if (selectedColorObj?.colorImage && !colorImageDismissed) { setColorImageDismissed(true); return; }
     const allMedia = [...(product.images || []), ...(product.videos || [])];
@@ -730,9 +741,20 @@ const ProductDetailPage = () => {
     else setGalleryCurrentIndex(prev => prev === 0 ? allMedia.length - 1 : prev - 1);
   };
 
+  // FIX 2: Desktop gallery prev/next — standalone handlers, no isTouchDevice gate needed
+  const handleMainPrev = (e) => {
+    e.stopPropagation();
+    setMainImageIndex(prev => prev === 0 ? totalMedia - 1 : prev - 1);
+  };
+  const handleMainNext = (e) => {
+    e.stopPropagation();
+    setMainImageIndex(prev => (prev + 1) % totalMedia);
+  };
+
   const addToCart = async () => {
     if (!product || product.price === null || product.price === undefined) return;
-    if (!selectedColorObj) { toast.error('Please select a color'); return; }
+    if (!selectedColorObj) { toast.error('Please select a color first'); return; }
+    if (selectedColorObj.quantity !== null && selectedColorObj.quantity === 0) { toast.error('Selected color is out of stock'); return; }
     if (selectedColorObj.quantity !== null && quantity > selectedColorObj.quantity) { toast.error(`Only ${selectedColorObj.quantity} available in stock`); return; }
     if (!isCustomerAuthenticated()) {
       const pendingItem = { _id: product._id, title: product.title, brand: product.brand, price: product.price, images: product.images, selectedColor: selectedColorObj.name, quantity, modelNumber: product.modelNumber, gender: product.gender, watchShape: product.watchShape, productType: product.productType };
@@ -820,6 +842,15 @@ const ProductDetailPage = () => {
   const totalMedia = allMedia.length;
   const visibleThumbnails = 4;
 
+  // Derived add-to-cart disabled state
+  const isOutOfStock = selectedColorObj && selectedColorObj.quantity !== null && selectedColorObj.quantity === 0;
+  const addToCartDisabled = !selectedColorObj || isOutOfStock;
+  const addToCartLabel = !selectedColorObj
+    ? 'Select a Color'
+    : isOutOfStock
+      ? 'Out of Stock'
+      : 'Add to Cart';
+
   return (
     <div className="pdp-root">
       <style>{styles}</style>
@@ -887,13 +918,17 @@ const ProductDetailPage = () => {
                   <button className="gallery-color-dismiss" onClick={e => { e.stopPropagation(); setColorImageDismissed(true); }} title="Show all images">✕</button>
                 </div>
               )}
-              {/* Desktop nav arrows */}
-              {!colorImageOverride && totalMedia > 1 && !isTouchDevice && (
+
+              {/* FIX 2: Desktop nav arrows — always rendered when multi-media, no isTouchDevice gate.
+                  CSS handles show-on-hover via opacity + pointer-events. Touch users won't see them
+                  since hover doesn't trigger on touch. */}
+              {!colorImageOverride && totalMedia > 1 && (
                 <>
-                  <button className="gallery-nav-btn prev" onClick={e => { e.stopPropagation(); setMainImageIndex(prev => prev === 0 ? totalMedia - 1 : prev - 1); }}>‹</button>
-                  <button className="gallery-nav-btn next" onClick={e => { e.stopPropagation(); setMainImageIndex(prev => (prev + 1) % totalMedia); }}>›</button>
+                  <button className="gallery-nav-btn prev" onClick={handleMainPrev}>‹</button>
+                  <button className="gallery-nav-btn next" onClick={handleMainNext}>›</button>
                 </>
               )}
+
               {/* Media */}
               {colorImageOverride ? (
                 <img src={colorImageOverride} alt={`${selectedColorObj?.name} variant`} className="gallery-main-img" onError={e => e.target.style.display = 'none'} />
@@ -902,6 +937,7 @@ const ProductDetailPage = () => {
               ) : (
                 <img src={currentMediaUrl || ''} alt={product.title} className="gallery-main-img" onError={e => e.target.style.display = 'none'} />
               )}
+
               {/* Dots */}
               {!colorImageOverride && totalMedia > 1 && (
                 <div className="gallery-dots">
@@ -910,6 +946,7 @@ const ProductDetailPage = () => {
                   ))}
                 </div>
               )}
+
               {/* Zoom hint (CSS hides on mobile) */}
               <div className="gallery-zoom-hint">
                 <div className="gallery-zoom-pill">
@@ -921,7 +958,7 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            {/* Thumbnails — always scrollable on mobile, windowed on desktop */}
+            {/* Thumbnails */}
             {totalMedia > 0 && (
               <div className="thumb-strip-wrap">
                 {totalMedia > visibleThumbnails && (
@@ -930,7 +967,6 @@ const ProductDetailPage = () => {
                     <button className="thumb-nav-btn t-next" onClick={() => setThumbnailStartIndex(Math.min(totalMedia - visibleThumbnails, thumbnailStartIndex + 1))} disabled={thumbnailStartIndex + visibleThumbnails >= totalMedia}>›</button>
                   </>
                 )}
-                {/* All items always rendered — native scroll on mobile, JS-windowed on desktop */}
                 <div className="thumb-strip" ref={thumbStripRef}>
                   {allMedia.map((media, globalIndex) => {
                     const isThumbVideo = globalIndex >= (product.images?.length || 0);
@@ -996,18 +1032,35 @@ const ProductDetailPage = () => {
                     <span className="section-heading">Available Colors</span>
                     <div className="color-swatches">
                       {productColors.map((colorObj, idx) => (
-                        <button key={idx} className={`color-swatch-btn${selectedColorObj?.name === colorObj.name ? ' active' : ''}`} onClick={() => handleColorSelect(colorObj)}>
+                        <button
+                          key={idx}
+                          className={`color-swatch-btn${selectedColorObj?.name === colorObj.name ? ' active' : ''}`}
+                          onClick={() => handleColorSelect(colorObj)}
+                        >
                           {colorObj.colorImage && <img src={colorObj.colorImage} alt={colorObj.name} className="color-swatch-thumb" />}
                           {colorObj.name}
                         </button>
                       ))}
                     </div>
+
+                    {/* FIX 1: Nudge when no color selected */}
+                    {!selectedColorObj && (
+                      <div className="color-prompt">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                        </svg>
+                        Please select a color to continue
+                      </div>
+                    )}
+
                     {selectedColorObj?.colorImage && (
                       <div className="color-hint">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         Showing image for selected color
                       </div>
                     )}
+
+                    {/* Stock — only when a color is selected */}
                     {selectedColorObj && selectedColorObj.quantity !== null && selectedColorObj.quantity > 0 && (
                       <div className="stock-row"><div className="stock-dot green" /><span className="stock-text-green">{selectedColorObj.quantity} {selectedColorObj.quantity === 1 ? 'item' : 'items'} in stock</span></div>
                     )}
@@ -1025,9 +1078,14 @@ const ProductDetailPage = () => {
                   <span className="section-heading">Quantity</span>
                   <div className="qty-row">
                     <div className="qty-control">
-                      <button className="qty-btn" onClick={() => handleQuantityChange(quantity - 1)} disabled={quantity <= 1}>−</button>
-                      <input type="number" className="qty-input" min="1" max={getMaxQuantity()} value={quantity} onChange={handleQuantityInputChange} onFocus={handleQuantityInputFocus} />
-                      <button className="qty-btn" onClick={() => handleQuantityChange(quantity + 1)} disabled={selectedColorObj && selectedColorObj.quantity !== null && quantity >= selectedColorObj.quantity}>+</button>
+                      <button className="qty-btn" onClick={() => handleQuantityChange(quantity - 1)} disabled={quantity <= 1 || !selectedColorObj}>−</button>
+                      <input
+                        type="number" className="qty-input" min="1" max={getMaxQuantity()}
+                        value={quantity} onChange={handleQuantityInputChange} onFocus={handleQuantityInputFocus}
+                        disabled={!selectedColorObj}
+                        style={!selectedColorObj ? { opacity: 0.4 } : {}}
+                      />
+                      <button className="qty-btn" onClick={() => handleQuantityChange(quantity + 1)} disabled={!selectedColorObj || (selectedColorObj.quantity !== null && quantity >= selectedColorObj.quantity)}>+</button>
                     </div>
                     {selectedColorObj && selectedColorObj.quantity !== null && <span className="qty-max">Max: {selectedColorObj.quantity}</span>}
                   </div>
@@ -1035,11 +1093,11 @@ const ProductDetailPage = () => {
 
                 {/* Actions */}
                 <div className="action-row">
-                  <button className="btn-add-cart" onClick={addToCart} disabled={!selectedColorObj || (selectedColorObj.quantity !== null && selectedColorObj.quantity === 0)}>
+                  <button className="btn-add-cart" onClick={addToCart} disabled={addToCartDisabled}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    {selectedColorObj && selectedColorObj.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+                    {addToCartLabel}
                   </button>
                   <button className="btn-my-cart" onClick={goToCart}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
