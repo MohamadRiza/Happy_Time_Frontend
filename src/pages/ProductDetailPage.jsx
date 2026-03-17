@@ -1252,7 +1252,7 @@ const ProductDetailPage = () => {
           </div>
         )}
 
-      </div>{/* /pdp-wrapper */}
+      </div>{/* /pdp-wrapperrr */}
     </div>
   );
 };
