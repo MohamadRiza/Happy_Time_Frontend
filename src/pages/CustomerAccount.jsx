@@ -45,7 +45,8 @@ const CSS = `
 }
 
 /* ── ROOT ── */
-.ap{min-height:100vh;background:var(--bg);color:var(--t);font-family:'Outfit',sans-serif;font-weight:300;}
+*,*::before,*::after{box-sizing:border-box;}
+.ap{min-height:100vh;width:100%;max-width:100vw;overflow-x:hidden;background:var(--bg);color:var(--t);font-family:'Outfit',sans-serif;font-weight:300;}
 
 /* ── HERO ── */
 .ap-hero{background:linear-gradient(150deg,#0e0e0b 0%,#0a0a08 50%,#080806 100%);border-bottom:1px solid var(--b);position:relative;overflow:hidden;}
@@ -76,7 +77,7 @@ const CSS = `
 @media(min-width:640px){.ap-ey{font-size:9px;}}
 .ap-nm{font-family:'Cormorant Garamond',serif;font-size:clamp(19px,4vw,30px);font-weight:400;color:var(--t);line-height:1.1;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ap-nm em{font-style:italic;color:var(--gl);}
-.ap-sb{font-size:11px;color:var(--tm);letter-spacing:.01em;}
+.ap-sb{font-size:11px;color:var(--tm);letter-spacing:.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .ap-sb span{color:var(--ts);font-weight:500;}
 
 /* Chips */
@@ -110,14 +111,14 @@ const CSS = `
 .ap-tab:hover:not(.on){color:var(--ts);}
 
 /* ── MAIN LAYOUT ── */
-.ap-main{max-width:1280px;margin:0 auto;padding:14px 12px 40px;}
-@media(min-width:480px){.ap-main{padding:16px 16px 44px;}}
-@media(min-width:640px){.ap-main{padding:20px 22px 48px;}}
+.ap-main{max-width:1280px;margin:0 auto;padding:14px 12px 40px;width:100%;}
+@media(min-width:480px){.ap-main{padding:16px 14px 44px;}}
+@media(min-width:640px){.ap-main{padding:20px 20px 48px;}}
 @media(min-width:1024px){.ap-main{padding:28px 40px 56px;}}
 
-.ap-layout{display:grid;grid-template-columns:1fr;gap:14px;}
+.ap-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;width:100%;}
 @media(min-width:640px){.ap-layout{gap:18px;}}
-@media(min-width:1024px){.ap-layout{grid-template-columns:1fr 316px;gap:24px;}}
+@media(min-width:1024px){.ap-layout{grid-template-columns:minmax(0,1fr) 316px;gap:24px;}}
 
 /* ── SIDEBAR ── */
 .ap-side{display:flex;flex-direction:column;gap:12px;}
@@ -340,7 +341,7 @@ const CustomerAccount = () => {
           <div className="ap-layout">
 
             {/* Left column */}
-            <div style={{display:'flex',flexDirection:'column',gap:14}}>
+            <div style={{display:'flex',flexDirection:'column',gap:14,minWidth:0,width:'100%'}}>
               <div className={`ap-panel${mobileTab==='dashboard'?' vis':''}`}>
                 <CustomerDashboard orders={orders} customer={customer}/>
               </div>

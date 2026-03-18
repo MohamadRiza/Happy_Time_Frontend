@@ -45,11 +45,12 @@ const CSS = `
 }
 
 /* ── ROOT ── */
-.dr{font-family:'Outfit',sans-serif;font-weight:300;color:var(--t);display:flex;flex-direction:column;gap:12px;}
+*,*::before,*::after{box-sizing:border-box;}
+.dr{font-family:'Outfit',sans-serif;font-weight:300;color:var(--t);display:flex;flex-direction:column;gap:12px;width:100%;min-width:0;}
 @media(min-width:640px){.dr{gap:16px;}}
 
 /* ── CARD ── */
-.dc{background:var(--s1);border:1px solid var(--b);border-radius:14px;overflow:hidden;}
+.dc{background:var(--s1);border:1px solid var(--b);border-radius:14px;overflow:hidden;width:100%;min-width:0;}
 @media(min-width:640px){.dc{border-radius:18px;}}
 
 .dc-hd{padding:13px 16px 11px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
@@ -68,23 +69,26 @@ const CSS = `
 .dc-lk:hover{color:var(--gl);}
 
 /* ══════════════════════════════════
-   STATS  — horizontal row on mobile
+   STATS
 ══════════════════════════════════ */
 .ds-wrap{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:8px;
+  width:100%;
 }
-@media(min-width:480px){.ds-wrap{grid-template-columns:repeat(4,1fr);}}
+@media(min-width:480px){.ds-wrap{grid-template-columns:repeat(4,minmax(0,1fr));}}
 
 .ds{
   background:var(--s1);
   border:1px solid var(--b);
   border-radius:12px;
-  padding:12px 12px 10px;
+  padding:12px 10px 10px;
   transition:border-color .25s,box-shadow .2s;
   position:relative;
   overflow:hidden;
+  min-width:0;
+  width:100%;
 }
 @media(min-width:640px){.ds{padding:14px 15px 12px;border-radius:14px;}}
 .ds:hover{box-shadow:0 6px 22px rgba(0,0,0,.35);}
@@ -108,7 +112,8 @@ const CSS = `
 .ic-b{background:var(--ld);border-color:var(--lb);}
 .ic-p{background:var(--pd);border-color:var(--pb);}
 
-.ds-val{font-size:22px;font-weight:700;letter-spacing:-.03em;line-height:1;margin-bottom:3px;font-family:'Outfit',sans-serif;}
+.ds-val{font-size:20px;font-weight:700;letter-spacing:-.03em;line-height:1;margin-bottom:3px;font-family:'Outfit',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+@media(min-width:480px){.ds-val{font-size:24px;}}
 @media(min-width:640px){.ds-val{font-size:26px;}}
 .vc-g{color:var(--gl);}.vc-n{color:var(--gn);}.vc-b{color:var(--bl);}.vc-p{color:var(--pu);}
 
@@ -131,8 +136,10 @@ const CSS = `
 ══════════════════════════════════ */
 .dp-scroll{
   overflow-x:auto;
+  overflow-y:visible;
   scrollbar-width:none;
   -webkit-overflow-scrolling:touch;
+  width:100%;
 }
 .dp-scroll::-webkit-scrollbar{display:none;}
 
@@ -698,7 +705,7 @@ const CustomerDashboard = ({ orders = [], customer }) => {
           </div>
         </div>
 
-        {/* ── SPENDING CHARTTT ── */}
+        {/* ── SPENDING CHART ── */}
         {orders.length>0 && (
           <div className="da da5 dc">
             <div className="dc-hd">
