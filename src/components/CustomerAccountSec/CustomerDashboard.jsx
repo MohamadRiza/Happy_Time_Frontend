@@ -698,7 +698,7 @@ const CustomerDashboard = ({ orders = [], customer }) => {
           </div>
         </div>
 
-        {/* ── SPENDING CHART ── */}
+        {/* ── SPENDING CHARTTT ── */}
         {orders.length>0 && (
           <div className="da da5 dc">
             <div className="dc-hd">
