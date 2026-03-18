@@ -76,7 +76,7 @@ const LoginPage = () => {
     }
   };
 
-  // Luxury background images for desktop
+  // Luxury background images for desktopp
   const luxuryImages = [
     'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=1200&q=80',
     'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=1200&q=80',
