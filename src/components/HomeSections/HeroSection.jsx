@@ -7,9 +7,9 @@ const HeroSection = () => {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
   const videoSources = [
-    '/generated_video.mp4',
-    '/generated_video1.mp4',
-    '/generated_video2.mp4',
+    '/generated_videoa.webm',
+    '/generated_video1a.webm',
+    '/generated_video2a.webm',
   ];
 
   const totalVideos = videoSources.length;
