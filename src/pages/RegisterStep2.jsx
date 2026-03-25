@@ -1,4 +1,3 @@
-// src/pages/RegisterStep2.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { customerLogin } from '../utils/auth';
@@ -12,8 +11,10 @@ const RegisterStep2 = () => {
     shopAddress: '',
     businessType: ''
   });
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const navigate = useNavigate();
 
   // Redirect if Step 1 data is missing
@@ -24,80 +25,138 @@ const RegisterStep2 = () => {
     }
   }, [navigate]);
 
+  // Real-time validation for conditional fields
+  const validateField = (name, value) => {
+    if (!businessDetails.sellsWatches) return ''; // no validation if not selling watches
+
+    switch (name) {
+      case 'businessType':
+        if (!value) return 'Business type is required';
+        return '';
+      case 'shopName':
+        if (businessDetails.hasWatchShop && !value.trim()) return 'Shop name is required';
+        return '';
+      case 'shopAddress':
+        if (businessDetails.hasWatchShop && !value.trim()) return 'Shop address is required';
+        return '';
+      default:
+        return '';
+    }
+  };
+
   const handleCheckboxChange = (field) => {
-    setBusinessDetails((prev) => ({
+    setBusinessDetails(prev => ({
       ...prev,
       [field]: !prev[field]
     }));
-    setError('');
+    // Clear any errors related to this field when toggling
+    if (field === 'sellsWatches' && !businessDetails.sellsWatches) {
+      setErrors({});
+    } else if (field === 'hasWatchShop' && !businessDetails.hasWatchShop) {
+      setErrors(prev => ({ ...prev, shopName: '', shopAddress: '' }));
+    }
   };
 
   const handleInputChange = (e) => {
-    setBusinessDetails((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-    setError('');
+    const { name, value } = e.target;
+    setBusinessDetails(prev => ({ ...prev, [name]: value }));
+    // Clear field error if any
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
-  const validateStep2 = () => {
-    if (businessDetails.sellsWatches) {
-      if (!businessDetails.businessType) {
-        setError('Business type is required');
-        return false;
-      }
-      
-      if (businessDetails.hasWatchShop) {
-        if (!businessDetails.shopName.trim()) {
-          setError('Shop name is required');
-          return false;
-        }
-        if (!businessDetails.shopAddress.trim()) {
-          setError('Shop address is required');
-          return false;
-        }
-      }
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+    const error = validateField(name, value);
+    setErrors(prev => ({ ...prev, [name]: error }));
+  };
+
+  const validateAll = () => {
+    if (!businessDetails.sellsWatches) return true; // no additional validation needed
+
+    const newErrors = {};
+    if (!businessDetails.businessType) newErrors.businessType = 'Business type is required';
+    if (businessDetails.hasWatchShop) {
+      if (!businessDetails.shopName.trim()) newErrors.shopName = 'Shop name is required';
+      if (!businessDetails.shopAddress.trim()) newErrors.shopAddress = 'Shop address is required';
     }
-    return true;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateStep2()) return;
-    
+    setSubmitError('');
+
+    if (!validateAll()) {
+      // Mark all conditional fields as touched to show errors
+      const newTouched = {};
+      if (businessDetails.sellsWatches) {
+        if (businessDetails.hasWatchShop) {
+          newTouched.shopName = true;
+          newTouched.shopAddress = true;
+        }
+        newTouched.businessType = true;
+      }
+      setTouched(newTouched);
+      return;
+    }
+
     setLoading(true);
-    setError('');
 
     try {
-      const step1Data = JSON.parse(sessionStorage.getItem('registerStep1'));
+      const step1Data = sessionStorage.getItem('registerStep1');
+      if (!step1Data) {
+        throw new Error('Registration data missing. Please start over.');
+      }
+      const parsedStep1 = JSON.parse(step1Data);
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
       const registerData = {
-        ...step1Data,
-        businessDetails
+        ...parsedStep1,
+        businessDetails: {
+          // Ensure all fields are present (even if empty)
+          sellsWatches: businessDetails.sellsWatches,
+          hasWatchShop: businessDetails.hasWatchShop,
+          shopName: businessDetails.shopName || '',
+          shopAddress: businessDetails.shopAddress || '',
+          businessType: businessDetails.businessType || ''
+        }
       };
+
+      // Debug: log the payload
+      console.log('Sending registration data:', registerData);
 
       const res = await fetch(`${API_URL}/api/customers/register`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(registerData)
       });
 
-      const data = await res.json();
+      // Try to parse response, even if not ok
+      let data;
+      try {
+        data = await res.json();
+      } catch (jsonError) {
+        // If response is not JSON, get text
+        const text = await res.text();
+        throw new Error(`Server responded with status ${res.status}: ${text}`);
+      }
 
-      if (data.success) {
+      if (res.ok && data.success) {
         customerLogin(data.data.token, data.data.customer);
         sessionStorage.removeItem('registerStep1');
         navigate('/account');
       } else {
-        setError(data.message || 'Registration failed. Please try again.');
+        // Show detailed server error message
+        const errorMessage = data.message || data.error || `Registration failed (${res.status})`;
+        throw new Error(errorMessage);
       }
     } catch (err) {
       console.error('Registration error:', err);
-      setError('Network error. Please try again.');
+      setSubmitError(err.message || 'Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -105,36 +164,43 @@ const RegisterStep2 = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white flex items-center justify-center p-4 py-8 md:py-12 relative overflow-hidden">
-      {/* Subtle gold radial accents */}
-            <Helmet>
+      <Helmet>
         <title>Business Details – Happy Time Registration</title>
         <meta name="description" content="Complete your wholesale registration with Happy Time by providing your business details. Join our network of watch retailers and dealers." />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://happytimeonline.com/register/step2" />
-
-        {/* Open Graph */}
         <meta property="og:title" content="Business Details – Happy Time Registration" />
         <meta property="og:description" content="Complete your wholesale registration with Happy Time." />
         <meta property="og:url" content="https://happytimeonline.com/register/step2" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://happytimeonline.com/ogimage.png" />
-
-        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Business Details – Happy Time Registration" />
         <meta name="twitter:description" content="Complete your wholesale registration with Happy Time." />
         <meta name="twitter:image" content="https://happytimeonline.com/ogimage.png" />
       </Helmet>
+
       <div
         className="absolute inset-0 opacity-5"
         style={{
-          backgroundImage: `radial-gradient(circle at 25% 20%, rgba(212, 175, 55, 0.2) 0%, transparent 30%), 
+          backgroundImage: `radial-gradient(circle at 25% 20%, rgba(212, 175, 55, 0.2) 0%, transparent 30%),
                              radial-gradient(circle at 75% 80%, rgba(212, 175, 55, 0.15) 0%, transparent 35%)`
         }}
       ></div>
 
       <div className="relative w-full max-w-3xl">
         <div className="bg-black/40 backdrop-blur-xl border border-gray-800 rounded-2xl p-6 md:p-10 shadow-2xl shadow-gold/10">
+          {/* Step indicator */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-gray-400">Step 2 of 2</span>
+              <span className="text-xs text-gray-400">Business Details</span>
+            </div>
+            <div className="w-full bg-gray-800 rounded-full h-2">
+              <div className="bg-gold h-2 rounded-full w-full"></div>
+            </div>
+          </div>
+
           <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold text-gold mb-2 tracking-wide">Business Details</h2>
             <p className="text-gray-400 text-sm md:text-base">
@@ -143,7 +209,11 @@ const RegisterStep2 = () => {
             <p className="text-gray-500 text-xs mt-1">(Required for wholesale accounts)</p>
           </div>
 
-          {error && <p className="text-red-400 mb-6 text-center text-sm bg-red-500/10 border border-red-500/20 rounded-lg py-2 px-4">{error}</p>}
+          {submitError && (
+            <p className="text-red-400 mb-6 text-center text-sm bg-red-500/10 border border-red-500/20 rounded-lg py-2 px-4">
+              {submitError}
+            </p>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Toggle: Do you sell watches? */}
@@ -203,10 +273,15 @@ const RegisterStep2 = () => {
                           name="shopName"
                           value={businessDetails.shopName}
                           onChange={handleInputChange}
-                          className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
+                          onBlur={handleBlur}
+                          className={`w-full bg-black/30 border rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold transition ${touched.shopName && errors.shopName ? 'border-red-500' : 'border-gray-700'
+                            }`}
                           placeholder="Happy Time Watch Shop"
                           required
                         />
+                        {touched.shopName && errors.shopName && (
+                          <p className="text-red-400 text-xs mt-1">{errors.shopName}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-gray-400 mb-2 text-sm font-medium">Shop Address *</label>
@@ -215,10 +290,15 @@ const RegisterStep2 = () => {
                           name="shopAddress"
                           value={businessDetails.shopAddress}
                           onChange={handleInputChange}
-                          className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition"
+                          onBlur={handleBlur}
+                          className={`w-full bg-black/30 border rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold transition ${touched.shopAddress && errors.shopAddress ? 'border-red-500' : 'border-gray-700'
+                            }`}
                           placeholder="49A Keyzer Street, Colombo"
                           required
                         />
+                        {touched.shopAddress && errors.shopAddress && (
+                          <p className="text-red-400 text-xs mt-1">{errors.shopAddress}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -237,7 +317,9 @@ const RegisterStep2 = () => {
                       name="businessType"
                       value={businessDetails.businessType}
                       onChange={handleInputChange}
-                      className="w-full bg-black/30 border border-gray-700 rounded-lg px-4 py-2.5 text-white pr-10 appearance-none focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition cursor-pointer"
+                      onBlur={handleBlur}
+                      className={`w-full bg-black/30 border rounded-lg px-4 py-2.5 text-white pr-10 appearance-none focus:outline-none focus:ring-2 focus:ring-gold transition cursor-pointer ${touched.businessType && errors.businessType ? 'border-red-500' : 'border-gray-700'
+                        }`}
                       required
                     >
                       <option value="" className="bg-gray-900 text-gray-400">Select your business type</option>
@@ -247,13 +329,15 @@ const RegisterStep2 = () => {
                       <option value="collector" className="bg-gray-900 text-white">Watch Collector</option>
                       <option value="other" className="bg-gray-900 text-white">Other</option>
                     </select>
-                    {/* Custom arrow */}
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
                     </div>
                   </div>
+                  {touched.businessType && errors.businessType && (
+                    <p className="text-red-400 text-xs mt-1">{errors.businessType}</p>
+                  )}
                 </div>
               </div>
             )}
@@ -273,7 +357,7 @@ const RegisterStep2 = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-gold hover:bg-gold/90 text-black py-3 rounded-lg font-bold tracking-wide transition duration-200 shadow-lg shadow-gold/20 disabled:opacity-70 active:scale-[0.98] flex items-center justify-center gap-2"
+                className="flex-1 bg-gold hover:bg-gold/90 text-black py-3 rounded-lg font-bold tracking-wide transition duration-200 shadow-lg shadow-gold/20 disabled:opacity-70 disabled:cursor-not-allowed active:scale-[0.98] flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
