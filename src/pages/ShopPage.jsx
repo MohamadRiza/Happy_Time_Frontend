@@ -1,10 +1,310 @@
 // src/pages/ShopPage.jsx
-import { useState, useEffect, useRef } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import ScrollToTop from "../components/ScrollToTop";
 import Loading from "../components/Loading";
 
+/* ═══════════════════════════════════════════════════════════
+   LIGHTBOX  (used by GalleryView)
+═══════════════════════════════════════════════════════════ */
+const formatPriceLB = (price) =>
+  price == null ? "Contact for Price" : `LKR ${price.toLocaleString()}`;
+
+const Lightbox = ({ products, startIndex, onClose, onNavigate }) => {
+  const [current, setCurrent] = useState(startIndex);
+  const [zoomed, setZoomed] = useState(false);
+  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [swipeDelta, setSwipeDelta] = useState(0);
+  const [swiping, setSwiping] = useState(false);
+  const [showHint, setShowHint] = useState(true);
+
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+  const imgRef = useRef(null);
+  const thumbsRef = useRef(null);
+
+  const product = products[current];
+
+  useEffect(() => {
+    setZoomed(false);
+    setImgLoaded(false);
+    setSwipeDelta(0);
+    setShowHint(true);
+  }, [current]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowHint(false), 3200);
+    return () => clearTimeout(timer);
+  }, [current]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight" && !zoomed) goNext();
+      if (e.key === "ArrowLeft" && !zoomed) goPrev();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [current, zoomed]);
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  const goNext = useCallback(() => {
+    if (current < products.length - 1) setCurrent((c) => c + 1);
+  }, [current, products.length]);
+
+  const goPrev = useCallback(() => {
+    if (current > 0) setCurrent((c) => c - 1);
+  }, [current]);
+
+  const handleTouchStart = (e) => {
+    if (zoomed) return;
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    setSwiping(true);
+  };
+  const handleTouchMove = (e) => {
+    if (zoomed || touchStartX.current == null) return;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = Math.abs(e.touches[0].clientY - touchStartY.current);
+    if (dy > 40) return;
+    setSwipeDelta(dx);
+  };
+  const handleTouchEnd = () => {
+    if (zoomed) return;
+    setSwiping(false);
+    if (swipeDelta < -60) goNext();
+    else if (swipeDelta > 60) goPrev();
+    setSwipeDelta(0);
+    touchStartX.current = null;
+  };
+
+  const handleImgDoubleClick = (e) => {
+    if (!zoomed) {
+      const rect = imgRef.current.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      setZoomOrigin({ x, y });
+    }
+    setZoomed((z) => !z);
+  };
+
+  useEffect(() => {
+    if (thumbsRef.current) {
+      const el = thumbsRef.current.children[current];
+      if (el) el.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }, [current]);
+
+  const slideStyle = {
+    transform: swiping ? `translateX(${swipeDelta}px)` : "translateX(0)",
+    transition: swiping ? "none" : "transform 0.32s cubic-bezier(0.25,0.46,0.45,0.94)",
+  };
+
+  return (
+    <div className="lb-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+
+      {/* ══ TOP BAR: Brand LEFT | Title CENTER | Price RIGHT ══ */}
+      <div className="lb-topbar">
+        {/* Brand — left */}
+        <div className="lb-topbar-brand">
+          <span className="lb-brand-eyebrow">Brand</span>
+          <span className="lb-brand-name">{product.brand}</span>
+        </div>
+
+        {/* Title — center */}
+        <div className="lb-topbar-center">
+          <span className="lb-title">{product.title}</span>
+        </div>
+
+        {/* Price — right */}
+        <div className="lb-topbar-price">
+          <span className="lb-price-eyebrow">Price</span>
+          <span className="lb-price">{formatPriceLB(product.price)}</span>
+        </div>
+      </div>
+
+      {/* Close */}
+      <button className="lb-close" onClick={onClose} aria-label="Close">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      {/* Counter */}
+      <div className="lb-counter">{current + 1} / {products.length}</div>
+
+      {/* Zoom hint */}
+      <div className={`lb-zoom-hint ${showHint ? "visible" : ""}`}>
+        {zoomed ? "double-tap to zoom out" : "double-tap to zoom"}
+      </div>
+
+      {/* Prev */}
+      {current > 0 && !zoomed && (
+        <button className="lb-nav lb-prev" onClick={goPrev} aria-label="Previous">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
+
+      {/* Next */}
+      {current < products.length - 1 && !zoomed && (
+        <button className="lb-nav lb-next" onClick={goNext} aria-label="Next">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      )}
+
+      {/* Stage */}
+      <div
+        className="lb-stage"
+        style={slideStyle}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div
+          className={`lb-img-wrap ${zoomed ? "zoomed" : ""}`}
+          style={zoomed ? { transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%` } : {}}
+        >
+          {!imgLoaded && <div className="lb-skeleton" />}
+          <img
+            ref={imgRef}
+            key={current}
+            src={product.images?.[0] || "/placeholder.png"}
+            alt={product.title}
+            className={`lb-img ${imgLoaded ? "loaded" : ""}`}
+            onLoad={() => setImgLoaded(true)}
+            onDoubleClick={handleImgDoubleClick}
+            draggable={false}
+          />
+        </div>
+      </div>
+
+      {/* View Details button — centered above thumbs */}
+      <div className="lb-bottom-bar">
+        <button
+          className="lb-view-btn"
+          onClick={() => { onClose(); onNavigate(product._id); }}
+        >
+          View Details
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Thumbnail strip */}
+      <div className="lb-thumbs" ref={thumbsRef}>
+        {products.map((p, i) => (
+          <button
+            key={p._id}
+            className={`lb-thumb ${i === current ? "active" : ""}`}
+            onClick={() => setCurrent(i)}
+            style={{ backgroundImage: `url(${p.images?.[0] || "/placeholder.png"})` }}
+            aria-label={p.title}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════
+   GALLERY VIEW
+═══════════════════════════════════════════════════════════ */
+const GalleryView = ({ products, onNavigate }) => {
+  const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [visibleSet, setVisibleSet] = useState(new Set());
+  const itemRefs = useRef([]);
+
+  useEffect(() => {
+    itemRefs.current = itemRefs.current.slice(0, products.length);
+  }, [products]);
+
+  useEffect(() => {
+    setVisibleSet(new Set());
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number(entry.target.dataset.idx);
+            setVisibleSet((prev) => new Set([...prev, idx]));
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: "0px 0px -20px 0px", threshold: 0.05 }
+    );
+    itemRefs.current.forEach((el) => { if (el) obs.observe(el); });
+    return () => obs.disconnect();
+  }, [products]);
+
+  if (!products || products.length === 0) return null;
+
+  return (
+    <div className="gv-root">
+      {products.map((product, i) => {
+        const isVisible = visibleSet.has(i);
+        return (
+          <div
+            key={product._id}
+            ref={(el) => (itemRefs.current[i] = el)}
+            data-idx={i}
+            className={`gv-item ${isVisible ? "visible" : ""}`}
+            style={{ animationDelay: `${(i % 14) * 40}ms` }}
+          >
+            <button
+              className="gv-photo-btn"
+              onClick={() => setLightboxIndex(i)}
+              aria-label={`Open ${product.title} in gallery`}
+            >
+              <img
+                src={product.images?.[0] || "/placeholder.png"}
+                alt={product.title}
+                className="gv-photo"
+                loading="lazy"
+              />
+              <div className="gv-overlay">
+                <div className="gv-overlay-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                  </svg>
+                </div>
+              </div>
+              {product.featured && <span className="gv-featured-dot" title="Featured" />}
+            </button>
+            <div className="gv-caption">
+              <span className="gv-caption-brand">{product.brand}</span>
+              <span className="gv-caption-title">{product.title}</span>
+            </div>
+          </div>
+        );
+      })}
+
+      {lightboxIndex !== null && (
+        <Lightbox
+          products={products}
+          startIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={onNavigate}
+        />
+      )}
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════
+   SHOP PAGE
+═══════════════════════════════════════════════════════════ */
 const ShopPage = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,9 +352,7 @@ const ShopPage = () => {
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
     }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showFilters]);
 
   const getUniqueShapes = () => [...new Set(products.map((p) => p.watchShape))];
@@ -128,9 +426,7 @@ const ShopPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  useEffect(() => { fetchProducts(); }, []);
 
   useEffect(() => {
     const params = {};
@@ -184,13 +480,13 @@ const ShopPage = () => {
     setFilteredProducts(result);
   }, [filters, products, searchQuery, sortBy]);
 
-  const sortProducts = (products, sortBy) => {
-    switch (sortBy) {
-      case "price-low-high": return [...products].sort((a, b) => (a.price || 0) - (b.price || 0));
-      case "price-high-low": return [...products].sort((a, b) => (b.price || 0) - (a.price || 0));
-      case "newest": return [...products].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const sortProducts = (prods, sort) => {
+    switch (sort) {
+      case "price-low-high": return [...prods].sort((a, b) => (a.price || 0) - (b.price || 0));
+      case "price-high-low": return [...prods].sort((a, b) => (b.price || 0) - (a.price || 0));
+      case "newest": return [...prods].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       default:
-        return [...products].sort((a, b) => {
+        return [...prods].sort((a, b) => {
           if (a.featured && !b.featured) return -1;
           if (!a.featured && b.featured) return 1;
           return 0;
@@ -242,7 +538,6 @@ const ShopPage = () => {
 
   const FilterContent = ({ onClose }) => (
     <div className="filter-content">
-      {/* Brand Logos */}
       <div className="filter-section brand-section">
         <h4 className="filter-section-title">Premium Brands</h4>
         <div className="brand-logos-grid">
@@ -268,7 +563,6 @@ const ShopPage = () => {
 
       <div className="filter-divider" />
 
-      {/* Product Type */}
       <div className="filter-group">
         <label className="filter-label">Product Type</label>
         <div className="custom-select-wrap">
@@ -281,7 +575,6 @@ const ShopPage = () => {
         </div>
       </div>
 
-      {/* Gender */}
       {(filters.productType === "all" || filters.productType === "watch") && (
         <div className="filter-group">
           <label className="filter-label">Gender</label>
@@ -316,7 +609,6 @@ const ShopPage = () => {
         </div>
       ))}
 
-      {/* Price Range */}
       <div className="filter-group">
         <label className="filter-label">Price Range <span className="filter-label-sub">(LKR)</span></label>
         <div className="price-range-row">
@@ -326,7 +618,6 @@ const ShopPage = () => {
         </div>
       </div>
 
-      {/* Reset */}
       <button
         onClick={() => { resetFilters(); if (onClose) onClose(); }}
         className={`reset-btn ${hasActiveFilters ? "active" : ""}`}
@@ -369,7 +660,6 @@ const ShopPage = () => {
           font-weight: 300;
         }
 
-        /* ── PAGE WRAPPER ── */
         .shop-wrapper {
           max-width: 1380px;
           margin: 0 auto;
@@ -378,7 +668,6 @@ const ShopPage = () => {
         @media(min-width:640px){ .shop-wrapper { padding: 32px 24px 64px; } }
         @media(min-width:1024px){ .shop-wrapper { padding: 40px 40px 80px; } }
 
-        /* ── PAGE HEADER ── */
         .shop-header {
           margin-bottom: 28px;
           padding-bottom: 20px;
@@ -403,17 +692,9 @@ const ShopPage = () => {
           letter-spacing: -0.01em;
           color: var(--text);
         }
-        .shop-header-title em {
-          font-style: italic;
-          color: var(--gold-light);
-        }
+        .shop-header-title em { font-style: italic; color: var(--gold-light); }
 
-        /* ── SEARCH BAR ── */
-        .search-wrap {
-          position: relative;
-          max-width: 520px;
-          margin-bottom: 16px;
-        }
+        .search-wrap { position: relative; max-width: 520px; margin-bottom: 16px; }
         .search-input {
           width: 100%;
           background: var(--surface2);
@@ -429,424 +710,153 @@ const ShopPage = () => {
           letter-spacing: 0.02em;
         }
         .search-input::placeholder { color: var(--text-muted); }
-        .search-input:focus {
-          border-color: var(--gold-border);
-          box-shadow: 0 0 0 3px var(--gold-dim);
-        }
+        .search-input:focus { border-color: var(--gold-border); box-shadow: 0 0 0 3px var(--gold-dim); }
         .search-icon {
-          position: absolute;
-          left: 16px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: var(--text-muted);
-          width: 16px;
-          height: 16px;
-          pointer-events: none;
+          position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+          color: var(--text-muted); width: 16px; height: 16px; pointer-events: none;
         }
         .search-clear {
-          position: absolute;
-          right: 14px;
-          top: 50%;
-          transform: translateY(-50%);
-          background: var(--surface3);
-          border: none;
-          color: var(--text-muted);
-          cursor: pointer;
-          font-size: 14px;
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          line-height: 1;
-          transition: color 0.2s;
+          position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+          background: var(--surface3); border: none; color: var(--text-muted); cursor: pointer;
+          font-size: 14px; width: 20px; height: 20px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center; line-height: 1; transition: color 0.2s;
         }
         .search-clear:hover { color: var(--text); }
 
-        /* ── CONTROLS ROW ── */
         .controls-row {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 24px;
-          flex-wrap: wrap;
+          display: flex; align-items: center; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;
         }
 
-        /* Filter button (mobile) */
         .filter-toggle-btn {
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          background: var(--surface2);
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 9px 14px;
-          color: var(--gold);
-          font-family: 'Outfit', sans-serif;
-          font-size: 12px;
-          font-weight: 500;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: border-color 0.2s, background 0.2s;
-          flex-shrink: 0;
+          display: flex; align-items: center; gap: 7px;
+          background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+          padding: 9px 14px; color: var(--gold); font-family: 'Outfit', sans-serif;
+          font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+          cursor: pointer; transition: border-color 0.2s, background 0.2s; flex-shrink: 0;
         }
         .filter-toggle-btn:hover { border-color: var(--gold-border); background: var(--surface3); }
         .filter-toggle-btn .filter-badge {
-          background: var(--gold);
-          color: #000;
-          border-radius: 50%;
-          width: 16px;
-          height: 16px;
-          font-size: 9px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
+          background: var(--gold); color: #000; border-radius: 50%;
+          width: 16px; height: 16px; font-size: 9px;
+          display: flex; align-items: center; justify-content: center; font-weight: 700;
         }
         @media(min-width:1024px){ .filter-toggle-btn { display: none; } }
 
-        /* View toggle */
         .view-toggle {
-          display: flex;
-          background: var(--surface2);
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 3px;
-          flex-shrink: 0;
+          display: flex; background: var(--surface2); border: 1px solid var(--border);
+          border-radius: 8px; padding: 3px; flex-shrink: 0;
         }
         .view-btn {
-          padding: 6px 9px;
-          border-radius: 6px;
-          border: none;
-          background: transparent;
-          color: var(--text-muted);
-          cursor: pointer;
-          transition: all 0.2s;
-          display: flex;
-          align-items: center;
+          padding: 6px 9px; border-radius: 6px; border: none; background: transparent;
+          color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+          display: flex; align-items: center; justify-content: center;
         }
         .view-btn.active { background: var(--gold); color: #000; }
         .view-btn:not(.active):hover { color: var(--text); }
 
-        /* Sort */
-        .sort-wrap {
-          position: relative;
-          flex: 1;
-          min-width: 0;
-          max-width: 200px;
-        }
+        .sort-wrap { position: relative; flex: 1; min-width: 0; max-width: 200px; }
         .sort-select {
-          width: 100%;
-          appearance: none;
-          background: var(--surface2);
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 9px 30px 9px 12px;
-          font-size: 12px;
-          font-family: 'Outfit', sans-serif;
-          font-weight: 400;
-          color: var(--text-sub);
-          outline: none;
-          cursor: pointer;
-          letter-spacing: 0.03em;
-          transition: border-color 0.2s;
+          width: 100%; appearance: none; background: var(--surface2);
+          border: 1px solid var(--border); border-radius: 8px; padding: 9px 30px 9px 12px;
+          font-size: 12px; font-family: 'Outfit', sans-serif; font-weight: 400;
+          color: var(--text-sub); outline: none; cursor: pointer; letter-spacing: 0.03em; transition: border-color 0.2s;
         }
         .sort-select:focus { border-color: var(--gold-border); }
         .sort-arrow {
-          position: absolute;
-          right: 10px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: var(--text-muted);
-          pointer-events: none;
-          font-size: 11px;
+          position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+          color: var(--text-muted); pointer-events: none; font-size: 11px;
         }
 
-        /* Results count */
         .results-count {
-          margin-left: auto;
-          font-size: 11px;
-          color: var(--text-muted);
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          flex-shrink: 0;
-          white-space: nowrap;
+          margin-left: auto; font-size: 11px; color: var(--text-muted);
+          letter-spacing: 0.08em; text-transform: uppercase; flex-shrink: 0; white-space: nowrap;
         }
         .results-count strong { color: var(--gold); font-weight: 500; }
 
-        /* ── LAYOUT ── */
-        .shop-layout {
-          display: flex;
-          gap: 28px;
-          align-items: flex-start;
-        }
+        .shop-layout { display: flex; gap: 28px; align-items: flex-start; }
 
-        /* ── DESKTOP SIDEBAR ── */
-        .desktop-sidebar {
-          display: none;
-          width: 240px;
-          flex-shrink: 0;
-        }
+        .desktop-sidebar { display: none; width: 240px; flex-shrink: 0; }
         @media(min-width:1024px){ .desktop-sidebar { display: block; } }
 
         .sidebar-inner {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: var(--radius-lg);
-          padding: 20px;
-          position: sticky;
-          top: 20px;
+          background: var(--surface); border: 1px solid var(--border);
+          border-radius: var(--radius-lg); padding: 20px; position: sticky; top: 20px;
         }
-        .sidebar-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 18px;
-        }
-        .sidebar-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 17px;
-          font-weight: 500;
-          letter-spacing: 0.02em;
-          color: var(--text);
-        }
-        .sidebar-count {
-          font-size: 10px;
-          color: var(--text-muted);
-          letter-spacing: 0.05em;
-        }
+        .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+        .sidebar-title { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 500; letter-spacing: 0.02em; color: var(--text); }
+        .sidebar-count { font-size: 10px; color: var(--text-muted); letter-spacing: 0.05em; }
 
-        /* ── FILTER CONTENT (shared) ── */
         .filter-content { display: flex; flex-direction: column; gap: 16px; }
-
-        .brand-section {}
         .filter-section-title {
-          font-size: 9px;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: var(--text-muted);
-          margin-bottom: 10px;
-          font-weight: 500;
+          font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+          color: var(--text-muted); margin-bottom: 10px; font-weight: 500;
         }
-        .brand-logos-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-        }
+        .brand-logos-grid { display: flex; flex-wrap: wrap; gap: 8px; }
         .brand-logo-btn {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          background: var(--surface2);
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 6px 10px;
-          cursor: pointer;
-          transition: all 0.2s;
-          outline: none;
+          display: flex; flex-direction: column; align-items: center;
+          background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+          padding: 6px 10px; cursor: pointer; transition: all 0.2s; outline: none;
         }
         .brand-logo-btn:hover { border-color: var(--gold-border); }
-        .brand-logo-btn.active {
-          border-color: var(--gold);
-          background: var(--gold-dim);
-          box-shadow: var(--shadow-gold);
-        }
-        .brand-logo-img {
-          height: 32px;
-          width: auto;
-          object-fit: contain;
-          transition: transform 0.2s;
-        }
+        .brand-logo-btn.active { border-color: var(--gold); background: var(--gold-dim); box-shadow: var(--shadow-gold); }
+        .brand-logo-img { height: 32px; width: auto; object-fit: contain; transition: transform 0.2s; }
         .brand-logo-btn:hover .brand-logo-img { transform: scale(1.05); }
-        .brand-logo-placeholder {
-          height: 32px;
-          width: 64px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 11px;
-          color: var(--gold);
-        }
-        .brand-logo-label {
-          font-size: 9px;
-          color: var(--text-muted);
-          margin-top: 3px;
-          letter-spacing: 0.06em;
-        }
-
-        .filter-divider {
-          height: 1px;
-          background: var(--border);
-          margin: 2px 0;
-        }
-
-        .filter-group {}
-        .filter-label {
-          font-size: 9px;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          color: var(--text-muted);
-          display: block;
-          margin-bottom: 6px;
-          font-weight: 500;
-        }
+        .brand-logo-placeholder { height: 32px; width: 64px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--gold); }
+        .brand-logo-label { font-size: 9px; color: var(--text-muted); margin-top: 3px; letter-spacing: 0.06em; }
+        .filter-divider { height: 1px; background: var(--border); margin: 2px 0; }
+        .filter-label { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 500; }
         .filter-label-sub { text-transform: none; letter-spacing: 0; font-size: 9px; }
-
-        .custom-select-wrap {
-          position: relative;
-        }
+        .custom-select-wrap { position: relative; }
         .custom-select {
-          width: 100%;
-          appearance: none;
-          background: var(--surface2);
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 9px 28px 9px 12px;
-          font-size: 12px;
-          font-family: 'Outfit', sans-serif;
-          font-weight: 400;
-          color: var(--text);
-          outline: none;
-          cursor: pointer;
-          transition: border-color 0.2s, box-shadow 0.2s;
-          letter-spacing: 0.02em;
+          width: 100%; appearance: none; background: var(--surface2); border: 1px solid var(--border);
+          border-radius: 8px; padding: 9px 28px 9px 12px; font-size: 12px; font-family: 'Outfit', sans-serif;
+          font-weight: 400; color: var(--text); outline: none; cursor: pointer;
+          transition: border-color 0.2s, box-shadow 0.2s; letter-spacing: 0.02em;
         }
         .custom-select:focus { border-color: var(--gold-border); box-shadow: 0 0 0 2px var(--gold-dim); }
-        .select-arrow {
-          position: absolute;
-          right: 10px;
-          top: 50%;
-          transform: translateY(-50%);
-          pointer-events: none;
-          color: var(--text-muted);
-          font-size: 11px;
-        }
-
-        .price-range-row {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
+        .select-arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted); font-size: 11px; }
+        .price-range-row { display: flex; align-items: center; gap: 6px; }
         .price-input {
-          flex: 1;
-          background: var(--surface2);
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 9px 10px;
-          font-size: 12px;
-          font-family: 'Outfit', sans-serif;
-          color: var(--text);
-          outline: none;
-          transition: border-color 0.2s;
-          min-width: 0;
+          flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+          padding: 9px 10px; font-size: 12px; font-family: 'Outfit', sans-serif; color: var(--text);
+          outline: none; transition: border-color 0.2s; min-width: 0;
         }
         .price-input::placeholder { color: var(--text-muted); }
         .price-input:focus { border-color: var(--gold-border); }
         .price-separator { color: var(--text-muted); font-size: 12px; flex-shrink: 0; }
-
         .reset-btn {
-          width: 100%;
-          background: transparent;
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 9px;
-          font-size: 11px;
-          font-family: 'Outfit', sans-serif;
-          color: var(--text-muted);
-          cursor: pointer;
-          transition: all 0.2s;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          margin-top: 4px;
+          width: 100%; background: transparent; border: 1px solid var(--border); border-radius: 8px;
+          padding: 9px; font-size: 11px; font-family: 'Outfit', sans-serif; color: var(--text-muted);
+          cursor: pointer; transition: all 0.2s; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px;
         }
-        .reset-btn.active {
-          border-color: rgba(255,80,80,0.3);
-          color: #ff8080;
-          background: rgba(255,80,80,0.05);
-        }
-        .reset-btn.active:hover {
-          background: rgba(255,80,80,0.12);
-          border-color: rgba(255,80,80,0.5);
-        }
-        .reset-btn:not(.active):hover {
-          border-color: var(--border-hover);
-          color: var(--text);
-        }
+        .reset-btn.active { border-color: rgba(255,80,80,0.3); color: #ff8080; background: rgba(255,80,80,0.05); }
+        .reset-btn.active:hover { background: rgba(255,80,80,0.12); border-color: rgba(255,80,80,0.5); }
+        .reset-btn:not(.active):hover { border-color: var(--border-hover); color: var(--text); }
 
-        /* ── MOBILE FILTER DRAWER ── */
-        .mobile-overlay {
-          position: fixed;
-          inset: 0;
-          z-index: 50;
-        }
-        .mobile-backdrop {
-          position: absolute;
-          inset: 0;
-          background: rgba(0,0,0,0.75);
-          backdrop-filter: blur(4px);
-        }
+        .mobile-overlay { position: fixed; inset: 0; z-index: 50; }
+        .mobile-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); }
         .mobile-drawer {
-          position: absolute;
-          top: 0;
-          left: 0;
-          height: 100%;
-          width: 280px;
-          max-width: 85vw;
-          background: var(--surface);
-          border-right: 1px solid var(--border);
-          box-shadow: 4px 0 40px rgba(0,0,0,0.6);
-          overflow-y: auto;
-          z-index: 10;
-          animation: slideIn 0.25s ease;
+          position: absolute; top: 0; left: 0; height: 100%; width: 280px; max-width: 85vw;
+          background: var(--surface); border-right: 1px solid var(--border);
+          box-shadow: 4px 0 40px rgba(0,0,0,0.6); overflow-y: auto; z-index: 10; animation: slideIn 0.25s ease;
         }
-        @keyframes slideIn {
-          from { transform: translateX(-100%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
+        @keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .mobile-drawer-header {
-          position: sticky;
-          top: 0;
-          background: var(--surface);
-          border-bottom: 1px solid var(--border);
-          padding: 16px 18px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          z-index: 1;
+          position: sticky; top: 0; background: var(--surface); border-bottom: 1px solid var(--border);
+          padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; z-index: 1;
         }
-        .mobile-drawer-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 18px;
-          font-weight: 500;
-          color: var(--text);
-        }
+        .mobile-drawer-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500; color: var(--text); }
         .drawer-close-btn {
-          background: var(--surface2);
-          border: 1px solid var(--border);
-          color: var(--text-muted);
-          width: 30px;
-          height: 30px;
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          font-size: 14px;
-          transition: all 0.2s;
+          background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted);
+          width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center;
+          justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s;
         }
         .drawer-close-btn:hover { color: var(--text); border-color: var(--border-hover); }
         .mobile-drawer-body { padding: 18px; }
 
-        /* ── PRODUCT GRID / LIST ── */
         .products-main { flex: 1; min-width: 0; }
 
-        .product-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
-        }
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         @media(min-width:640px){ .product-grid { gap: 16px; } }
         @media(min-width:1024px){ .product-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; } }
         @media(min-width:1280px){ .product-grid { grid-template-columns: repeat(4, 1fr); } }
@@ -854,288 +864,374 @@ const ShopPage = () => {
         .product-list { display: flex; flex-direction: column; gap: 10px; }
         @media(min-width:640px){ .product-list { gap: 14px; } }
 
-        /* ── PRODUCT CARD (grid) ── */
         .product-card {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: var(--radius);
-          overflow: hidden;
-          text-decoration: none;
-          color: inherit;
-          display: block;
-          transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
-          position: relative;
+          background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+          overflow: hidden; text-decoration: none; color: inherit; display: block;
+          transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s; position: relative;
         }
-        .product-card:hover {
-          border-color: var(--gold-border);
-          transform: translateY(-3px);
-          box-shadow: 0 12px 40px rgba(0,0,0,0.5), var(--shadow-gold);
-        }
-
-        .card-img-wrap {
-          position: relative;
-          aspect-ratio: 1;
-          overflow: hidden;
-          background: var(--surface2);
-        }
-        .card-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
+        .product-card:hover { border-color: var(--gold-border); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.5), var(--shadow-gold); }
+        .card-img-wrap { position: relative; aspect-ratio: 1; overflow: hidden; background: var(--surface2); }
+        .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94); }
         .product-card:hover .card-img { transform: scale(1.06); }
-
         .card-featured-badge {
-          position: absolute;
-          top: 8px;
-          left: 8px;
-          background: var(--gold);
-          color: #000;
-          font-size: 8px;
-          font-weight: 700;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          padding: 3px 7px;
-          border-radius: 3px;
+          position: absolute; top: 8px; left: 8px; background: var(--gold); color: #000;
+          font-size: 8px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+          padding: 3px 7px; border-radius: 3px;
         }
-
-        .card-body {
-          padding: 12px;
-        }
+        .card-body { padding: 12px; }
         @media(min-width:640px){ .card-body { padding: 14px; } }
-
-        .card-brand {
-          font-size: 9px;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          color: var(--gold);
-          font-weight: 500;
-          margin-bottom: 4px;
-          display: block;
-        }
-
-        .card-title {
-          font-size: 12px;
-          font-weight: 500;
-          line-height: 1.35;
-          color: var(--text);
-          margin-bottom: 6px;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
+        .card-brand { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 4px; display: block; }
+        .card-title { font-size: 12px; font-weight: 500; line-height: 1.35; color: var(--text); margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         @media(min-width:640px){ .card-title { font-size: 13px; } }
-
-        .card-desc {
-          font-size: 11px;
-          color: var(--text-muted);
-          line-height: 1.5;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          margin-bottom: 10px;
-        }
-
-        .card-meta {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          flex-wrap: wrap;
-          margin-bottom: 10px;
-        }
-
-        .card-footer {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding-top: 10px;
-          border-top: 1px solid var(--border);
-        }
-        .card-price {
-          font-family: 'Outfit', sans-serif;
-          font-size: 13px;
-          font-weight: 500;
-          color: var(--gold-light);
-          letter-spacing: 0.02em;
-        }
+        .card-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 10px; }
+        .card-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+        .card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--border); }
+        .card-price { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 500; color: var(--gold-light); letter-spacing: 0.02em; }
         @media(min-width:640px){ .card-price { font-size: 14px; } }
-        .card-cta {
-          font-size: 10px;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: var(--text-muted);
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          transition: color 0.2s, gap 0.2s;
-          font-weight: 500;
-        }
+        .card-cta { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; gap: 4px; transition: color 0.2s, gap 0.2s; font-weight: 500; }
         .product-card:hover .card-cta { color: var(--gold); gap: 7px; }
 
-        /* ── PRODUCT CARD (list) ── */
-        .product-card-list {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: var(--radius);
-          overflow: hidden;
-          text-decoration: none;
-          color: inherit;
-          display: flex;
-          gap: 0;
-          transition: border-color 0.25s, box-shadow 0.25s;
-        }
-        .product-card-list:hover {
-          border-color: var(--gold-border);
-          box-shadow: 0 6px 24px rgba(0,0,0,0.5), var(--shadow-gold);
-        }
-        .list-img-wrap {
-          width: 100px;
-          flex-shrink: 0;
-          overflow: hidden;
-          background: var(--surface2);
-        }
+        .product-card-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; text-decoration: none; color: inherit; display: flex; transition: border-color 0.25s, box-shadow 0.25s; }
+        .product-card-list:hover { border-color: var(--gold-border); box-shadow: 0 6px 24px rgba(0,0,0,0.5), var(--shadow-gold); }
+        .list-img-wrap { width: 100px; flex-shrink: 0; overflow: hidden; background: var(--surface2); }
         @media(min-width:640px){ .list-img-wrap { width: 140px; } }
-        .list-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.4s ease;
-        }
+        .list-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
         .product-card-list:hover .list-img { transform: scale(1.05); }
-        .list-body {
-          flex: 1;
-          min-width: 0;
-          padding: 14px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-        }
+        .list-body { flex: 1; min-width: 0; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
         @media(min-width:640px){ .list-body { padding: 18px; flex-direction: row; align-items: center; gap: 20px; } }
-
         .list-info { flex: 1; min-width: 0; }
-        .list-right {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          margin-top: 10px;
-        }
+        .list-right { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; }
         @media(min-width:640px){ .list-right { flex-direction: column; align-items: flex-end; margin-top: 0; gap: 8px; flex-shrink: 0; } }
 
-        /* ── BADGES ── */
-        .gender-badge {
-          font-size: 9px;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          padding: 3px 8px;
-          border-radius: 4px;
-          font-weight: 500;
-        }
-        .gender-badge.men { background: rgba(59,130,246,0.12); color: #93c5fd; border: 1px solid rgba(59,130,246,0.2); }
-        .gender-badge.women { background: rgba(236,72,153,0.12); color: #f9a8d4; border: 1px solid rgba(236,72,153,0.2); }
-        .gender-badge.kids { background: rgba(34,197,94,0.12); color: #86efac; border: 1px solid rgba(34,197,94,0.2); }
+        .gender-badge { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; font-weight: 500; }
+        .gender-badge.men    { background: rgba(59,130,246,0.12); color: #93c5fd; border: 1px solid rgba(59,130,246,0.2); }
+        .gender-badge.women  { background: rgba(236,72,153,0.12); color: #f9a8d4; border: 1px solid rgba(236,72,153,0.2); }
+        .gender-badge.kids   { background: rgba(34,197,94,0.12);  color: #86efac; border: 1px solid rgba(34,197,94,0.2); }
         .gender-badge.unisex { background: rgba(255,255,255,0.05); color: #a0a0a0; border: 1px solid rgba(255,255,255,0.08); }
         .gender-badge.wall-clock { background: rgba(201,168,76,0.1); color: var(--gold); border: 1px solid var(--gold-border); }
+        .color-badge { font-size: 9px; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.04); color: var(--text-sub); border: 1px solid rgba(255,255,255,0.07); text-transform: uppercase; font-weight: 400; }
 
-        .color-badge {
-          font-size: 9px;
-          letter-spacing: 0.06em;
-          padding: 3px 8px;
-          border-radius: 4px;
-          background: rgba(255,255,255,0.04);
-          color: var(--text-sub);
-          border: 1px solid rgba(255,255,255,0.07);
-          text-transform: uppercase;
-          font-weight: 400;
-        }
-
-        /* ── EMPTY STATE ── */
-        .empty-state {
-          border: 1px solid var(--border);
-          border-radius: var(--radius-lg);
-          padding: 60px 24px;
-          text-align: center;
-          background: var(--surface);
-        }
-        .empty-icon {
-          font-size: 48px;
-          margin-bottom: 12px;
-          filter: grayscale(0.5);
-        }
-        .empty-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 22px;
-          font-weight: 400;
-          margin-bottom: 8px;
-          color: var(--text);
-        }
-        .empty-sub {
-          font-size: 13px;
-          color: var(--text-muted);
-          margin-bottom: 20px;
-        }
-        .empty-reset-btn {
-          background: var(--gold);
-          color: #000;
-          border: none;
-          padding: 10px 24px;
-          border-radius: 6px;
-          font-size: 12px;
-          font-family: 'Outfit', sans-serif;
-          font-weight: 600;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
+        .empty-state { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 60px 24px; text-align: center; background: var(--surface); }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; filter: grayscale(0.5); }
+        .empty-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin-bottom: 8px; color: var(--text); }
+        .empty-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+        .empty-reset-btn { background: var(--gold); color: #000; border: none; padding: 10px 24px; border-radius: 6px; font-size: 12px; font-family: 'Outfit', sans-serif; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
         .empty-reset-btn:hover { background: var(--gold-light); }
 
-        /* ── ERROR ── */
         .error-msg { color: #f87171; padding: 40px 0; font-size: 14px; }
 
-        /* ── Active filter pills ── */
-        .active-filters {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-          margin-bottom: 16px;
-        }
-        .filter-pill {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          background: var(--gold-dim);
-          border: 1px solid var(--gold-border);
-          border-radius: 50px;
-          padding: 4px 10px 4px 10px;
-          font-size: 10px;
-          color: var(--gold-light);
-          letter-spacing: 0.06em;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
+        .active-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+        .filter-pill { display: flex; align-items: center; gap: 5px; background: var(--gold-dim); border: 1px solid var(--gold-border); border-radius: 50px; padding: 4px 10px; font-size: 10px; color: var(--gold-light); letter-spacing: 0.06em; cursor: pointer; transition: background 0.2s; }
         .filter-pill:hover { background: rgba(201,168,76,0.25); }
         .filter-pill-x { font-size: 11px; opacity: 0.7; }
 
-        /* ── SELECT OPTION COLORS ── */
         select option { background: #1a1a1a; color: #f0ece4; }
+
+        /* ════════════════════════════════════
+           GALLERY VIEW
+        ════════════════════════════════════ */
+        .gv-root { columns: 2; column-gap: 8px; line-height: 0; }
+        @media(min-width:480px)  { .gv-root { columns: 3; column-gap: 10px; } }
+        @media(min-width:768px)  { .gv-root { columns: 4; column-gap: 12px; } }
+        @media(min-width:1100px) { .gv-root { columns: 5; column-gap: 12px; } }
+
+        .gv-item { break-inside: avoid; display: inline-block; width: 100%; margin-bottom: 8px; opacity: 0; transform: translateY(16px) scale(0.97); transition: opacity 0.4s ease, transform 0.4s ease; line-height: normal; }
+        @media(min-width:640px) { .gv-item { margin-bottom: 12px; } }
+        .gv-item.visible { opacity: 1; transform: translateY(0) scale(1); }
+
+        .gv-photo-btn { position: relative; display: block; width: 100%; border: none; padding: 0; background: var(--surface2); border-radius: 8px; overflow: hidden; cursor: zoom-in; outline: none; border: 1px solid var(--border); transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s; }
+        .gv-photo-btn:hover { border-color: var(--gold-border); box-shadow: 0 8px 28px rgba(0,0,0,0.55), var(--shadow-gold); transform: translateY(-2px); }
+        .gv-photo-btn:focus-visible { box-shadow: 0 0 0 3px var(--gold); }
+        .gv-photo { display: block; width: 100%; height: auto; object-fit: cover; transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), filter 0.25s; }
+        .gv-photo-btn:hover .gv-photo { transform: scale(1.04); filter: brightness(0.78); }
+        .gv-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.25s; pointer-events: none; }
+        .gv-photo-btn:hover .gv-overlay { opacity: 1; }
+        .gv-overlay-icon { width: 42px; height: 42px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); border: 1px solid rgba(201,168,76,0.5); color: var(--gold); display: flex; align-items: center; justify-content: center; transform: scale(0.65); transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+        .gv-photo-btn:hover .gv-overlay-icon { transform: scale(1); }
+        .gv-featured-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 6px rgba(201,168,76,0.9); }
+        .gv-caption { padding: 6px 3px 2px; display: flex; flex-direction: column; gap: 1px; }
+        .gv-caption-brand { font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); font-weight: 500; font-family: 'Outfit', sans-serif; }
+        .gv-caption-title { font-size: 10.5px; color: var(--text-sub); font-family: 'Outfit', sans-serif; font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+
+        /* ════════════════════════════════════
+           LIGHTBOX
+        ════════════════════════════════════ */
+        .lb-overlay {
+          position: fixed; inset: 0; z-index: 9999;
+          background: rgba(0,0,0,0.97);
+          display: flex; align-items: center; justify-content: center;
+          animation: lb-in 0.18s ease;
+        }
+        @keyframes lb-in { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ── TOP BAR: 3-column grid — Brand | Title | Price ── */
+        .lb-topbar {
+          position: fixed;
+          top: 0; left: 0; right: 0;
+          z-index: 10010;
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          align-items: center;
+          gap: 8px;
+          padding: 0 52px 0 16px;
+          height: 62px;
+          background: linear-gradient(to bottom, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.7) 70%, transparent 100%);
+          pointer-events: none;
+          box-sizing: border-box;
+        }
+        @media(min-width:640px){ .lb-topbar { padding: 0 56px 0 22px; height: 66px; } }
+
+        /* Brand — left */
+        .lb-topbar-brand {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          justify-self: start;
+          align-items: flex-start;
+          min-width: 0;
+          max-width: 140px;
+        }
+        @media(min-width:640px){ .lb-topbar-brand { max-width: 180px; } }
+        .lb-brand-eyebrow {
+          font-size: 7.5px;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          color: rgba(201,168,76,0.55);
+          font-family: 'Outfit', sans-serif;
+          font-weight: 500;
+          line-height: 1;
+        }
+        .lb-brand-name {
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--gold);
+          font-family: 'Outfit', sans-serif;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          line-height: 1.2;
+        }
+        @media(min-width:640px){ .lb-brand-name { font-size: 14px; } }
+
+        /* Title — center */
+        .lb-topbar-center {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 0;
+          padding: 0 4px;
+        }
+        .lb-title {
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 14px;
+          font-weight: 400;
+          color: rgba(255,255,255,0.92);
+          letter-spacing: 0.01em;
+          text-align: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          line-height: 1.2;
+          max-width: 220px;
+        }
+        @media(min-width:480px){ .lb-title { font-size: 15px; max-width: 280px; } }
+        @media(min-width:640px){ .lb-title { font-size: 17px; max-width: 380px; } }
+        @media(min-width:900px){ .lb-title { font-size: 19px; max-width: 500px; } }
+
+        /* Price — right */
+        .lb-topbar-price {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          justify-self: end;
+          align-items: flex-end;
+          min-width: 0;
+          max-width: 140px;
+        }
+        @media(min-width:640px){ .lb-topbar-price { max-width: 180px; } }
+        .lb-price-eyebrow {
+          font-size: 7.5px;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          color: rgba(226,192,122,0.55);
+          font-family: 'Outfit', sans-serif;
+          font-weight: 500;
+          line-height: 1;
+        }
+        .lb-price {
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--gold-light);
+          font-family: 'Outfit', sans-serif;
+          letter-spacing: 0.04em;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          line-height: 1.2;
+        }
+        @media(min-width:640px){ .lb-price { font-size: 14px; } }
+
+        /* Close */
+        .lb-close {
+          position: fixed;
+          top: 13px; right: 14px;
+          z-index: 10011;
+          width: 34px; height: 34px;
+          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,0.14);
+          background: rgba(10,10,10,0.75);
+          backdrop-filter: blur(8px);
+          color: rgba(255,255,255,0.75);
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer;
+          transition: border-color 0.2s, color 0.2s, transform 0.2s;
+        }
+        .lb-close:hover { color: #fff; border-color: rgba(255,255,255,0.4); transform: scale(1.08); }
+
+        /* Counter */
+        .lb-counter {
+          position: fixed;
+          bottom: 72px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 10010;
+          font-size: 10px;
+          letter-spacing: 0.16em;
+          color: rgba(255,255,255,0.28);
+          font-family: 'Outfit', sans-serif;
+          pointer-events: none;
+        }
+        @media(min-width:640px){ .lb-counter { bottom: 78px; } }
+
+        /* Zoom hint */
+        .lb-zoom-hint {
+          position: fixed;
+          bottom: 88px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 10010;
+          font-size: 9px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.2);
+          font-family: 'Outfit', sans-serif;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.4s;
+          white-space: nowrap;
+        }
+        .lb-zoom-hint.visible { opacity: 1; }
+        @media(min-width:640px){ .lb-zoom-hint { bottom: 96px; } }
+
+        /* Nav arrows */
+        .lb-nav {
+          position: fixed;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 10010;
+          width: 44px; height: 44px;
+          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(0,0,0,0.5);
+          backdrop-filter: blur(10px);
+          color: rgba(255,255,255,0.65);
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer;
+          transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.2s;
+        }
+        .lb-nav:hover { color: #fff; border-color: var(--gold-border); background: rgba(0,0,0,0.8); transform: translateY(-50%) scale(1.07); }
+        .lb-prev { left: 14px; }
+        .lb-next { right: 14px; }
+        @media(min-width:640px){ .lb-prev { left: 22px; } .lb-next { right: 22px; } }
+
+        /* Stage */
+        .lb-stage {
+          width: 100%; height: 100%;
+          display: flex; align-items: center; justify-content: center;
+          padding: 74px 60px 112px;
+          box-sizing: border-box;
+          will-change: transform;
+        }
+        @media(max-width:640px){ .lb-stage { padding: 70px 46px 108px; } }
+
+        .lb-img-wrap {
+          max-width: 100%; max-height: 100%;
+          display: flex; align-items: center; justify-content: center;
+          transition: transform 0.38s cubic-bezier(0.25,0.46,0.45,0.94);
+          cursor: zoom-in; will-change: transform; position: relative;
+        }
+        .lb-img-wrap.zoomed { transform: scale(2.9); cursor: zoom-out; }
+
+        .lb-skeleton {
+          position: absolute; width: 280px; height: 280px; border-radius: 6px;
+          background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 100%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+        .lb-img {
+          max-width: 100%;
+          max-height: calc(100vh - 190px);
+          object-fit: contain; border-radius: 5px; opacity: 0;
+          transition: opacity 0.3s ease; user-select: none; -webkit-user-drag: none;
+          box-shadow: 0 24px 80px rgba(0,0,0,0.85); display: block;
+        }
+        .lb-img.loaded { opacity: 1; }
+
+        /* View Details button — centered above thumbs */
+        .lb-bottom-bar {
+          position: fixed;
+          bottom: 62px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 10010;
+          pointer-events: all;
+        }
+        @media(min-width:640px){ .lb-bottom-bar { bottom: 68px; } }
+
+        .lb-view-btn {
+          display: flex; align-items: center; gap: 6px;
+          background: var(--gold); color: #000; border: none; border-radius: 6px;
+          padding: 9px 20px; font-size: 10px; font-family: 'Outfit', sans-serif; font-weight: 700;
+          letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+          transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+          white-space: nowrap; box-shadow: 0 4px 20px rgba(201,168,76,0.35);
+        }
+        .lb-view-btn:hover { background: var(--gold-light); transform: scale(1.05); box-shadow: 0 6px 28px rgba(201,168,76,0.5); }
+
+        /* Thumbnail strip */
+        .lb-thumbs {
+          position: fixed; bottom: 0; left: 0; right: 0;
+          z-index: 10010;
+          display: flex; gap: 5px; padding: 8px 16px 10px;
+          overflow-x: auto; scrollbar-width: none;
+          background: linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.7) 100%);
+          justify-content: flex-start; scroll-behavior: smooth;
+        }
+        .lb-thumbs::-webkit-scrollbar { display: none; }
+        .lb-thumb {
+          flex-shrink: 0; width: 44px; height: 44px; border-radius: 5px;
+          background-size: cover; background-position: center;
+          border: 2px solid transparent; cursor: pointer; opacity: 0.42;
+          transition: opacity 0.2s, border-color 0.2s, transform 0.2s; outline: none;
+        }
+        @media(min-width:640px){ .lb-thumb { width: 50px; height: 50px; } }
+        .lb-thumb:hover { opacity: 0.72; transform: scale(1.06); }
+        .lb-thumb.active { opacity: 1; border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 10px rgba(201,168,76,0.5); }
       `}</style>
 
       <div className="shop-root">
         <ScrollToTop />
         <div className="shop-wrapper">
 
-          {/* ── PAGE HEADER ── */}
           <div className="shop-header">
             <span className="shop-header-eyebrow">Collection</span>
             <h1 className="shop-header-title">Our <em>Timepieces</em></h1>
           </div>
 
-          {/* ── SEARCH ── */}
           <div className="search-wrap">
             <svg className="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -1152,9 +1248,7 @@ const ShopPage = () => {
             )}
           </div>
 
-          {/* ── CONTROLS ROW ── */}
           <div className="controls-row">
-            {/* Filter btn (mobile) */}
             <button className="filter-toggle-btn" onClick={() => setShowFilters(true)}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -1163,7 +1257,6 @@ const ShopPage = () => {
               {hasActiveFilters && <span className="filter-badge">!</span>}
             </button>
 
-            {/* View toggle */}
             <div className="view-toggle">
               <button className={`view-btn ${viewMode === "grid" ? "active" : ""}`} onClick={() => setViewMode("grid")} aria-label="Grid view">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -1175,9 +1268,16 @@ const ShopPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
               </button>
+              <button className={`view-btn ${viewMode === "gallery" ? "active" : ""}`} onClick={() => setViewMode("gallery")} aria-label="Gallery view">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <rect x="3" y="3" width="7" height="9" rx="1" />
+                  <rect x="14" y="3" width="7" height="5" rx="1" />
+                  <rect x="14" y="12" width="7" height="9" rx="1" />
+                  <rect x="3" y="16" width="7" height="5" rx="1" />
+                </svg>
+              </button>
             </div>
 
-            {/* Sort */}
             <div className="sort-wrap">
               <select className="sort-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                 <option value="featured">Featured</option>
@@ -1188,13 +1288,11 @@ const ShopPage = () => {
               <span className="sort-arrow">▾</span>
             </div>
 
-            {/* Results count */}
             <span className="results-count">
               <strong>{filteredProducts.length}</strong> {filteredProducts.length === 1 ? "item" : "items"}
             </span>
           </div>
 
-          {/* ── ACTIVE FILTER PILLS ── */}
           {hasActiveFilters && (
             <div className="active-filters">
               {searchQuery && (
@@ -1237,7 +1335,6 @@ const ShopPage = () => {
 
           <div className="shop-layout">
 
-            {/* ── MOBILE FILTER DRAWER ── */}
             {showFilters && (
               <div className="mobile-overlay">
                 <div className="mobile-backdrop" onClick={() => setShowFilters(false)} />
@@ -1253,7 +1350,6 @@ const ShopPage = () => {
               </div>
             )}
 
-            {/* ── DESKTOP SIDEBAR ── */}
             <aside className="desktop-sidebar">
               <div className="sidebar-inner">
                 <div className="sidebar-header">
@@ -1264,7 +1360,6 @@ const ShopPage = () => {
               </div>
             </aside>
 
-            {/* ── PRODUCTS MAIN ── */}
             <main className="products-main">
               {loading && <Loading message="Loading products..." size="large" />}
 
@@ -1280,7 +1375,12 @@ const ShopPage = () => {
               )}
 
               {!loading && !error && filteredProducts.length > 0 && (
-                viewMode === "grid" ? (
+                viewMode === "gallery" ? (
+                  <GalleryView
+                    products={filteredProducts}
+                    onNavigate={(id) => navigate(`/shop/${id}`)}
+                  />
+                ) : viewMode === "grid" ? (
                   <div className="product-grid">
                     {filteredProducts.map((product) => {
                       const productColors = getProductColors(product);
