@@ -118,7 +118,7 @@ const Footer = () => {
                     </svg>
                   </div>
                   <a href="mailto:sales@happytimeonline.com" className="hover:text-gold transition-colors">
-                    sales@happytimeonline.com  
+                    sales@happytimeonline.com
                   </a>
                 </div>
               </div>
