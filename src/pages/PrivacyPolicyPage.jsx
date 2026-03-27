@@ -121,7 +121,7 @@ const PrivacyPolicyPage = () => {
             <li>Opt out of non-essential communications</li>
           </ul>
           <p className="text-gray-300 mt-4">
-            Contact us at <Link to="/contact" className="text-gold hover:underline">our contact page</Link> or email <a href="mailto:happytime143b@gmail.com" className="text-gold hover:underline">happytime143b@gmail.com</a>.
+            Contact us at <Link to="/contact" className="text-gold hover:underline">our contact page</Link> or email <a href="mailto:sales@happytimeonline.com" className="text-gold hover:underline">sales@happytimeonline.com</a>.
           </p>
         </section>
 
@@ -170,7 +170,7 @@ const PrivacyPolicyPage = () => {
             "contactPoint": {
               "@type": "ContactPoint",
               "contactType": "Customer Service",
-              "email": "happytime143b@gmail.com",
+              "email": "sales@happytimeonline.com",
               "telephone": "+94 76 300 9123"
             }
           },

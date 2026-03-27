@@ -315,8 +315,8 @@ const VacancyDetailPage = () => {
               <p className="text-gray-400 text-sm leading-relaxed">
                 If you have any questions about this position or the application process, 
                 please don't hesitate to contact our HR team at{' '}
-                <a href="mailto:happytime143b@gmail.com" className="text-gold hover:underline">
-                  happytime143b@gmail.com
+                <a href="mailto:sales@happytimeonline.com" className="text-gold hover:underline">
+                  sales@happytimeonline.com
                 </a>
               </p>
             </div>
