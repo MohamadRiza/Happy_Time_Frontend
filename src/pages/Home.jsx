@@ -9,7 +9,7 @@ import TrustSection from '../components/HomeSections/TrustSection';
 import AboutSection from '../components/HomeSections/AboutSection';
 import ScrollToTop from '../components/ScrollToTop';
 import BrandsMarquee from '../components/HomeSections/BrandsMarquee';
-import GuestPrompt from '../components/GuestPrompt';
+import GuestPrompt1 from '../components/GuestPrompt1';
 
 const Home = () => {
   // SEO Meta Data
@@ -32,14 +32,14 @@ const Home = () => {
 
       <ScrollToTop />
       <div className="relative">
-        {/* <GuestPrompt> */}
+        <GuestPrompt1>
           <HeroSection />
           <FeaturedWatches />
           <CategorySection />
           <AboutSection />
           <TrustSection />
           <BrandsMarquee />
-        {/* </GuestPrompt> */}
+        </GuestPrompt1>
       </div>
 
       {/* Structured Data - Organization & Website */}
