@@ -410,6 +410,160 @@ const styles = `
     line-height: 1.4;
   }
 
+  /* ── WHATSAPP SHARE ROW ── */
+  .item-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(37,211,102,0.1);
+    color: #25d366;
+    border: 1px solid rgba(37,211,102,0.25);
+    border-radius: 8px;
+    padding: 5px 11px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+    line-height: 1;
+  }
+  .btn-whatsapp:hover {
+    background: rgba(37,211,102,0.18);
+    border-color: rgba(37,211,102,0.45);
+  }
+  .btn-whatsapp svg { flex-shrink: 0; }
+
+  /* ── STOCK CHECK MODAL ── */
+  .stock-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .stock-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px 20px 20px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), var(--shadow-gold);
+  }
+  .stock-modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .stock-modal-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 18px;
+    line-height: 1.6;
+  }
+  .stock-issue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .stock-issue-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--red-dim);
+    border: 1px solid var(--red-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .stock-issue-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+  .stock-issue-info { flex: 1; min-width: 0; }
+  .stock-issue-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .stock-issue-reason {
+    font-size: 11px;
+    color: var(--red);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .stock-modal-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-modal-cancel {
+    flex: 1;
+    background: var(--surface2);
+    color: var(--text-sub);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-modal-cancel:hover { border-color: var(--border-hover); color: var(--text); }
+  .btn-modal-proceed {
+    flex: 1;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-modal-proceed:hover { background: var(--gold-light); }
+  .btn-modal-proceed:disabled { background: var(--surface3); color: var(--text-muted); cursor: not-allowed; }
+
   /* ── ORDER SUMMARY (sidebar / mobile inline) ── */
   .order-summary {
     background: var(--surface);
@@ -573,10 +727,6 @@ const styles = `
   .btn-browse:hover { background: var(--gold-light); box-shadow: 0 6px 24px rgba(201,168,76,0.3); }
 
   /* ── MOBILE STICKY BAR ── */
-  /*
-    Sits just above the bottom nav bar.
-    Uses var(--nav-height) so you only need to change it in one place.
-  */
   .mobile-sticky-bar {
     display: block;
     position: fixed;
@@ -589,7 +739,6 @@ const styles = `
     border-top: 1px solid var(--border);
     padding: 10px 14px;
     z-index: 100;
-    /* Safe-area inset for notched phones — no effect on regular phones */
     padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   }
   @media(min-width:768px) { .mobile-sticky-bar { display: none; } }
@@ -666,11 +815,19 @@ const styles = `
   .trust-badge-item span:first-child { font-size: 13px; }
 `;
 
+// ── WEBSITE CONFIG ──
+// Update this to match your site's username / display name and base URL
+const SITE_USERNAME = 'HappyTime';
+const SITE_BASE_URL = 'https://happytimeonline.com';
+
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedItems, setSelectedItems] = useState(new Set());
+  // Stock-check modal state
+  const [stockIssues, setStockIssues] = useState([]);
+  const [showStockModal, setShowStockModal] = useState(false);
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -802,19 +959,71 @@ const CartPage = () => {
     }
   };
 
+  // ── NEW: Stock check before checkout ──
   const proceedToCheckout = () => {
     if (selectedItems.size === 0) { toast.error('Please select at least one item'); return; }
+
     const selectedCartItems = cartItems.filter(item => selectedItems.has(item._id));
+    const issues = [];
+
     for (const item of selectedCartItems) {
-      if (!item.productId) { toast.error('Some items are no longer available'); return; }
+      if (!item.productId) {
+        issues.push({ item, reason: 'no-longer-available' });
+        continue;
+      }
       const maxAvailable = getMaxAvailableQuantity(item.productId._id, item.selectedColor);
-      if (maxAvailable !== Infinity && item.quantity > maxAvailable) {
-        toast.error(`Insufficient stock for ${item.productId.title}`); return;
+      if (maxAvailable === 0) {
+        issues.push({ item, reason: 'out-of-stock' });
+      } else if (maxAvailable !== Infinity && item.quantity > maxAvailable) {
+        issues.push({ item, reason: 'insufficient-stock', available: maxAvailable });
       }
     }
+
+    if (issues.length > 0) {
+      setStockIssues(issues);
+      setShowStockModal(true);
+      return;
+    }
+
+    // All good — proceed
     navigate('/checkout', {
       state: { selectedItems: Array.from(selectedItems), cartItems: selectedCartItems }
     });
+  };
+
+  // Proceed ignoring out-of-stock (deselects problematic items first)
+  const proceedWithAvailableItems = () => {
+    const problemIds = new Set(stockIssues.map(i => i.item._id));
+    const cleanSelected = new Set([...selectedItems].filter(id => !problemIds.has(id)));
+    if (cleanSelected.size === 0) {
+      toast.error('No available items to checkout');
+      setShowStockModal(false);
+      return;
+    }
+    setSelectedItems(cleanSelected);
+    const cleanItems = cartItems.filter(item => cleanSelected.has(item._id));
+    setShowStockModal(false);
+    navigate('/checkout', {
+      state: { selectedItems: Array.from(cleanSelected), cartItems: cleanItems }
+    });
+  };
+
+  // ── NEW: WhatsApp share ──
+  const buildWhatsAppUrl = (item) => {
+    const product = item.productId;
+    if (!product) return '#';
+    const productUrl = `${SITE_BASE_URL}/shop/${product._id}`;
+    const imageUrl = product.images?.[0] || '';
+    const price = product.price != null ? `LKR ${product.price.toLocaleString()}` : 'Contact for price';
+    const color = item.selectedColor ? ` | Color: ${item.selectedColor}` : '';
+    const message =
+      `👋 Check out this item from *${SITE_USERNAME}*!\n\n` +
+      `*${product.title}*${color}\n` +
+      `💰 ${price}\n\n` +
+      `🖼️ Image: ${imageUrl}\n` +
+      `🔗 ${productUrl}`;
+    // 077 718 1785 → international format: +94 77 718 1785
+    return `https://wa.me/94777181785?text=${encodeURIComponent(message)}`;
   };
 
   const handleQuantityInputChange = (itemId, value) => {
@@ -841,6 +1050,13 @@ const CartPage = () => {
     if (maxQty === 0) return { label: 'Out of Stock', cls: 'out' };
     if (maxQty <= 3) return { label: `${maxQty} left`, cls: 'low-stock' };
     return { label: `${maxQty} available`, cls: 'in-stock' };
+  };
+
+  const getIssueLabel = (issue) => {
+    if (issue.reason === 'no-longer-available') return 'No longer available';
+    if (issue.reason === 'out-of-stock') return 'Out of stock';
+    if (issue.reason === 'insufficient-stock') return `Only ${issue.available} in stock (qty: ${issue.item.quantity})`;
+    return 'Stock issue';
   };
 
   if (loading) return <Loading message="Loading your cart..." size="large" />;
@@ -877,6 +1093,57 @@ const CartPage = () => {
         </Helmet>
 
         <ScrollToTop />
+
+        {/* ── STOCK CHECK MODAL ── */}
+        {showStockModal && (
+          <div className="stock-modal-overlay" onClick={() => setShowStockModal(false)}>
+            <div className="stock-modal" onClick={e => e.stopPropagation()}>
+              <h2 className="stock-modal-title">Stock Issue Detected</h2>
+              <p className="stock-modal-sub">
+                The following selected {stockIssues.length === 1 ? 'item has a' : 'items have'} stock{' '}
+                {stockIssues.length === 1 ? 'issue' : 'issues'}. You can remove them and continue with
+                the remaining items, or go back to adjust quantities.
+              </p>
+              <div className="stock-issue-list">
+                {stockIssues.map(({ item, reason, available }) => (
+                  <div key={item._id} className="stock-issue-item">
+                    {item.productId?.images?.[0] && (
+                      <img
+                        src={item.productId.images[0]}
+                        alt={item.productId?.title || 'Product'}
+                        className="stock-issue-img"
+                      />
+                    )}
+                    <div className="stock-issue-info">
+                      <span className="stock-issue-name">
+                        {item.productId?.title || 'Unavailable Item'}
+                        {item.selectedColor ? ` · ${item.selectedColor}` : ''}
+                      </span>
+                      <span className="stock-issue-reason">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        {getIssueLabel({ item, reason, available })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="stock-modal-actions">
+                <button className="btn-modal-cancel" onClick={() => setShowStockModal(false)}>
+                  Go Back
+                </button>
+                <button
+                  className="btn-modal-proceed"
+                  onClick={proceedWithAvailableItems}
+                  disabled={selectedItems.size - stockIssues.length === 0}
+                >
+                  Skip & Checkout
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="cart-wrapper">
           {/* ── HEADER ── */}
@@ -1031,6 +1298,23 @@ const CartPage = () => {
                                 Currently out of stock — cannot be selected for checkout
                               </div>
                             )}
+
+                            {/* ── WHATSAPP SHARE ── */}
+                            <div className="item-action-row">
+                              <a
+                                href={buildWhatsAppUrl(item)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-whatsapp"
+                              >
+                                {/* WhatsApp icon */}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                </svg>
+                                Share on WhatsApp
+                              </a>
+                            </div>
+
                           </div>
                         </div>
                       </div>
@@ -1056,8 +1340,6 @@ const CartPage = () => {
               </div>
 
               {/* ── RIGHT / BOTTOM: ORDER SUMMARY ── */}
-              {/* On mobile this renders below the items list (normal flow).
-                  On desktop (≥900px) it becomes the sticky sidebar via grid. */}
               <div className="order-summary">
                 <h2 className="summary-title">Order Summary</h2>
 
@@ -1081,7 +1363,6 @@ const CartPage = () => {
                   <span className="summary-total-val">{formatPrice(selectedTotal)}</span>
                 </div>
 
-                {/* Show checkout button inside summary only on desktop */}
                 <button
                   className="btn-checkout"
                   onClick={proceedToCheckout}
@@ -1145,7 +1426,7 @@ const CartPage = () => {
             </div>
           </div>
         )}
-      </div> 
+      </div>
     </>
   );
 };
