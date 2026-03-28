@@ -90,7 +90,7 @@ const GuestPrompt = ({ children }) => {
 
             {/* Offer Image */}
             <img
-              src="/Offer.png"
+              src="/Offer.webp"
               alt="Special Offer - Happy Time Watches"
               className="w-full rounded-2xl shadow-2xl"
             />
