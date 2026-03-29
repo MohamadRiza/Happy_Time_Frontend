@@ -441,6 +441,22 @@ const styles = `
   .btn-contact-cta:hover { background: var(--gold-light); }
   .btn-contact-cta:active { transform: scale(0.98); }
 
+  /* ── WHATSAPP SALES BUTTON ── */
+  .btn-whatsapp-sales {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 9px;
+    background: #25D366; color: #fff; border: none; border-radius: 12px;
+    padding: 0 20px; font-family: 'Outfit', sans-serif; font-size: 13px;
+    font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+    box-shadow: 0 4px 18px rgba(37,211,102,0.22);
+    -webkit-tap-highlight-color: transparent;
+    min-height: 52px; text-decoration: none;
+    margin-bottom: 18px;
+  }
+  @media(min-width:640px) { .btn-whatsapp-sales { margin-bottom: 22px; } }
+  .btn-whatsapp-sales:hover { background: #20bd5a; box-shadow: 0 6px 24px rgba(37,211,102,0.34); }
+  .btn-whatsapp-sales:active { transform: scale(0.98); }
+
   /* ── WHOLESALE ── */
   .wholesale-card {
     background: linear-gradient(135deg, rgba(201,168,76,0.06) 0%, transparent 100%);
@@ -768,6 +784,27 @@ const ProductDetailPage = () => {
       if (data.success) { toast.success('Added to cart successfully!'); setError(''); window.dispatchEvent(new CustomEvent('cartUpdated')); }
       else toast.error(data.message || 'Failed to add to cart');
     } catch (err) { console.error('Add to cart error:', err); toast.error('Network error. Please try again.'); }
+  };
+
+  // ── WHATSAPP SALES HANDLER ──
+  const handleWhatsAppSales = () => {
+    if (!product) return;
+    const productUrl = `${window.location.origin}/shop/${product._id}`;
+    const firstImage = product.images?.[0] || '';
+    const priceText = (product.price !== null && product.price !== undefined)
+      ? `LKR ${product.price.toLocaleString()}`
+      : 'Contact for Price';
+    const colorText = selectedColorObj ? ` | Color: ${selectedColorObj.name}` : '';
+
+    const message =
+      `🛍️ Check out this item from *HappyTime*!\n` +
+      `*${product.title}*${colorText}\n` +
+      `💰 ${priceText}\n` +
+      (firstImage ? `🖼️ Image: ${firstImage}\n` : '') +
+      `🔗 ${productUrl}`;
+
+    const waUrl = `https://wa.me/94777181785?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
   };
 
   const goToCart = () => navigate('/cart');
@@ -1109,6 +1146,14 @@ const ProductDetailPage = () => {
               </>
             )}
 
+            {/* ── WHATSAPP SALES BUTTON ── */}
+            <button className="btn-whatsapp-sales" onClick={handleWhatsAppSales}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16 0C7.163 0 0 7.163 0 16c0 2.813.735 5.44 2.02 7.746L0 32l8.413-2.008A15.957 15.957 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm8.566 22.486c-.33.92-1.927 1.77-2.689 1.86-.717.083-1.598.115-5.488-2.078-4.572-2.566-7.506-9.118-7.718-9.505-.212-.388-1.715-2.452-1.715-4.676 0-2.224 1.112-3.316 1.507-3.765.397-.449.87-.575 1.164-.575.295 0 .59.003.847.01.273.007.64-.103.997.774.355.875 1.203 3.03 1.31 3.25.107.22.178.483-.106.775-.283.293-.515.637-.736.95-.223.314-.47.66-.218 1.05.252.388 1.124 1.853 2.406 2.998 1.657 1.55 3.041 2.07 3.534 2.3.493.229.781.191.975.116.193-.076.588-.22 1.074-.532.485-.313 1.28-1.488 1.457-2.926.176-1.438.176-2.658-.124-2.926-.3-.268-.557-.318-.747-.316-.19.003-.41.003-.63.003-.22 0-.577-.082-.88.623-.302.704-1.2 1.49-1.2 1.49s-.173.22-.31.365c-.137.145-.28.3-.28.3s-.263.22-.1.55c.163.33.744 1.205.8 1.29.056.085.93 1.56 2.39 2.51 1.46.95 2.285.905 2.62.85.334-.055 1.085-.44 1.238-.87.153-.43.153-.8.106-.88z"/>
+              </svg>
+              Chat with Sales on WhatsApp
+            </button>
+
             {/* Wholesale */}
             <div className="wholesale-card">
               <div className="wholesale-inner">
@@ -1252,7 +1297,7 @@ const ProductDetailPage = () => {
           </div>
         )}
 
-      </div>{/* /pdp-wrapperrr */}
+      </div>{/* /pdp-wrapper */}
     </div>
   );
 };
