@@ -51,6 +51,7 @@ import InventoryManagement from "./pages/AdminPages/InventoryManagement";
 import Snowfall from "./components/Snowfall";
 import { isChristmasSeason } from "./utils/dateUtils";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsAndConditionsPage from "./pages/TermsAndConditionsPage";
 
 function App() {
 
@@ -92,6 +93,7 @@ function App() {
             <Route path="/register" element={<RegisterStep1 />} />
             <Route path="/register/step2" element={<RegisterStep2 />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsAndConditionsPage/>} />
             <Route
               path="/account"
               element={
