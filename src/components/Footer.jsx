@@ -37,7 +37,7 @@ const Footer = () => {
   return (
     <footer className="relative bg-black text-gray-400 pt-16 pb-8 px-4 overflow-hidden">
       {/* Desktop+ background image with overlay */}
-      <div 
+      <div
         className="hidden md:block absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url('/watchFTR.jpg')` }}
       >
@@ -50,7 +50,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Top Section - 4 Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 mb-14">
-          
+
           {/* Column 1: Brand & Contact */}
           <div>
             <img
@@ -86,15 +86,15 @@ const Footer = () => {
                 </div>
               </div>
 
-              
+
               {/* Phone */}
               <div className='space-y-4 text-sm'>
                 {/* ✅ ADDED: Brand logo next to Contact Us heading */}
                 <div className="flex items-center gap-2 mb-2">
-                  <img 
-                    src="/Logo_ORG.png" 
-                    alt="Happy Time" 
-                    className="h-5 w-auto opacity-90" 
+                  <img
+                    src="/Logo_ORG.png"
+                    alt="Happy Time"
+                    className="h-5 w-auto opacity-90"
                   />
                   <Link to="/about" className="text-white font-medium hover:text-gold transition-colors ">Contact Us</Link>
                 </div>
@@ -122,7 +122,7 @@ const Footer = () => {
                   </a>
                 </div>
               </div>
-          </div>
+            </div>
           </div>
 
           {/* Column 2: Quick Links */}
@@ -197,37 +197,45 @@ const Footer = () => {
             </h3>
             <div className="flex gap-4">
               {[
-                { platform: 'TikTok', url: 'https://www.tiktok.com/@happytime_pvtltd?_r=1&_t=ZS-93nVkM8WbJY', icon: (
-                  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-                    <path d="M16 3a5.7 5.7 0 0 0 4 4v3.2 a8.9 8.9 0 0 1-4-1.1V16a5 5 0 1 1-5-5c.3 0 .6 0 .9.1v3.2a2 2 0 1 0 2.1 2V3h2z" />
-                  </svg>
-                )},
-                { platform: 'Facebook', url: 'https://facebook.com/happy-time-time-pvt-ltd', icon: (
-                  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-                    <path d="M22 12a10 10 0 1 0-11.5 9.9v-7H8v-3h2.5V9.5c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.5V12H16l-.5 3h-2.8v7A10 10 0 0 0 22 12z" />
-                  </svg>
-                )},
-                { platform: 'Youtube', url: 'https://youtube.com/@happytimepvt077?si=zN4VfnTDUnbyFRLG', icon: (
-                  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.507 3.545 12 3.545 12 3.545s-7.507 0-9.376.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.869.505 9.376.505 9.376.505s7.507 0 9.376-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                  </svg>
-                )},
-                { platform: 'Instagram', url: 'https://www.instagram.com/happy_time_pvt_ltd?igsh=MXdkcHV2bnFpenBjMw%3D%3D&utm_source=qr', icon: (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-5 h-5"
-                  >
-                    <rect x="3" y="3" width="18" height="18" rx="5" ry="5" />
-                    <circle cx="12" cy="12" r="3.5" />
-                    <circle cx="17.5" cy="6.5" r="0.9" />
-                  </svg>
-                )}
+                {
+                  platform: 'TikTok', url: 'https://www.tiktok.com/@happytime_pvtltd?_r=1&_t=ZS-93nVkM8WbJY', icon: (
+                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+                      <path d="M16 3a5.7 5.7 0 0 0 4 4v3.2 a8.9 8.9 0 0 1-4-1.1V16a5 5 0 1 1-5-5c.3 0 .6 0 .9.1v3.2a2 2 0 1 0 2.1 2V3h2z" />
+                    </svg>
+                  )
+                },
+                {
+                  platform: 'Facebook', url: 'https://facebook.com/happy-time-time-pvt-ltd', icon: (
+                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+                      <path d="M22 12a10 10 0 1 0-11.5 9.9v-7H8v-3h2.5V9.5c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.5V12H16l-.5 3h-2.8v7A10 10 0 0 0 22 12z" />
+                    </svg>
+                  )
+                },
+                {
+                  platform: 'Youtube', url: 'https://youtube.com/@happytimepvt077?si=zN4VfnTDUnbyFRLG', icon: (
+                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.507 3.545 12 3.545 12 3.545s-7.507 0-9.376.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.869.505 9.376.505 9.376.505s7.507 0 9.376-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                    </svg>
+                  )
+                },
+                {
+                  platform: 'Instagram', url: 'https://www.instagram.com/happy_time_pvt_ltd?igsh=MXdkcHV2bnFpenBjMw%3D%3D&utm_source=qr', icon: (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="w-5 h-5"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="5" ry="5" />
+                      <circle cx="12" cy="12" r="3.5" />
+                      <circle cx="17.5" cy="6.5" r="0.9" />
+                    </svg>
+                  )
+                }
               ].map(({ platform, url, icon }) => (
                 <a
                   key={platform}
@@ -249,7 +257,7 @@ const Footer = () => {
           <p className="text-gray-400 text-sm">
             &copy; {new Date().getFullYear()}{' '}
             <span className="text-white font-medium"><Link to="/about">Happy Time Pvt Ltd</Link></span>. All Rights Reserved.
-          </p> 
+          </p>
 
           <p className="mt-2 text-gray-400 text-sm max-w-2xl mx-auto">
             A trusted luxury watch retailer and wholesaler in Sri Lanka and the UAE since 1996.
@@ -259,7 +267,7 @@ const Footer = () => {
             <p className="text-gray-400 text-sm">
               Developed with precision by{' '}
               <a
-                href="https://www.nexasoft.site/"
+                href="https://www.nexasoft.uk/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-gold hover:text-white font-medium transition"

@@ -22,12 +22,12 @@ const TermsAndConditionsPage = () => {
         canonicalUrl={seoData.canonicalUrl}
         ogImage="/watchFTR.jpg"
       />
-      
+
       <ScrollToTop />
-      
+
       <div className="max-w-4xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-        <h1 
-          className="text-4xl font-bold text-center mb-12 text-[#D4AF37]" 
+        <h1
+          className="text-4xl font-bold text-center mb-12 text-[#D4AF37]"
           itemProp="headline"
         >
           Terms & Conditions
@@ -39,8 +39,8 @@ const TermsAndConditionsPage = () => {
 
         {/* 1. Acceptance of Terms */}
         <section className="mb-10" aria-labelledby="acceptance-heading">
-          <h2 
-            className="text-2xl font-bold text-[#D4AF37] mb-4" 
+          <h2
+            className="text-2xl font-bold text-[#D4AF37] mb-4"
             id="acceptance-heading"
             itemProp="name"
           >
@@ -243,7 +243,7 @@ const TermsAndConditionsPage = () => {
         <div className="border-t border-gray-800 pt-8 mt-12 text-center text-gray-500">
           <p>© {new Date().getFullYear()} Happy Time Pvt Ltd. All rights reserved.</p>
           <p className="mt-2 text-sm">
-            Developed by <a href="https://nexasoft.com" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:underline">Nexasoft</a>
+            Developed by <a href="https://nexasoft.uk" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:underline">Nexasoft</a>
           </p>
         </div>
       </div>
