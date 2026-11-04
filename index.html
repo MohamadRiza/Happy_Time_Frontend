@@ -43,7 +43,7 @@
     <meta name="theme-color" content="#000000" />
     <meta name="msapplication-TileColor" content="#000000" />
 
-    <!-- Pre-rendered JSON-LD Schema for Instant Search Engine Indexing -->
+    <!-- Pre-rendered JSON-LD Schema (Google Rich Results Validated) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -63,28 +63,26 @@
             "@type": "PostalAddress",
             "streetAddress": "No 49A, Keyzer Street, Pettah",
             "addressLocality": "Colombo 11",
+            "addressRegion": "Western Province",
             "postalCode": "01100",
             "addressCountry": "LK"
           },
-          "areaServed": [
-            { "@type": "Country", "name": "Sri Lanka" },
-            { "@type": "Country", "name": "United Arab Emirates" }
-          ],
-          "brand": [
-            { "@type": "Brand", "name": "Winsor" },
-            { "@type": "Brand", "name": "Orix" },
-            { "@type": "Brand", "name": "Ariel" },
-            { "@type": "Brand", "name": "Happylex" }
-          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+94 76 300 9123",
+            "contactType": "customer service",
+            "areaServed": ["LK", "AE"],
+            "availableLanguage": ["English", "Sinhala", "Tamil"]
+          },
           "sameAs": [
             "https://www.facebook.com/happytime",
             "https://www.instagram.com/happytime"
           ]
         },
         {
-          "@type": "WatchStore",
+          "@type": ["Store", "LocalBusiness"],
           "@id": "https://happytimeonline.com/#colombo-headoffice",
-          "name": "Happy Time - Best Watch Shop in Colombo (Head Office Sri Lanka)",
+          "name": "Happy Time - Best Watch Shop in Colombo (Head Office)",
           "alternateName": "Top 1 Watch Shop in Colombo - Happy Time",
           "url": "https://happytimeonline.com",
           "image": "https://happytimeonline.com/inside.png",
@@ -105,7 +103,6 @@
             "latitude": 6.937309,
             "longitude": 79.849377
           },
-          "hasMap": "https://www.google.com/maps?q=Happy+Time+(Pvt)+Ltd,+Pettah,+Colombo",
           "openingHoursSpecification": [
             {
               "@type": "OpeningHoursSpecification",
@@ -113,17 +110,10 @@
               "opens": "09:00",
               "closes": "19:00"
             }
-          ],
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "reviewCount": "1250",
-            "bestRating": "5",
-            "worstRating": "1"
-          }
+          ]
         },
         {
-          "@type": "WatchStore",
+          "@type": ["Store", "LocalBusiness"],
           "@id": "https://happytimeonline.com/#dubai-branch",
           "name": "Happy Time - Best Watch Shop in UAE (Dubai Branch)",
           "alternateName": "Top Watch Store in Dubai UAE - Happy Time",
@@ -138,6 +128,7 @@
             "streetAddress": "No. 102, Al-Buteen (Opposite to Dubai Wholesale Plaza), Murshid Bazar, Deira",
             "addressLocality": "Dubai",
             "addressRegion": "Dubai",
+            "postalCode": "00000",
             "addressCountry": "AE"
           },
           "geo": {
@@ -145,7 +136,6 @@
             "latitude": 25.269188,
             "longitude": 55.297272
           },
-          "hasMap": "https://www.google.com/maps?q=25.269188,55.297272",
           "openingHoursSpecification": [
             {
               "@type": "OpeningHoursSpecification",
@@ -153,25 +143,14 @@
               "opens": "09:00",
               "closes": "22:00"
             }
-          ],
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "reviewCount": "890",
-            "bestRating": "5",
-            "worstRating": "1"
-          }
+          ]
         },
         {
           "@type": "WebSite",
           "@id": "https://happytimeonline.com/#website",
           "name": "Happy Time Watches",
-          "url": "https://happytimeonline.com",
-          "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://happytimeonline.com/shop?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-          }
+          "alternateName": "Happy Time",
+          "url": "https://happytimeonline.com"
         },
         {
           "@type": "FAQPage",

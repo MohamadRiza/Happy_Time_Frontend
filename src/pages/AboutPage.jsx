@@ -657,12 +657,6 @@ const AboutPage = () => {
               latitude: 6.937309,
               longitude: 79.849377,
             },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: "4.9",
-              reviewCount: "1250",
-              bestRating: "5",
-            },
             openingHoursSpecification: {
               "@type": "OpeningHoursSpecification",
               dayOfWeek: [
@@ -697,12 +691,6 @@ const AboutPage = () => {
               "@type": "GeoCoordinates",
               latitude: 6.937309,
               longitude: 79.849377,
-            },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: "4.9",
-              reviewCount: "1250",
-              bestRating: "5",
             },
             openingHoursSpecification: {
               "@type": "OpeningHoursSpecification",
@@ -739,12 +727,6 @@ const AboutPage = () => {
               latitude: 6.937309,
               longitude: 79.849377,
             },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: "4.9",
-              reviewCount: "1250",
-              bestRating: "5",
-            },
             openingHoursSpecification: {
               "@type": "OpeningHoursSpecification",
               dayOfWeek: [
@@ -777,12 +759,6 @@ const AboutPage = () => {
               "@type": "GeoCoordinates",
               latitude: 6.937309,
               longitude: 79.849377,
-            },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: "4.9",
-              reviewCount: "1250",
-              bestRating: "5",
             },
             openingHoursSpecification: {
               "@type": "OpeningHoursSpecification",
@@ -818,12 +794,6 @@ const AboutPage = () => {
               latitude: 6.937309,
               longitude: 79.849377,
             },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: "4.9",
-              reviewCount: "1250",
-              bestRating: "5",
-            },
             openingHoursSpecification: {
               "@type": "OpeningHoursSpecification",
               dayOfWeek: [
@@ -858,12 +828,6 @@ const AboutPage = () => {
               "@type": "GeoCoordinates",
               latitude: 25.269188,
               longitude: 55.297272,
-            },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: "4.9",
-              reviewCount: "890",
-              bestRating: "5",
             },
             openingHoursSpecification: {
               "@type": "OpeningHoursSpecification",

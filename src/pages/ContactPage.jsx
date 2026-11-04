@@ -573,12 +573,6 @@ const ContactPage = () => {
                 "latitude": 6.937309,
                 "longitude": 79.849377
               },
-              "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": "4.9",
-                "reviewCount": "1250",
-                "bestRating": "5"
-              },
               "openingHoursSpecification": {
                 "@type": "OpeningHoursSpecification",
                 "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -606,12 +600,6 @@ const ContactPage = () => {
                 "@type": "GeoCoordinates",
                 "latitude": 6.937309,
                 "longitude": 79.849377
-              },
-              "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": "4.9",
-                "reviewCount": "1250",
-                "bestRating": "5"
               },
               "openingHoursSpecification": {
                 "@type": "OpeningHoursSpecification",
@@ -641,12 +629,6 @@ const ContactPage = () => {
                 "latitude": 6.937309,
                 "longitude": 79.849377
               },
-              "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": "4.9",
-                "reviewCount": "1250",
-                "bestRating": "5"
-              },
               "openingHoursSpecification": {
                 "@type": "OpeningHoursSpecification",
                 "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -672,12 +654,6 @@ const ContactPage = () => {
                 "@type": "GeoCoordinates",
                 "latitude": 6.937309,
                 "longitude": 79.849377
-              },
-              "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": "4.9",
-                "reviewCount": "1250",
-                "bestRating": "5"
               },
               "openingHoursSpecification": {
                 "@type": "OpeningHoursSpecification",
@@ -705,12 +681,6 @@ const ContactPage = () => {
                 "latitude": 6.937309,
                 "longitude": 79.849377
               },
-              "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": "4.9",
-                "reviewCount": "1250",
-                "bestRating": "5"
-              },
               "openingHoursSpecification": {
                 "@type": "OpeningHoursSpecification",
                 "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -737,12 +707,6 @@ const ContactPage = () => {
                 "@type": "GeoCoordinates",
                 "latitude": 25.269188,
                 "longitude": 55.297272
-              },
-              "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": "4.9",
-                "reviewCount": "890",
-                "bestRating": "5"
               },
               "openingHoursSpecification": {
                 "@type": "OpeningHoursSpecification",
