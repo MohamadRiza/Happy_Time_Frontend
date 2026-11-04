@@ -92,9 +92,9 @@ const CareersPage = () => {
     <div className="bg-black text-white min-h-screen">
 
       <Helmet>
-        <title>Careers at Happy Time – Join Our Team</title>
-        <meta name="description" content="Explore career opportunities at Happy Time. Find open positions in Colombo, Kandy, Dubai, and more. Apply online and start your journey with Sri Lanka's trusted watch retailer." />
-        <meta name="keywords" content="Happy Time careers, jobs in Sri Lanka, watch retailer jobs, Colombo jobs, Kandy jobs, Dubai jobs, retail careers" />
+        <title>Careers at Happy Time | Join the Best Watch Shop in Sri Lanka & UAE</title>
+        <meta name="description" content="Explore career opportunities at Happy Time, Sri Lanka's leading watch distributor and retailer with branches in Colombo, Kandy, and Dubai UAE. Apply online today." />
+        <meta name="keywords" content="Happy Time careers, jobs in Sri Lanka, best watch shop in sri lanka jobs, top watch shop colombo careers, watch retailer jobs, Colombo jobs, Kandy jobs, Dubai jobs, retail careers" />
         <link rel="canonical" href="https://happytimeonline.com/careers" />
 
         {/* Open Graph */}

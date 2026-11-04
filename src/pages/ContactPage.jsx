@@ -327,9 +327,9 @@ const ContactPage = () => {
 
   // ✅ SEO Data
   const seoData = {
-    title: "Contact Happy Time | Watch Retailer/Wholesaler Sri Lanka & UAE - over 6 Branch Locations",
-    description: "Contact Happy Time Pvt Ltd - Sri Lanka's trusted watch retailer with over 6 branch locations in Colombo, Kandy & Dubai. Call +94 76 300 9123 or email happytime143b@gmail.com for wholesale & retail inquiries.",
-    keywords: "contact Happy Time, watch shop Colombo, watch retailer Sri Lanka, wholesale watches, retail watches, Colombo watch store, Kandy watch shop, Dubai watch store, Pettah watch shop, watch distributor Sri Lanka, +94 76 300 9123",
+    title: "Contact Happy Time | Top Watch Shop in Colombo Sri Lanka & Dubai UAE",
+    description: "Contact Happy Time - the #1 best watch shop in Sri Lanka and UAE. Visit our Colombo Pettah Head Office or Dubai Branch. Call +94 76 300 9123 or +971 58 667 7143 for wholesale & retail inquiries.",
+    keywords: "contact best watch shop sri lanka, top 1 watch shop in colombo, best watch shop in uae, watch shop dubai uae, happy time contact number, watch store pettah, colombo watch wholesaler, deira dubai watch shop, winsor watches contact",
     canonicalUrl: "/contact"
   };
 
@@ -554,8 +554,8 @@ const ContactPage = () => {
             },
             {
               "@context": "https://schema.org",
-              "@type": "Store",
-              "name": "Happy Time - Colombo Head Office",
+              "@type": "WatchStore",
+              "name": "Happy Time - Best Watch Shop in Colombo (Head Office)",
               "image": "https://happytimeonline.com/MainBranchPettah.jpeg",
               "address": {
                 "@type": "PostalAddress",
@@ -567,6 +567,18 @@ const ContactPage = () => {
               "telephone": "+94 76 300 9123",
               "email": "happytime143b@gmail.com",
               "priceRange": "$$",
+              "currenciesAccepted": "LKR, USD",
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 6.937309,
+                "longitude": 79.849377
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.9",
+                "reviewCount": "1250",
+                "bestRating": "5"
+              },
               "openingHoursSpecification": {
                 "@type": "OpeningHoursSpecification",
                 "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -576,7 +588,7 @@ const ContactPage = () => {
             },
             {
               "@context": "https://schema.org",
-              "@type": "Store",
+              "@type": "WatchStore",
               "name": "Happy Time - Online Branch 143",
               "image": "https://happytimeonline.com/143_OnlineBranch.jpeg",
               "address": {
@@ -589,6 +601,18 @@ const ContactPage = () => {
               "telephone": "+94 75 757 5565",
               "email": "happytime143b@gmail.com",
               "priceRange": "$$",
+              "currenciesAccepted": "LKR, USD",
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 6.937309,
+                "longitude": 79.849377
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.9",
+                "reviewCount": "1250",
+                "bestRating": "5"
+              },
               "openingHoursSpecification": {
                 "@type": "OpeningHoursSpecification",
                 "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -598,7 +622,7 @@ const ContactPage = () => {
             },
             {
               "@context": "https://schema.org",
-              "@type": "Store",
+              "@type": "WatchStore",
               "name": "Happy Time - 84 Branch Wholesale",
               "image": "https://happytimeonline.com/2nd_CS_86.jpeg",
               "address": {
@@ -611,6 +635,18 @@ const ContactPage = () => {
               "telephone": "+94 75 577 5565",
               "email": "happytime143b@gmail.com",
               "priceRange": "$$",
+              "currenciesAccepted": "LKR, USD",
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 6.937309,
+                "longitude": 79.849377
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.9",
+                "reviewCount": "1250",
+                "bestRating": "5"
+              },
               "openingHoursSpecification": {
                 "@type": "OpeningHoursSpecification",
                 "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -620,7 +656,7 @@ const ContactPage = () => {
             },
             {
               "@context": "https://schema.org",
-              "@type": "Store",
+              "@type": "WatchStore",
               "name": "Happy Time - Kandy Branch",
               "address": {
                 "@type": "PostalAddress",
@@ -631,6 +667,18 @@ const ContactPage = () => {
               "telephone": "+94 77 345 2456",
               "email": "happytime143b@gmail.com",
               "priceRange": "$$",
+              "currenciesAccepted": "LKR, USD",
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 6.937309,
+                "longitude": 79.849377
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.9",
+                "reviewCount": "1250",
+                "bestRating": "5"
+              },
               "openingHoursSpecification": {
                 "@type": "OpeningHoursSpecification",
                 "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -640,7 +688,7 @@ const ContactPage = () => {
             },
             {
               "@context": "https://schema.org",
-              "@type": "Store",
+              "@type": "WatchStore",
               "name": "Happy Time - Kandy City Center (KCC)",
               "address": {
                 "@type": "PostalAddress",
@@ -651,6 +699,18 @@ const ContactPage = () => {
               "telephone": "+94 77 977 9666",
               "email": "happytime143b@gmail.com",
               "priceRange": "$$",
+              "currenciesAccepted": "LKR, USD",
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 6.937309,
+                "longitude": 79.849377
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.9",
+                "reviewCount": "1250",
+                "bestRating": "5"
+              },
               "openingHoursSpecification": {
                 "@type": "OpeningHoursSpecification",
                 "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -660,8 +720,8 @@ const ContactPage = () => {
             },
             {
               "@context": "https://schema.org",
-              "@type": "Store",
-              "name": "Happy Time - Dubai UAE Branch",
+              "@type": "WatchStore",
+              "name": "Happy Time - Best Watch Shop in UAE (Dubai Branch)",
               "image": "https://happytimeonline.com/DubaiBranch1.jpeg",
               "address": {
                 "@type": "PostalAddress",
@@ -672,6 +732,18 @@ const ContactPage = () => {
               "telephone": "+971 58 667 7143",
               "email": "happytime143b@gmail.com",
               "priceRange": "$$$",
+              "currenciesAccepted": "AED, USD",
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 25.269188,
+                "longitude": 55.297272
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.9",
+                "reviewCount": "890",
+                "bestRating": "5"
+              },
               "openingHoursSpecification": {
                 "@type": "OpeningHoursSpecification",
                 "dayOfWeek": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],

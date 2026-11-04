@@ -1,4 +1,19 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /checkout
+Disallow: /login
+Disallow: /register
+Disallow: /customer/
+Disallow: /application-status
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /checkout
+Disallow: /login
+Disallow: /register
 
 Sitemap: https://happytimeonline.com/sitemap.xml

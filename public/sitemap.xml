@@ -1,44 +1,92 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Home Page: Top #1 Watch Shop in Colombo / Sri Lanka & UAE -->
   <url>
     <loc>https://happytimeonline.com/</loc>
-    <changefreq>weekly</changefreq>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://happytimeonline.com/ogimage.png</image:loc>
+      <image:title>Happy Time - Best Watch Shop in Sri Lanka and UAE</image:title>
+      <image:caption>Top #1 Watch Shop in Colombo, Sri Lanka &amp; Dubai UAE</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://happytimeonline.com/inside.png</image:loc>
+      <image:title>Happy Time Colombo Head Office Pettah Sri Lanka</image:title>
+    </image:image>
   </url>
+
+  <!-- Shop Page: Watch Catalog -->
+  <url>
+    <loc>https://happytimeonline.com/shop</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://happytimeonline.com/watch1.png</image:loc>
+      <image:title>Luxury Timepieces Collection - Happy Time Sri Lanka</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://happytimeonline.com/Watch2.png</image:loc>
+      <image:title>Winsor &amp; Orix Watches Colombo</image:title>
+    </image:image>
+  </url>
+
+  <!-- About Us: History, Heritage & Branch Locations -->
   <url>
     <loc>https://happytimeonline.com/about</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://happytimeonline.com/inside.png</image:loc>
+      <image:title>Happy Time Colombo Head Office - No 49A Keyzer Street Pettah</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://happytimeonline.com/DubaiBranch1.jpeg</image:loc>
+      <image:title>Happy Time Dubai UAE Branch - Deira Murshid Bazar</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://happytimeonline.com/143_OnlineBranch.jpeg</image:loc>
+      <image:title>Happy Time Online Branch Pettah 143 Colombo</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://happytimeonline.com/2nd_CS_86.jpeg</image:loc>
+      <image:title>Happy Time 84 Branch Wholesale Colombo</image:title>
+    </image:image>
   </url>
+
+  <!-- Contact Us: Colombo Head Office & Dubai UAE Branch Contact -->
   <url>
     <loc>https://happytimeonline.com/contact</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://happytimeonline.com/MainBranchPettah.jpeg</image:loc>
+      <image:title>Happy Time Colombo Main Branch Pettah Contact</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://happytimeonline.com/DubaiBranch1.jpeg</image:loc>
+      <image:title>Happy Time Dubai UAE Branch Contact</image:title>
+    </image:image>
   </url>
+
+  <!-- Careers -->
   <url>
     <loc>https://happytimeonline.com/careers</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Legal & Trust Pages -->
   <url>
-    <loc>https://happytimeonline.com/shop</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <loc>https://happytimeonline.com/terms</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://happytimeonline.com/privacy</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
   </url>
-  <url>
-    <loc>https://happytimeonline.com/login</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-  <loc>https://happytimeonline.com/application-status</loc>
-  <changefreq>monthly</changefreq>
-  <priority>0.6</priority>
-</url>
-  <!-- Add other static pages like /apply-job, /application-status if you want them indexed -->
 </urlset>

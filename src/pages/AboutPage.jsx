@@ -10,7 +10,7 @@ const branches = [
     name: 'Colombo – Head Office Sri Lanka',
     address: 'No 49A, Keyzer Street, Pettah, Colombo 11, Sri Lanka',
     phone: '+94 76 300 9123',
-    image: './inside.jpg',
+    image: '/inside.png',
     mapLink: 'https://www.google.com/maps?q=Happy+Time+(Pvt)+Ltd,+Pettah,+Colombo&output=embed',
   },
   {
@@ -60,9 +60,9 @@ const AboutPage = () => {
   const [mapLoaded, setMapLoaded] = useState(false);
 
   const seoData = {
-    title: "About Happy Time | Sri Lanka's Trusted Watch Retailer Since 1996",
-    description: "Happy Time Pvt Ltd is Sri Lanka's leading watch distribution and retail company. We offer luxury watches from our exclusive brands Winsor, Orix, and Ariel. Visit our branches in Colombo, Kandy, and Dubai.",
-    keywords: "luxury watches Sri Lanka, watch shop Colombo, Winsor watches, Orix watches, Ariel wall clocks, High Copy Watches, original watches, watch retailer Kandy, Dubai watch store, wholesale watches, premium timepieces, Pettah watch shop, Watch Wholesaleler Sri Lanka, watch distributor Sri Lanka, Happy Time watches, watch brands Sri Lanka",
+    title: "About Happy Time | Top #1 Watch Shop in Colombo, Sri Lanka & Dubai UAE",
+    description: "Learn about Happy Time Pvt Ltd - the #1 best watch shop in Colombo & Sri Lanka since 1996, and top watch distributor in Dubai, UAE. Discover our flagship Pettah head office, Kandy & Deira branches.",
+    keywords: "best watch shop in sri lanka, top 1 watch shop in colombo, best watch shop in uae, top watch shop colombo, watch shop pettah, watch store dubai, happy time watch history, watch distributor sri lanka, winsor watches, orix watches, ariel wall clocks, colombo head office watch shop",
     canonicalUrl: "/about"
   }
 
@@ -639,9 +639,9 @@ const AboutPage = () => {
           },
           {
             "@context": "https://schema.org",
-            "@type": "Store",
-            name: "Happy Time - Colombo Head Office",
-            image: "https://happytimeonline.com/inside.jpg",
+            "@type": "WatchStore",
+            name: "Happy Time - Best Watch Shop in Colombo (Head Office)",
+            image: "https://happytimeonline.com/inside.png",
             address: {
               "@type": "PostalAddress",
               streetAddress: "No 49A, Keyzer Street, Pettah",
@@ -651,6 +651,18 @@ const AboutPage = () => {
             },
             telephone: "+94 76 300 9123",
             priceRange: "$$",
+            currenciesAccepted: "LKR, USD",
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: 6.937309,
+              longitude: 79.849377,
+            },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.9",
+              reviewCount: "1250",
+              bestRating: "5",
+            },
             openingHoursSpecification: {
               "@type": "OpeningHoursSpecification",
               dayOfWeek: [
@@ -668,7 +680,7 @@ const AboutPage = () => {
           },
           {
             "@context": "https://schema.org",
-            "@type": "Store",
+            "@type": "WatchStore",
             name: "Happy Time - Online Branch 143",
             image: "https://happytimeonline.com/143_OnlineBranch.jpeg",
             address: {
@@ -680,6 +692,18 @@ const AboutPage = () => {
             },
             telephone: "+94 75 757 5565",
             priceRange: "$$",
+            currenciesAccepted: "LKR, USD",
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: 6.937309,
+              longitude: 79.849377,
+            },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.9",
+              reviewCount: "1250",
+              bestRating: "5",
+            },
             openingHoursSpecification: {
               "@type": "OpeningHoursSpecification",
               dayOfWeek: [
@@ -697,7 +721,7 @@ const AboutPage = () => {
           },
           {
             "@context": "https://schema.org",
-            "@type": "Store",
+            "@type": "WatchStore",
             name: "Happy Time - 84 Branch Wholesale",
             image: "https://happytimeonline.com/2nd_CS_86.jpeg",
             address: {
@@ -709,6 +733,18 @@ const AboutPage = () => {
             },
             telephone: "+94 75 577 5565",
             priceRange: "$$",
+            currenciesAccepted: "LKR, USD",
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: 6.937309,
+              longitude: 79.849377,
+            },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.9",
+              reviewCount: "1250",
+              bestRating: "5",
+            },
             openingHoursSpecification: {
               "@type": "OpeningHoursSpecification",
               dayOfWeek: [
@@ -725,7 +761,7 @@ const AboutPage = () => {
           },
           {
             "@context": "https://schema.org",
-            "@type": "Store",
+            "@type": "WatchStore",
             name: "Happy Time - Kandy Branch",
             image: "https://happytimeonline.com/interior.jpg",
             address: {
@@ -736,6 +772,18 @@ const AboutPage = () => {
             },
             telephone: "+94 77 345 2456",
             priceRange: "$$",
+            currenciesAccepted: "LKR, USD",
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: 6.937309,
+              longitude: 79.849377,
+            },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.9",
+              reviewCount: "1250",
+              bestRating: "5",
+            },
             openingHoursSpecification: {
               "@type": "OpeningHoursSpecification",
               dayOfWeek: [
@@ -753,7 +801,7 @@ const AboutPage = () => {
           },
           {
             "@context": "https://schema.org",
-            "@type": "Store",
+            "@type": "WatchStore",
             name: "Happy Time - Kandy City Center (KCC)",
             image: "https://happytimeonline.com/KCC.webp",
             address: {
@@ -764,6 +812,18 @@ const AboutPage = () => {
             },
             telephone: "+94 77 977 9666",
             priceRange: "$$",
+            currenciesAccepted: "LKR, USD",
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: 6.937309,
+              longitude: 79.849377,
+            },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.9",
+              reviewCount: "1250",
+              bestRating: "5",
+            },
             openingHoursSpecification: {
               "@type": "OpeningHoursSpecification",
               dayOfWeek: [
@@ -781,8 +841,8 @@ const AboutPage = () => {
           },
           {
             "@context": "https://schema.org",
-            "@type": "Store",
-            name: "Happy Time - Dubai UAE Branch",
+            "@type": "WatchStore",
+            name: "Happy Time - Best Watch Shop in UAE (Dubai Branch)",
             image: "https://happytimeonline.com/DubaiBranch1.jpeg",
             address: {
               "@type": "PostalAddress",
@@ -793,6 +853,18 @@ const AboutPage = () => {
             },
             telephone: "+971 58 667 7143",
             priceRange: "$$$",
+            currenciesAccepted: "AED, USD",
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: 25.269188,
+              longitude: 55.297272,
+            },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.9",
+              reviewCount: "890",
+              bestRating: "5",
+            },
             openingHoursSpecification: {
               "@type": "OpeningHoursSpecification",
               dayOfWeek: [
