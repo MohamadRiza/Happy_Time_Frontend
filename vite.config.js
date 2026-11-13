@@ -7,14 +7,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://happytimeonline.com',
-        changeOrigin: true,
-        secure: false
+        target: 'http://localhost:5000',
+        changeOrigin: true
       },
       '/uploads': {
-        target: 'https://happytimeonline.com',
-        changeOrigin: true,
-        secure: false
+        target: 'http://localhost:5000',
+        changeOrigin: true
       }
     }
   }
