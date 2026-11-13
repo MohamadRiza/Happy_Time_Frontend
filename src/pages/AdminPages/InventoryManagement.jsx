@@ -152,7 +152,8 @@ const InventoryManagement = () => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '';
     if (imagePath.startsWith('http')) return imagePath;
-    return `${API_URL}/${imagePath}`;
+    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    return `${API_URL}${cleanPath}`;
   };
 
   if (loading) {
@@ -502,7 +503,8 @@ const InventoryItem = ({ item, onUpdateStock, API_URL }) => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '';
     if (imagePath.startsWith('http')) return imagePath;
-    return `${API_URL}/${imagePath}`;
+    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    return `${API_URL}${cleanPath}`;
   };
 
   const getStatusColor = () => {

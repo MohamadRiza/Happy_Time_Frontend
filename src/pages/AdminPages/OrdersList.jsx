@@ -27,7 +27,8 @@ const OrdersList = () => {
     if (imagePath.startsWith('http')) {
       return imagePath;
     }
-    return `${API_URL}/${imagePath}`;
+    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    return `${API_URL}${cleanPath}`;
   };
 
   const fetchOrders = async () => {

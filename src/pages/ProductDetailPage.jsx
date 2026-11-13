@@ -862,7 +862,9 @@ const ProductDetailPage = () => {
             "@context": "https://schema.org",
             "@type": "Product",
             "name": product.title,
-            "image": product.images || ["https://happytimeonline.com/ogimage.png"],
+            "image": (product.images && product.images.length > 0)
+              ? product.images.map(img => img?.startsWith('http') ? img : `https://happytimeonline.com${img?.startsWith('/') ? img : `/${img}`}`)
+              : ["https://happytimeonline.com/ogimage.png"],
             "description": product.description || product.title,
             "brand": {
               "@type": "Brand",
@@ -902,7 +904,9 @@ const ProductDetailPage = () => {
             "@context": "https://schema.org",
             "@type": "Product",
             "name": product.title,
-            "image": product.images || ["https://happytimeonline.com/ogimage.png"],
+            "image": (product.images && product.images.length > 0)
+              ? product.images.map(img => img?.startsWith('http') ? img : `https://happytimeonline.com${img?.startsWith('/') ? img : `/${img}`}`)
+              : ["https://happytimeonline.com/ogimage.png"],
             "description": product.description || product.title,
             "brand": {
               "@type": "Brand",
@@ -966,7 +970,9 @@ const ProductDetailPage = () => {
             "@context": "https://schema.org",
             "@type": "Product",
             "name": product.title,
-            "image": product.images || ["https://happytimeonline.com/ogimage.png"],
+            "image": (product.images && product.images.length > 0)
+              ? product.images.map(img => img?.startsWith('http') ? img : `https://happytimeonline.com${img?.startsWith('/') ? img : `/${img}`}`)
+              : ["https://happytimeonline.com/ogimage.png"],
             "description": product.description || product.title,
             "brand": {
               "@type": "Brand",
