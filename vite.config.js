@@ -6,9 +6,15 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
+      '/api': {
+        target: 'https://happytimeonline.com',
+        changeOrigin: true,
+        secure: false
+      },
       '/uploads': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
+        target: 'https://happytimeonline.com',
+        changeOrigin: true,
+        secure: false
       }
     }
   }
