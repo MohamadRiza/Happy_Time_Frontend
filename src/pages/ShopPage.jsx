@@ -631,11 +631,12 @@ const ShopPage = () => {
   return (
     <>
       <SEO
-        title="Shop Luxury & Casual Watches Online | Best Watch Shop in Sri Lanka & UAE - Happy Time"
-        description="Shop original luxury & casual watches online at Happy Time - the #1 best watch shop in Sri Lanka and UAE. Browse Winsor, Orix & Ariel watches with islandwide cash on delivery."
-        keywords="buy watches online sri lanka, best watch shop in sri lanka, top 1 watch shop in colombo, best watch shop in uae, luxury watches online sri lanka, winsor watches online, orix watches, branded watches online, ladies watches colombo, gents watches sri lanka, pettah watch shop"
+        title="Shop Watches Online | Happy Time Sri Lanka"
+        description="Browse watches online at Happy Time Colombo."
+        keywords=""
         canonicalUrl="/shop"
         ogImage="/ogimage.png"
+        noindex={true}
       />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap');

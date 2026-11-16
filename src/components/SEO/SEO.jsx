@@ -10,7 +10,8 @@ const SEO = ({
   schemaData = null,
   geoRegion = 'LK-11',
   geoPlacename = 'Colombo, Pettah, Sri Lanka',
-  geoPosition = '6.937309;79.849377'
+  geoPosition = '6.937309;79.849377',
+  noindex = false
 }) => {
   const baseUrl = 'https://happytimeonline.com';
   const fullUrl = canonicalUrl ? `${baseUrl}${canonicalUrl}` : baseUrl;
@@ -24,8 +25,20 @@ const SEO = ({
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
       <meta name="author" content="Happy Time Pvt Ltd" />
-      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-      <meta name="googlebot" content="index, follow" />
+
+      {/* Robots Control: Noindex for protected pages like Shop and Products */}
+      {noindex ? (
+        <>
+          <meta name="robots" content="noindex, nofollow, noimageindex, noarchive, nosnippet" />
+          <meta name="googlebot" content="noindex, nofollow, noimageindex, noarchive, nosnippet" />
+          <meta name="bingbot" content="noindex, nofollow, noimageindex, noarchive, nosnippet" />
+        </>
+      ) : (
+        <>
+          <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+          <meta name="googlebot" content="index, follow" />
+        </>
+      )}
       
       {/* Geo Location Tags for Local SEO */}
       <meta name="geo.region" content={geoRegion} />
@@ -58,8 +71,8 @@ const SEO = ({
       <meta name="theme-color" content="#000000" />
       <meta name="msapplication-TileColor" content="#000000" />
       
-      {/* Structured Data - JSON-LD (Only when custom schema provided) */}
-      {schemaData && (
+      {/* Structured Data - JSON-LD (Only when custom schema provided and NOT noindex) */}
+      {!noindex && schemaData && (
         <script type="application/ld+json">
           {JSON.stringify(schemaData)}
         </script>

@@ -1,5 +1,10 @@
 User-agent: *
 Allow: /
+Allow: /about
+Allow: /contact
+Allow: /careers
+Allow: /privacy
+Allow: /terms
 Disallow: /admin
 Disallow: /admin/
 Disallow: /checkout
@@ -7,13 +12,33 @@ Disallow: /login
 Disallow: /register
 Disallow: /customer/
 Disallow: /application-status
+Disallow: /shop
+Disallow: /shop/
+Disallow: /api/products
+Disallow: /api/products/
+Disallow: /uploads/products/
 
 User-agent: Googlebot
 Allow: /
+Allow: /about
+Allow: /contact
+Allow: /careers
+Allow: /privacy
+Allow: /terms
 Disallow: /admin
 Disallow: /admin/
 Disallow: /checkout
 Disallow: /login
 Disallow: /register
+Disallow: /shop
+Disallow: /shop/
+Disallow: /api/products
+Disallow: /api/products/
+Disallow: /uploads/products/
+
+User-agent: Googlebot-Image
+Disallow: /uploads/products/
+Disallow: /shop
+Disallow: /shop/
 
 Sitemap: https://happytimeonline.com/sitemap.xml

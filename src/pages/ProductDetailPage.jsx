@@ -853,35 +853,12 @@ const ProductDetailPage = () => {
       <ScrollToTop />
       {product && (
         <SEO
-          title={`${product.title} | ${product.brand} - Best Watch Shop in Sri Lanka | Happy Time`}
-          description={`${product.description?.slice(0, 150) || product.title} - Available at Happy Time, the #1 watch shop in Colombo Sri Lanka & UAE.`}
-          keywords={`${product.title}, ${product.brand} watch, buy ${product.title} sri lanka, best watch shop in sri lanka, top 1 watch shop in colombo, best watch shop in uae, happy time watches`}
+          title={`${product.title} | Happy Time Watches`}
+          description="View product details at Happy Time."
+          keywords=""
           canonicalUrl={`/shop/${product._id}`}
           ogImage={product.images?.[0] || '/ogimage.png'}
-          schemaData={{
-            "@context": "https://schema.org",
-            "@type": "Product",
-            "name": product.title,
-            "image": (product.images && product.images.length > 0)
-              ? product.images.map(img => img?.startsWith('http') ? img : `https://happytimeonline.com${img?.startsWith('/') ? img : `/${img}`}`)
-              : ["https://happytimeonline.com/ogimage.png"],
-            "description": product.description || product.title,
-            "brand": {
-              "@type": "Brand",
-              "name": product.brand || "Happy Time"
-            },
-            "offers": {
-              "@type": "Offer",
-              "url": `https://happytimeonline.com/shop/${product._id}`,
-              "priceCurrency": "LKR",
-              "price": product.price || 0,
-              "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-              "seller": {
-                "@type": "Organization",
-                "name": "Happy Time Pvt Ltd"
-              }
-            }
-          }}
+          noindex={true}
         />
       )}
       <Loading message="Loading product details..." size="large" />
@@ -895,35 +872,12 @@ const ProductDetailPage = () => {
       <ScrollToTop />
       {product && (
         <SEO
-          title={`${product.title} | ${product.brand} - Best Watch Shop in Sri Lanka | Happy Time`}
-          description={`${product.description?.slice(0, 150) || product.title} - Available at Happy Time, the #1 watch shop in Colombo Sri Lanka & UAE.`}
-          keywords={`${product.title}, ${product.brand} watch, buy ${product.title} sri lanka, best watch shop in sri lanka, top 1 watch shop in colombo, best watch shop in uae, happy time watches`}
+          title={`${product.title} | Happy Time Watches`}
+          description="View product details at Happy Time."
+          keywords=""
           canonicalUrl={`/shop/${product._id}`}
           ogImage={product.images?.[0] || '/ogimage.png'}
-          schemaData={{
-            "@context": "https://schema.org",
-            "@type": "Product",
-            "name": product.title,
-            "image": (product.images && product.images.length > 0)
-              ? product.images.map(img => img?.startsWith('http') ? img : `https://happytimeonline.com${img?.startsWith('/') ? img : `/${img}`}`)
-              : ["https://happytimeonline.com/ogimage.png"],
-            "description": product.description || product.title,
-            "brand": {
-              "@type": "Brand",
-              "name": product.brand || "Happy Time"
-            },
-            "offers": {
-              "@type": "Offer",
-              "url": `https://happytimeonline.com/shop/${product._id}`,
-              "priceCurrency": "LKR",
-              "price": product.price || 0,
-              "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-              "seller": {
-                "@type": "Organization",
-                "name": "Happy Time Pvt Ltd"
-              }
-            }
-          }}
+          noindex={true}
         />
       )}
       <div className="notfound-wrap">
@@ -961,35 +915,12 @@ const ProductDetailPage = () => {
       <ScrollToTop />
       {product && (
         <SEO
-          title={`${product.title} | ${product.brand} - Best Watch Shop in Sri Lanka | Happy Time`}
-          description={`${product.description?.slice(0, 150) || product.title} - Available at Happy Time, the #1 watch shop in Colombo Sri Lanka & UAE.`}
-          keywords={`${product.title}, ${product.brand} watch, buy ${product.title} sri lanka, best watch shop in sri lanka, top 1 watch shop in colombo, best watch shop in uae, happy time watches`}
+          title={`${product.title} | Happy Time Watches`}
+          description="View product details at Happy Time."
+          keywords=""
           canonicalUrl={`/shop/${product._id}`}
           ogImage={product.images?.[0] || '/ogimage.png'}
-          schemaData={{
-            "@context": "https://schema.org",
-            "@type": "Product",
-            "name": product.title,
-            "image": (product.images && product.images.length > 0)
-              ? product.images.map(img => img?.startsWith('http') ? img : `https://happytimeonline.com${img?.startsWith('/') ? img : `/${img}`}`)
-              : ["https://happytimeonline.com/ogimage.png"],
-            "description": product.description || product.title,
-            "brand": {
-              "@type": "Brand",
-              "name": product.brand || "Happy Time"
-            },
-            "offers": {
-              "@type": "Offer",
-              "url": `https://happytimeonline.com/shop/${product._id}`,
-              "priceCurrency": "LKR",
-              "price": product.price || 0,
-              "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-              "seller": {
-                "@type": "Organization",
-                "name": "Happy Time Pvt Ltd"
-              }
-            }
-          }}
+          noindex={true}
         />
       )}
       <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="dark" />
