@@ -288,7 +288,7 @@ const ProductManager = () => {
         video.preload = 'metadata';
         video.onloadedmetadata = () => {
           window.URL.revokeObjectURL(video.src);
-          if (video.duration > 60) resolve(null);
+          if (video.duration > 120) resolve(null);
           else resolve(file);
         };
         video.onerror = () => resolve(null);
@@ -298,7 +298,7 @@ const ProductManager = () => {
     Promise.all(selectedFiles.map(checkDuration)).then(results => {
       const valid = results.filter(Boolean);
       if (valid.length === 0) {
-        toast.error('Each video must be less than 1 minute long.');
+        toast.error('Each video must be less than 2 minutes long.');
         return;
       }
       setVideoFiles(valid);
@@ -1080,7 +1080,7 @@ const ProductManager = () => {
             {/* Videos */}
             <div className="mb-6">
               <label className="block text-gray-400 mb-2 text-sm">
-                Product Videos (Max 2, max 20MB each, 60s)
+                Product Videos (Max 2, max 20MB each, max 2 mins)
               </label>
               <input
                 type="file"
